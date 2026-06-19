@@ -91,7 +91,7 @@ class _ShopCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: Colors.white06, borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(color: Colors.white.withOpacity(.06), borderRadius: BorderRadius.circular(12)),
               child: Column(
                 children: [
                   _InfoRow(Icons.person_outline, shop.ownerName),
@@ -112,7 +112,7 @@ class _ShopCard extends StatelessWidget {
               alignment: WrapAlignment.end,
               children: shop.services.map((s) => Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(color: Colors.white08, borderRadius: BorderRadius.circular(999)),
+                decoration: BoxDecoration(color: Colors.white.withOpacity(.08), borderRadius: BorderRadius.circular(999)),
                 child: Text(s, style: GoogleFonts.tajawal(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white60)),
               )).toList(),
             ),

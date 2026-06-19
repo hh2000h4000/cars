@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../theme.dart';
-import '../../widgets/widgets.dart';
 import '../../providers/app_provider.dart';
 import '../../models/dispute.dart';
 

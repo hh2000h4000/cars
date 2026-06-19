@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../../data/mock_data.dart';
-import '../../models/shop.dart';
-import '../../providers/app_provider.dart';
 
 class ShopProfileScreen extends StatelessWidget {
   final String shopId;
@@ -14,8 +11,6 @@ class ShopProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final shop = MockData.shops.firstWhere((s) => s.id == shopId, orElse: () => MockData.shops.first);
-    final provider = context.watch<AppProvider>();
-    final isSelected = provider.selectedShops.contains(shopId);
 
     return Scaffold(
       backgroundColor: AppColors.surface,

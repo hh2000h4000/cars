@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../../providers/app_provider.dart';
+import '../../models/models.dart';
 
 class ShopRequestDetailScreen extends StatelessWidget {
   final String requestId;
