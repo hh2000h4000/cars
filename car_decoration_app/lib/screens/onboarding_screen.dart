@@ -104,7 +104,8 @@ class OnboardingScreen extends StatelessWidget {
                 borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
               ),
               padding: const EdgeInsets.fromLTRB(24, 30, 24, 28),
-              child: Column(
+              child: SingleChildScrollView(
+                child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text('اختر نوع الحساب', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
@@ -159,6 +160,7 @@ class OnboardingScreen extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
               ),
             ),
           ),

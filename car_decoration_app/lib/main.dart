@@ -6,9 +6,12 @@ import 'providers/app_provider.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => AppProvider(),
-      child: const CarDecorationApp(),
+    Directionality(
+      textDirection: TextDirection.rtl,
+      child: ChangeNotifierProvider(
+        create: (_) => AppProvider(),
+        child: const CarDecorationApp(),
+      ),
     ),
   );
 }
