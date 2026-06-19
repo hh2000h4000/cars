@@ -12,8 +12,10 @@ class OnboardingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
-      body: Column(
+      body: Stack(
         children: [
+          Column(
+            children: [
           // Hero section
           Container(
             height: 340,
@@ -85,12 +87,18 @@ class OnboardingScreen extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(height: 26),
+            ],
+          ),
 
-          // Account type selection
-          Expanded(
+          // Account type selection overlapping hero
+          Positioned(
+            top: 314,
+            left: 0,
+            right: 0,
+            bottom: 0,
             child: Container(
               width: double.infinity,
-              margin: const EdgeInsets.only(top: -26),
               decoration: const BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
@@ -159,6 +167,7 @@ class OnboardingScreen extends StatelessWidget {
     );
   }
 }
+
 
 class _AccountTypeCard extends StatelessWidget {
   final IconData icon;
