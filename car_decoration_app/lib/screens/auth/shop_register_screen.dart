@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 
@@ -31,7 +31,7 @@ class ShopRegisterScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     const Spacer(),
-                    Text('تسجيل متجر / مركز', style: GoogleFonts.tajawal(fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    Text('تسجيل متجر / مركز', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                     const SizedBox(width: 14),
                     const AppBackButton(),
                   ],
@@ -49,14 +49,14 @@ class ShopRegisterScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('اسم المتجر', style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                          Text('اسم المتجر', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                           const SizedBox(height: 6),
                           Container(
                             height: 42,
                             decoration: BoxDecoration(color: AppColors.surface, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(11)),
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             alignment: Alignment.centerRight,
-                            child: Text('مركز اللمسة الذهبية', style: GoogleFonts.tajawal(fontSize: 13.5, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                            child: Text('مركز اللمسة الذهبية', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
                           ),
                         ],
                       ),
@@ -76,7 +76,7 @@ class ShopRegisterScreen extends StatelessWidget {
                       children: [
                         const Icon(Icons.add, color: AppColors.goldText, size: 22),
                         const SizedBox(height: 5),
-                        Text('شعار المتجر', style: GoogleFonts.tajawal(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.goldText)),
+                        Text('شعار المتجر', style: TextStyle(fontFamily: 'Tajawal', fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.goldText)),
                       ],
                     ),
                   ),
@@ -95,7 +95,7 @@ class ShopRegisterScreen extends StatelessWidget {
               }),
 
               // CR document upload
-              Text('السجل التجاري (مستند)', style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+              Text('السجل التجاري (مستند)', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
               const SizedBox(height: 6),
               Container(
                 padding: const EdgeInsets.all(15),
@@ -116,8 +116,8 @@ class ShopRegisterScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('سجل_تجاري.pdf', style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                          Text('تم الإرفاق · 1.2MB', style: GoogleFonts.tajawal(fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                          Text('سجل_تجاري.pdf', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                          Text('تم الإرفاق · 1.2MB', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                         ],
                       ),
                     ),

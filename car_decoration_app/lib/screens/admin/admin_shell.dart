@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../../theme.dart';
 import 'admin_dashboard_screen.dart';
 import 'admin_pending_screen.dart';
@@ -66,7 +66,7 @@ class _DarkNavItem extends StatelessWidget {
         children: [
           Icon(active ? fillIcon : outIcon, color: active ? AppColors.goldLight : Colors.white30, size: 22),
           const SizedBox(height: 3),
-          Text(label, style: GoogleFonts.tajawal(fontSize: 10.5, fontWeight: active ? FontWeight.w800 : FontWeight.w600, color: active ? AppColors.goldLight : Colors.white30)),
+          Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: active ? FontWeight.w800 : FontWeight.w600, color: active ? AppColors.goldLight : Colors.white30)),
           const SizedBox(height: 2),
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),

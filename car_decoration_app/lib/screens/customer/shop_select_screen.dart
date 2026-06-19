@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
@@ -26,8 +26,8 @@ class ShopSelectScreen extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text('اختر المتاجر', style: GoogleFonts.tajawal(fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                      Text('سيتلقى كل متجر طلبك ويرسل عرضه', style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                      Text('اختر المتاجر', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                      Text('سيتلقى كل متجر طلبك ويرسل عرضه', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                     ],
                   ),
                   const SizedBox(width: 14),
@@ -45,7 +45,7 @@ class ShopSelectScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     const Spacer(),
-                    Text('اختر حتى ٥ متاجر للحصول على أفضل عرض', style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.goldText)),
+                    Text('اختر حتى ٥ متاجر للحصول على أفضل عرض', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.goldText)),
                     const SizedBox(width: 8),
                     const Icon(Icons.info_outline, color: AppColors.goldText, size: 16),
                   ],
@@ -60,7 +60,7 @@ class ShopSelectScreen extends StatelessWidget {
                 children: [
                   const Spacer(),
                   Text('تم اختيار ${provider.selectedShops.length} متجر',
-                    style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+                    style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
                 ],
               ),
             ),
@@ -109,20 +109,20 @@ class ShopSelectScreen extends StatelessWidget {
                                   children: [
                                     if (shop.verified) const Icon(Icons.verified, color: AppColors.goldText, size: 13),
                                     const SizedBox(width: 5),
-                                    Text(shop.name, style: GoogleFonts.tajawal(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                    Text(shop.name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                                   ],
                                 ),
                                 const SizedBox(height: 2),
-                                Text(shop.area, style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                                Text(shop.area, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                                 const SizedBox(height: 6),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
-                                    Text(shop.distance, style: GoogleFonts.tajawal(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+                                    Text(shop.distance, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
                                     const SizedBox(width: 3),
                                     const Icon(Icons.location_on_outlined, color: AppColors.textMuted, size: 12),
                                     const SizedBox(width: 10),
-                                    Text(shop.rating.toString(), style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                    Text(shop.rating.toString(), style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                                     const SizedBox(width: 3),
                                     const Icon(Icons.star, color: AppColors.star, size: 12),
                                   ],

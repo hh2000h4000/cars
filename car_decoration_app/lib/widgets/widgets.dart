@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../theme.dart';
 
 // ─── Gold gradient button ─────────────────────────────────────────────────────
@@ -22,7 +22,7 @@ class GoldButton extends StatelessWidget {
           boxShadow: [BoxShadow(color: AppColors.goldLight.withOpacity(.35), blurRadius: 20, offset: const Offset(0, 8))],
         ),
         alignment: Alignment.center,
-        child: Text(label, style: GoogleFonts.tajawal(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.dark)),
+        child: Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.dark)),
       ),
     );
   }
@@ -54,7 +54,7 @@ class DarkButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (leading != null) ...[leading!, const SizedBox(width: 8)],
-            Text(label, style: GoogleFonts.tajawal(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white)),
+            Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white)),
           ],
         ),
       ),
@@ -84,7 +84,7 @@ class OutlinedDarkButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
         ),
         alignment: Alignment.center,
-        child: Text(label, style: GoogleFonts.tajawal(fontSize: 15, fontWeight: FontWeight.w800, color: textColor ?? AppColors.dark)),
+        child: Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: textColor ?? AppColors.dark)),
       ),
     );
   }
@@ -132,12 +132,12 @@ class SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(22, 20, 22, 12),
       child: Row(
         children: [
-          Text(title, style: GoogleFonts.tajawal(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+          Text(title, style: TextStyle(fontFamily: 'Tajawal', fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
           const Spacer(),
           if (action != null)
             GestureDetector(
               onTap: onAction,
-              child: Text(action!, style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.goldText)),
+              child: Text(action!, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.goldText)),
             ),
         ],
       ),
@@ -164,7 +164,7 @@ class StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
       decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(999)),
-      child: Text(label, style: GoogleFonts.tajawal(fontSize: 10.5, fontWeight: FontWeight.w800, color: color)),
+      child: Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w800, color: color)),
     );
   }
 }
@@ -190,7 +190,7 @@ class ShopAvatar extends StatelessWidget {
         borderRadius: BorderRadius.circular(size * 0.28),
       ),
       alignment: Alignment.center,
-      child: Text(mono, style: GoogleFonts.tajawal(fontSize: fontSize, fontWeight: FontWeight.w900, color: light ? AppColors.goldText : AppColors.goldLight)),
+      child: Text(mono, style: TextStyle(fontFamily: 'Tajawal', fontSize: fontSize, fontWeight: FontWeight.w900, color: light ? AppColors.goldText : AppColors.goldLight)),
     );
   }
 }
@@ -207,7 +207,7 @@ class StarRatingRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(label, style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+        Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
         const Spacer(),
         Row(
           children: List.generate(5, (i) => GestureDetector(
@@ -233,7 +233,7 @@ class FormFieldBox extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Text(label, style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+        Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
         const SizedBox(height: 6),
         Container(
           constraints: multiline ? const BoxConstraints(minHeight: 52) : const BoxConstraints(minHeight: 48, maxHeight: 48),
@@ -244,7 +244,7 @@ class FormFieldBox extends StatelessWidget {
           ),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
           alignment: Alignment.centerRight,
-          child: Text(value, style: GoogleFonts.tajawal(fontSize: 13.5, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+          child: Text(value, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
         ),
       ],
     );
@@ -291,7 +291,7 @@ class GreenInfoBanner extends StatelessWidget {
         children: [
           const Icon(Icons.check_circle_outline, color: AppColors.green, size: 20),
           const SizedBox(width: 9),
-          Expanded(child: Text(text, style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.green))),
+          Expanded(child: Text(text, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.green))),
         ],
       ),
     );

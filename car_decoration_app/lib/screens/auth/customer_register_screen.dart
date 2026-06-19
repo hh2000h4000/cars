@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 
@@ -22,7 +22,7 @@ class CustomerRegisterScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     const Spacer(),
-                    Text('إنشاء حساب عميل', style: GoogleFonts.tajawal(fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    Text('إنشاء حساب عميل', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                     const SizedBox(width: 14),
                     const AppBackButton(),
                   ],
@@ -31,7 +31,7 @@ class CustomerRegisterScreen extends StatelessWidget {
               Text(
                 'أنشئ حسابك في دقيقة — يتم تفعيل حساب العميل فوراً ويمكنك طلب الخدمات مباشرة.',
                 textAlign: TextAlign.right,
-                style: GoogleFonts.tajawal(fontSize: 13.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary, height: 1.6),
+                style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary, height: 1.6),
               ),
               const SizedBox(height: 22),
 
@@ -46,9 +46,9 @@ class CustomerRegisterScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    Text('+966 50 123 4567', style: GoogleFonts.tajawal(fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                    Text('+966 50 123 4567', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
                     const Spacer(),
-                    Text('🇸🇦 +966', style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.goldText)),
+                    Text('🇸🇦 +966', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.goldText)),
                   ],
                 ),
               ),
@@ -67,7 +67,7 @@ class CustomerRegisterScreen extends StatelessWidget {
                   children: [
                     const Icon(Icons.visibility_outlined, color: AppColors.textMuted, size: 20),
                     const Spacer(),
-                    Text('••••••••', style: GoogleFonts.tajawal(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary, letterSpacing: 3)),
+                    Text('••••••••', style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary, letterSpacing: 3)),
                   ],
                 ),
               ),
@@ -91,7 +91,7 @@ class _FieldLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: 7),
-    child: Text(text, style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+    child: Text(text, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
   );
 }
 
@@ -106,6 +106,6 @@ class _FieldBox extends StatelessWidget {
     decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(15)),
     padding: const EdgeInsets.symmetric(horizontal: 16),
     alignment: ltr ? Alignment.centerLeft : Alignment.centerRight,
-    child: Text(value, style: GoogleFonts.tajawal(fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+    child: Text(value, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
   );
 }

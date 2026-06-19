@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../../data/mock_data.dart';
@@ -90,11 +90,11 @@ class ShopProfileScreen extends StatelessWidget {
                         children: [
                           if (shop.verified) const Icon(Icons.verified, color: AppColors.goldText, size: 17),
                           const SizedBox(width: 7),
-                          Text(shop.name, style: GoogleFonts.tajawal(fontSize: 21, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                          Text(shop.name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 21, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
                         ],
                       ),
                       const SizedBox(height: 3),
-                      Text(shop.area, style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                      Text(shop.area, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                       const SizedBox(height: 12),
                       Wrap(
                         spacing: 7, runSpacing: 6,
@@ -102,7 +102,7 @@ class ShopProfileScreen extends StatelessWidget {
                         children: shop.tags.map((t) => Container(
                           padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
                           decoration: BoxDecoration(color: const Color(0xFFF4F1EA), borderRadius: BorderRadius.circular(999)),
-                          child: Text(t, style: GoogleFonts.tajawal(fontSize: 11, fontWeight: FontWeight.w700, color: const Color(0xFF6B675E))),
+                          child: Text(t, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w700, color: const Color(0xFF6B675E))),
                         )).toList(),
                       ),
                     ],
@@ -144,12 +144,12 @@ class ShopProfileScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text('عن المتجر', style: GoogleFonts.tajawal(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                      Text('عن المتجر', style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                       const SizedBox(height: 8),
                       Text(
                         shop.description,
                         textAlign: TextAlign.right,
-                        style: GoogleFonts.tajawal(fontSize: 13.5, fontWeight: FontWeight.w500, color: AppColors.textSecondary, height: 1.65),
+                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w500, color: AppColors.textSecondary, height: 1.65),
                       ),
                     ],
                   ),
@@ -175,17 +175,17 @@ class ShopProfileScreen extends StatelessWidget {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('${s.price} ريال', style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.goldText)),
-                              Text(s.duration, style: GoogleFonts.tajawal(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+                              Text('${s.price} ريال', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.goldText)),
+                              Text(s.duration, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
                             ],
                           ),
                           const Spacer(),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Text(s.name, style: GoogleFonts.tajawal(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                              Text(s.name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                               if (s.description != null)
-                                Text(s.description!, style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
+                                Text(s.description!, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
                             ],
                           ),
                         ],
@@ -215,7 +215,7 @@ class ShopProfileScreen extends StatelessWidget {
                       ),
                       alignment: Alignment.bottomRight,
                       padding: const EdgeInsets.all(10),
-                      child: Text(shop.gallery[i], style: GoogleFonts.tajawal(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.goldMuted)),
+                      child: Text(shop.gallery[i], style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.goldMuted)),
                     ),
                   ),
                 ),
@@ -241,21 +241,21 @@ class ShopProfileScreen extends StatelessWidget {
                           children: [
                             Row(
                               children: [
-                                Text(r.date, style: GoogleFonts.tajawal(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+                                Text(r.date, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
                                 const Spacer(),
                                 Row(
                                   children: [
-                                    Text(r.rating.toString(), style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                    Text(r.rating.toString(), style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                                     const SizedBox(width: 3),
                                     const Icon(Icons.star, color: AppColors.star, size: 13),
                                     const SizedBox(width: 8),
-                                    Text(r.author, style: GoogleFonts.tajawal(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                    Text(r.author, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                                   ],
                                 ),
                               ],
                             ),
                             const SizedBox(height: 8),
-                            Text(r.comment, textAlign: TextAlign.right, style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary, height: 1.6)),
+                            Text(r.comment, textAlign: TextAlign.right, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary, height: 1.6)),
                           ],
                         ),
                       ),
@@ -296,7 +296,7 @@ class ShopProfileScreen extends StatelessWidget {
                           children: [
                             const Icon(Icons.chat_bubble_outline, size: 18, color: AppColors.textPrimary),
                             const SizedBox(width: 6),
-                            Text('مراسلة', style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                            Text('مراسلة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                           ],
                         ),
                       ),
@@ -318,7 +318,7 @@ class ShopProfileScreen extends StatelessWidget {
                           children: [
                             const Icon(Icons.add_circle_outline, size: 18, color: AppColors.dark),
                             const SizedBox(width: 6),
-                            Text('طلب خدمة', style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.dark)),
+                            Text('طلب خدمة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.dark)),
                           ],
                         ),
                       ),
@@ -351,11 +351,11 @@ class _StatItem extends StatelessWidget {
             Icon(icon, size: 14, color: iconColor),
             const SizedBox(width: 3),
           ],
-          Text(value, style: GoogleFonts.tajawal(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+          Text(value, style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
         ],
       ),
       const SizedBox(height: 3),
-      Text(label, style: GoogleFonts.tajawal(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+      Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
     ],
   );
 }

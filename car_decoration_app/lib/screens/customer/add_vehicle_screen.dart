@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
@@ -27,7 +27,7 @@ class AddVehicleScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     const Spacer(),
-                    Text('إضافة مركبة', style: GoogleFonts.tajawal(fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    Text('إضافة مركبة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                     const SizedBox(width: 14),
                     const AppBackButton(),
                   ],
@@ -63,8 +63,8 @@ class AddVehicleScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('اسم المركبة', style: GoogleFonts.tajawal(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white54)),
-                          Text('السنة · اللون', style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.goldMuted.withOpacity(.5))),
+                          Text('اسم المركبة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white54)),
+                          Text('السنة · اللون', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.goldMuted.withOpacity(.5))),
                         ],
                       ),
                     ),
@@ -98,7 +98,7 @@ class AddVehicleScreen extends StatelessWidget {
                       border: Border.all(color: i == 0 ? AppColors.goldLight : AppColors.border),
                       borderRadius: BorderRadius.circular(11),
                     ),
-                    child: Text(_colors[i], style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w700, color: i == 0 ? AppColors.goldText : AppColors.textSecondary)),
+                    child: Text(_colors[i], style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: i == 0 ? AppColors.goldText : AppColors.textSecondary)),
                   ),
                 ),
               ),
@@ -133,7 +133,7 @@ class _Label extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: 7),
-    child: Text(text, style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+    child: Text(text, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
   );
 }
 
@@ -146,7 +146,7 @@ class _FieldBox extends StatelessWidget {
     decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(14)),
     padding: const EdgeInsets.symmetric(horizontal: 16),
     alignment: Alignment.centerRight,
-    child: Text(hint, style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+    child: Text(hint, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
   );
 }
 
@@ -163,7 +163,7 @@ class _DropdownBox extends StatelessWidget {
       children: [
         const Icon(Icons.keyboard_arrow_down, color: AppColors.textMuted, size: 20),
         const Spacer(),
-        Text(hint, style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+        Text(hint, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
       ],
     ),
   );

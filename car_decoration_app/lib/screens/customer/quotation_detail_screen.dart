@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
@@ -25,7 +25,7 @@ class QuotationDetailScreen extends StatelessWidget {
               child: Row(
                 children: [
                   const Spacer(),
-                  Text('تفاصيل العرض', style: GoogleFonts.tajawal(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                  Text('تفاصيل العرض', style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
                   const SizedBox(width: 14),
                   const AppBackButton(),
                 ],
@@ -53,7 +53,7 @@ class QuotationDetailScreen extends StatelessWidget {
                             children: [
                               Row(
                                 children: [
-                                  Text(q.shopRating.toString(), style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                  Text(q.shopRating.toString(), style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                                   const SizedBox(width: 3),
                                   const Icon(Icons.star, color: AppColors.star, size: 13),
                                 ],
@@ -68,7 +68,7 @@ class QuotationDetailScreen extends StatelessWidget {
                                     children: [
                                       const Icon(Icons.check_circle, color: AppColors.green, size: 13),
                                       const SizedBox(width: 4),
-                                      Text('تم القبول', style: GoogleFonts.tajawal(fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.green)),
+                                      Text('تم القبول', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.green)),
                                     ],
                                   ),
                                 ),
@@ -78,7 +78,7 @@ class QuotationDetailScreen extends StatelessWidget {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Text(q.shopName, style: GoogleFonts.tajawal(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                              Text(q.shopName, style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
                               const SizedBox(height: 3),
                               const Text('متجر معتمد', style: TextStyle(fontSize: 12)),
                             ],
@@ -101,9 +101,9 @@ class QuotationDetailScreen extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              Text('${q.price} ريال', style: GoogleFonts.tajawal(fontSize: 28, fontWeight: FontWeight.w900, color: AppColors.goldLight)),
+                              Text('${q.price} ريال', style: TextStyle(fontFamily: 'Tajawal', fontSize: 28, fontWeight: FontWeight.w900, color: AppColors.goldLight)),
                               const Spacer(),
-                              Text('السعر الإجمالي', style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white54)),
+                              Text('السعر الإجمالي', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white54)),
                             ],
                           ),
                           const SizedBox(height: 12),
@@ -127,10 +127,10 @@ class QuotationDetailScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('تفاصيل الخدمة', style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                          Text('تفاصيل الخدمة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                           const SizedBox(height: 10),
                           Text(q.serviceDetails, textAlign: TextAlign.right,
-                            style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary, height: 1.65)),
+                            style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary, height: 1.65)),
                         ],
                       ),
                     ),
@@ -145,14 +145,14 @@ class QuotationDetailScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text('المواد والقطع المستخدمة', style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                            Text('المواد والقطع المستخدمة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                             const SizedBox(height: 10),
                             ...q.parts.map((p) => Padding(
                               padding: const EdgeInsets.only(bottom: 8),
                               child: Row(
                                 children: [
                                   const Spacer(),
-                                  Text(p, textAlign: TextAlign.right, style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                                  Text(p, textAlign: TextAlign.right, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                                   const SizedBox(width: 8),
                                   Container(
                                     width: 6, height: 6,
@@ -205,9 +205,9 @@ class _PriceRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(
     children: [
-      Text(value, style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white70)),
+      Text(value, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white70)),
       const Spacer(),
-      Text(label, style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white38)),
+      Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white38)),
     ],
   );
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
@@ -24,7 +24,7 @@ class SendQuoteScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     const Spacer(),
-                    Text('إرسال عرض سعر', style: GoogleFonts.tajawal(fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    Text('إرسال عرض سعر', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                     const SizedBox(width: 14),
                     const AppBackButton(),
                   ],
@@ -42,8 +42,8 @@ class SendQuoteScreen extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('طلب #$requestId', style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.goldText)),
-                        Text('تظليل زجاج · لاند كروزر 2023', style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                        Text('طلب #$requestId', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.goldText)),
+                        Text('تظليل زجاج · لاند كروزر 2023', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                       ],
                     ),
                     const SizedBox(width: 10),
@@ -95,7 +95,7 @@ class SendQuoteScreen extends StatelessWidget {
                       border: Border.all(color: w == 'سنة' ? AppColors.goldLight : AppColors.border),
                       borderRadius: BorderRadius.circular(11),
                     ),
-                    child: Text(w, style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w700, color: w == 'سنة' ? AppColors.goldText : AppColors.textSecondary)),
+                    child: Text(w, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: w == 'سنة' ? AppColors.goldText : AppColors.textSecondary)),
                   )).toList(),
                 ),
               ),
@@ -110,7 +110,7 @@ class SendQuoteScreen extends StatelessWidget {
                 child: Text(
                   'تظليل النوافذ الجانبية والخلفية بأفلام 3M عالية الجودة، مع ضمان عدم التبقع أو التقشر لمدة سنة كاملة...',
                   textAlign: TextAlign.right,
-                  style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary, height: 1.6),
+                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary, height: 1.6),
                 ),
               ),
               const SizedBox(height: 18),
@@ -127,7 +127,7 @@ class SendQuoteScreen extends StatelessWidget {
                     child: Row(
                       children: [
                         const Spacer(),
-                        Text('+ إضافة مادة', style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.goldText)),
+                        Text('+ إضافة مادة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.goldText)),
                         const SizedBox(width: 4),
                         const Icon(Icons.add_circle_outline, color: AppColors.goldText, size: 16),
                       ],
@@ -159,7 +159,7 @@ class _Label extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: 7),
-    child: Text(text, style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+    child: Text(text, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
   );
 }
 
@@ -173,7 +173,7 @@ class _NumberBox extends StatelessWidget {
     decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(14)),
     padding: const EdgeInsets.symmetric(horizontal: 16),
     alignment: Alignment.centerRight,
-    child: Text(value, style: GoogleFonts.tajawal(fontSize: large ? 22 : 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+    child: Text(value, style: TextStyle(fontFamily: 'Tajawal', fontSize: large ? 22 : 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
   );
 }
 
@@ -186,7 +186,7 @@ class _TextBox extends StatelessWidget {
     decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(14)),
     padding: const EdgeInsets.symmetric(horizontal: 16),
     alignment: Alignment.centerRight,
-    child: Text(value, style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+    child: Text(value, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
   );
 }
 
@@ -202,7 +202,7 @@ class _PartRow extends StatelessWidget {
       children: [
         const Icon(Icons.remove_circle_outline, color: AppColors.red, size: 16),
         const Spacer(),
-        Text(text, style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+        Text(text, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
       ],
     ),
   );

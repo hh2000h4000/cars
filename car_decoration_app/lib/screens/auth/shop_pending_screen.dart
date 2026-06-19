@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 
@@ -36,12 +36,12 @@ class ShopPendingScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 26),
-              Text('طلبك قيد المراجعة', style: GoogleFonts.tajawal(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+              Text('طلبك قيد المراجعة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
               const SizedBox(height: 12),
               Text(
                 'تم استلام طلب تسجيل متجرك بنجاح. يقوم فريق الإدارة بمراجعة بياناتك والسجل التجاري، وعادة ما تستغرق المراجعة من ٢٤ إلى ٤٨ ساعة.',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.tajawal(fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary, height: 1.7),
+                style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary, height: 1.7),
               ),
               const SizedBox(height: 28),
 
@@ -52,7 +52,7 @@ class ShopPendingScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text('حتى يتم الاعتماد، لا يمكن لمتجرك:', style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.goldText)),
+                    Text('حتى يتم الاعتماد، لا يمكن لمتجرك:', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.goldText)),
                     const SizedBox(height: 13),
                     _RestrictedItem('استقبال طلبات الخدمة'),
                     const SizedBox(height: 9),
@@ -81,9 +81,9 @@ class _RestrictedItem extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     mainAxisAlignment: MainAxisAlignment.end,
     children: [
-      Text(text, style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF3A382F))),
+      Text(text, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF3A382F))),
       const SizedBox(width: 9),
-      Text('✕', style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.red)),
+      Text('✕', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.red)),
     ],
   );
 }

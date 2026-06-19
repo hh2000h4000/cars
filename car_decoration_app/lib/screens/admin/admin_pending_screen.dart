@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
@@ -26,10 +26,10 @@ class AdminPendingScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
                     decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(10)),
                     child: Text('${shops.where((s) => s.status == AdminShopStatus.pending).length} بانتظار',
-                      style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.goldText)),
+                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.goldText)),
                   ),
                   const Spacer(),
-                  Text('موافقة المتاجر', style: GoogleFonts.tajawal(fontSize: 19, fontWeight: FontWeight.w900, color: Colors.white)),
+                  Text('موافقة المتاجر', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w900, color: Colors.white)),
                 ],
               ),
             ),
@@ -76,8 +76,8 @@ class _ShopCard extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(shop.name, style: GoogleFonts.tajawal(fontSize: 15, fontWeight: FontWeight.w900, color: Colors.white)),
-                    Text('${shop.city} · ${shop.submittedAt}', style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white38)),
+                    Text(shop.name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w900, color: Colors.white)),
+                    Text('${shop.city} · ${shop.submittedAt}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white38)),
                   ],
                 ),
                 const SizedBox(width: 12),
@@ -113,7 +113,7 @@ class _ShopCard extends StatelessWidget {
               children: shop.services.map((s) => Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(color: Colors.white.withOpacity(.08), borderRadius: BorderRadius.circular(999)),
-                child: Text(s, style: GoogleFonts.tajawal(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white60)),
+                child: Text(s, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white60)),
               )).toList(),
             ),
           ),
@@ -167,19 +167,19 @@ class _ShopCard extends StatelessWidget {
       builder: (_) => AlertDialog(
         backgroundColor: const Color(0xFF1E1D17),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: Text(title, textAlign: TextAlign.right, style: GoogleFonts.tajawal(fontSize: 17, fontWeight: FontWeight.w800, color: Colors.white)),
-        content: Text(message, textAlign: TextAlign.right, style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white60)),
+        title: Text(title, textAlign: TextAlign.right, style: TextStyle(fontFamily: 'Tajawal', fontSize: 17, fontWeight: FontWeight.w800, color: Colors.white)),
+        content: Text(message, textAlign: TextAlign.right, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white60)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('إلغاء', style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white38)),
+            child: Text('إلغاء', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white38)),
           ),
           TextButton(
             onPressed: () {
               onConfirm();
               Navigator.pop(context);
             },
-            child: Text('تأكيد', style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.goldText)),
+            child: Text('تأكيد', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.goldText)),
           ),
         ],
       ),
@@ -195,7 +195,7 @@ class _StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
     decoration: BoxDecoration(color: status.color.withOpacity(.15), borderRadius: BorderRadius.circular(999)),
-    child: Text(status.label, style: GoogleFonts.tajawal(fontSize: 11.5, fontWeight: FontWeight.w800, color: status.color)),
+    child: Text(status.label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w800, color: status.color)),
   );
 }
 
@@ -208,7 +208,7 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     children: [
       const Spacer(),
-      Text(text, style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w600, color: Colors.white60)),
+      Text(text, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w600, color: Colors.white60)),
       const SizedBox(width: 8),
       Icon(icon, color: Colors.white38, size: 16),
     ],
@@ -229,7 +229,7 @@ class _ActionBtn extends StatelessWidget {
       height: 40,
       decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(11)),
       alignment: Alignment.center,
-      child: Text(label, style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w800, color: textColor)),
+      child: Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: textColor)),
     ),
   );
 }

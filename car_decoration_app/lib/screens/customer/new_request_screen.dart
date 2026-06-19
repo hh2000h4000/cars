@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
@@ -34,7 +34,7 @@ class NewRequestScreen extends StatelessWidget {
               child: Row(
                 children: [
                   const Spacer(),
-                  Text('طلب خدمة جديد', style: GoogleFonts.tajawal(fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                  Text('طلب خدمة جديد', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                   const SizedBox(width: 14),
                   const AppBackButton(),
                 ],
@@ -48,7 +48,7 @@ class NewRequestScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     // Vehicle selector
-                    Text('المركبة', style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    Text('المركبة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                     const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.all(14),
@@ -65,8 +65,8 @@ class NewRequestScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text('${vehicle.brand} ${vehicle.model} ${vehicle.year}',
-                                style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                              Text(vehicle.color, style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                                style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                              Text(vehicle.color, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                             ],
                           ),
                           const SizedBox(width: 12),
@@ -77,7 +77,7 @@ class NewRequestScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             alignment: Alignment.center,
-                            child: Text(vehicle.mono, style: GoogleFonts.tajawal(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.goldLight)),
+                            child: Text(vehicle.mono, style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.goldLight)),
                           ),
                         ],
                       ),
@@ -85,7 +85,7 @@ class NewRequestScreen extends StatelessWidget {
                     const SizedBox(height: 22),
 
                     // Service type
-                    Text('نوع الخدمة', style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    Text('نوع الخدمة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                     const SizedBox(height: 10),
                     GridView.builder(
                       shrinkWrap: true,
@@ -113,8 +113,8 @@ class NewRequestScreen extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(name, style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w800, color: selected ? AppColors.goldText : AppColors.textPrimary)),
-                                    Text(sub, style: GoogleFonts.tajawal(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+                                    Text(name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: selected ? AppColors.goldText : AppColors.textPrimary)),
+                                    Text(sub, style: TextStyle(fontFamily: 'Tajawal', fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
                                   ],
                                 ),
                                 const SizedBox(width: 8),
@@ -128,7 +128,7 @@ class NewRequestScreen extends StatelessWidget {
                     const SizedBox(height: 22),
 
                     // Notes
-                    Text('ملاحظات إضافية', style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    Text('ملاحظات إضافية', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                     const SizedBox(height: 8),
                     Container(
                       height: 100,
@@ -138,13 +138,13 @@ class NewRequestScreen extends StatelessWidget {
                       child: Text(
                         'أريد تظليل النوافذ الجانبية والخلفية فقط مع الحفاظ على الزجاج الأمامي شفافاً...',
                         textAlign: TextAlign.right,
-                        style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textMuted),
+                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textMuted),
                       ),
                     ),
                     const SizedBox(height: 22),
 
                     // Location
-                    Text('موقع الخدمة', style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    Text('موقع الخدمة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                     const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.all(14),
@@ -161,8 +161,8 @@ class NewRequestScreen extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                Text('العليا، الرياض', style: GoogleFonts.tajawal(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                                Text('طريق الملك فهد، مبنى الأعمال', style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
+                                Text('العليا، الرياض', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                                Text('طريق الملك فهد، مبنى الأعمال', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
                               ],
                             ),
                           ),
@@ -172,7 +172,7 @@ class NewRequestScreen extends StatelessWidget {
                     const SizedBox(height: 22),
 
                     // Service mode
-                    Text('طريقة الخدمة', style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    Text('طريقة الخدمة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                     const SizedBox(height: 8),
                     Row(
                       children: [
@@ -188,7 +188,7 @@ class NewRequestScreen extends StatelessWidget {
                               children: [
                                 const Icon(Icons.storefront_outlined, color: AppColors.textSecondary, size: 22),
                                 const SizedBox(height: 5),
-                                Text('في المركز', style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+                                Text('في المركز', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
                               ],
                             ),
                           ),
@@ -206,7 +206,7 @@ class NewRequestScreen extends StatelessWidget {
                               children: [
                                 const Icon(Icons.home_outlined, color: AppColors.goldText, size: 22),
                                 const SizedBox(height: 5),
-                                Text('خدمة منزلية', style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.goldText)),
+                                Text('خدمة منزلية', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.goldText)),
                               ],
                             ),
                           ),

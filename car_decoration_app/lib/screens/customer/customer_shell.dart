@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../../theme.dart';
 import 'home_screen.dart';
 import 'requests_screen.dart';
@@ -66,7 +66,7 @@ class _CustomerShellState extends State<CustomerShell> {
                         const SizedBox(height: 3),
                         Text(
                           label,
-                          style: GoogleFonts.tajawal(
+                          style: TextStyle(fontFamily: 'Tajawal', 
                             fontSize: 10.5,
                             fontWeight: active ? FontWeight.w800 : FontWeight.w600,
                             color: active ? AppColors.dark : AppColors.textMuted,

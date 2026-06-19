@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../../data/mock_data.dart';
@@ -40,7 +40,7 @@ class HomeScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(13),
                       ),
                       alignment: Alignment.center,
-                      child: Text('ع', style: GoogleFonts.tajawal(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.dark)),
+                      child: Text('ع', style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.dark)),
                     ),
                     const SizedBox(width: 10),
                     // Notification
@@ -64,12 +64,12 @@ class HomeScreen extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('مساء الخير،', style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                        Text('مساء الخير،', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                         Row(
                           children: [
-                            Text('▾', style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textMuted)),
+                            Text('▾', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textMuted)),
                             const SizedBox(width: 5),
-                            Text('العليا، الرياض', style: GoogleFonts.tajawal(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                            Text('العليا، الرياض', style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                             const SizedBox(width: 5),
                             const Icon(Icons.location_on_outlined, color: AppColors.goldText, size: 15),
                           ],
@@ -92,7 +92,7 @@ class HomeScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    Text('ابحث عن خدمة أو متجر تزيين...', style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+                    Text('ابحث عن خدمة أو متجر تزيين...', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
                     const Spacer(),
                     const Icon(Icons.search, color: AppColors.textMuted, size: 20),
                   ],
@@ -132,10 +132,10 @@ class HomeScreen extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(color: AppColors.goldLight, borderRadius: BorderRadius.circular(999)),
-                            child: Text('خدمة منزلية متنقلة', style: GoogleFonts.tajawal(fontSize: 10.5, fontWeight: FontWeight.w800, color: AppColors.dark)),
+                            child: Text('خدمة منزلية متنقلة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w800, color: AppColors.dark)),
                           ),
                           const SizedBox(height: 11),
-                          Text('احجز خدمة احترافية\nتصلك أينما كنت', style: GoogleFonts.tajawal(fontSize: 21, fontWeight: FontWeight.w900, color: const Color(0xFFFBF7EC), height: 1.35)),
+                          Text('احجز خدمة احترافية\nتصلك أينما كنت', style: TextStyle(fontFamily: 'Tajawal', fontSize: 21, fontWeight: FontWeight.w900, color: const Color(0xFFFBF7EC), height: 1.35)),
                           const SizedBox(height: 15),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
@@ -145,7 +145,7 @@ class HomeScreen extends StatelessWidget {
                               children: [
                                 const Icon(Icons.chevron_left, color: AppColors.dark, size: 18),
                                 const SizedBox(width: 4),
-                                Text('اطلب الآن', style: GoogleFonts.tajawal(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.dark)),
+                                Text('اطلب الآن', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.dark)),
                               ],
                             ),
                           ),
@@ -185,7 +185,7 @@ class HomeScreen extends StatelessWidget {
                           child: Icon(icon, color: AppColors.goldText, size: 26),
                         ),
                         const SizedBox(height: 7),
-                        Text(name, textAlign: TextAlign.center, style: GoogleFonts.tajawal(fontSize: 11, fontWeight: FontWeight.w700, color: const Color(0xFF3A382F))),
+                        Text(name, textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w700, color: const Color(0xFF3A382F))),
                       ],
                     ),
                   );
@@ -231,7 +231,7 @@ class HomeScreen extends StatelessWidget {
                                     decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(999)),
                                     child: Row(
                                       children: [
-                                        Text(shop.distance, style: GoogleFonts.tajawal(fontSize: 11, fontWeight: FontWeight.w700, color: const Color(0xFFFBF7EC))),
+                                        Text(shop.distance, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w700, color: const Color(0xFFFBF7EC))),
                                         const SizedBox(width: 4),
                                         const Icon(Icons.location_on, color: AppColors.goldLight, size: 13),
                                       ],
@@ -256,19 +256,19 @@ class HomeScreen extends StatelessWidget {
                                         children: [
                                           if (shop.verified) const Icon(Icons.verified, color: AppColors.goldText, size: 15),
                                           const SizedBox(width: 6),
-                                          Text(shop.name, style: GoogleFonts.tajawal(fontSize: 15.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                          Text(shop.name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 15.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                                         ],
                                       ),
                                       const SizedBox(height: 2),
-                                      Text(shop.area, style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                                      Text(shop.area, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                                       const SizedBox(height: 8),
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.end,
                                         children: [
-                                          Text('${shop.completedJobs} عملية مكتملة', style: GoogleFonts.tajawal(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+                                          Text('${shop.completedJobs} عملية مكتملة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
                                           const SizedBox(width: 12),
                                           Row(children: [
-                                            Text(shop.rating.toString(), style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                            Text(shop.rating.toString(), style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                                             const SizedBox(width: 3),
                                             const Icon(Icons.star, color: AppColors.star, size: 14),
                                           ]),
@@ -282,7 +282,7 @@ class HomeScreen extends StatelessWidget {
                                         children: shop.tags.map((t) => Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                           decoration: BoxDecoration(color: const Color(0xFFF4F1EA), borderRadius: BorderRadius.circular(999)),
-                                          child: Text(t, style: GoogleFonts.tajawal(fontSize: 10.5, fontWeight: FontWeight.w700, color: const Color(0xFF6B675E))),
+                                          child: Text(t, style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w700, color: const Color(0xFF6B675E))),
                                         )).toList(),
                                       ),
                                     ],

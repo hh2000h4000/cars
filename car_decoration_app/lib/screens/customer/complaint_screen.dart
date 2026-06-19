@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
@@ -28,7 +28,7 @@ class ComplaintScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     const Spacer(),
-                    Text('تقديم شكوى', style: GoogleFonts.tajawal(fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    Text('تقديم شكوى', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                     const SizedBox(width: 14),
                     const AppBackButton(),
                   ],
@@ -52,7 +52,7 @@ class ComplaintScreen extends StatelessWidget {
                       child: Text(
                         'سيتم مراجعة شكواك من قبل فريق الإدارة وسيتم التواصل معك خلال ٢٤ ساعة.',
                         textAlign: TextAlign.right,
-                        style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.red, height: 1.5),
+                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.red, height: 1.5),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -68,15 +68,15 @@ class ComplaintScreen extends StatelessWidget {
                 decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(14)),
                 child: Row(
                   children: [
-                    Text('طلب #$requestId', style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    Text('طلب #$requestId', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                     const Spacer(),
-                    Text('الطلب المتعلق بالشكوى', style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                    Text('الطلب المتعلق بالشكوى', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                   ],
                 ),
               ),
 
               // Reason selection
-              Text('سبب الشكوى', style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+              Text('سبب الشكوى', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
               const SizedBox(height: 10),
               Column(
                 children: MockData.complaintReasons.map((reason) {
@@ -106,7 +106,7 @@ class ComplaintScreen extends StatelessWidget {
                             child: isSelected ? const Icon(Icons.check, color: Colors.white, size: 12) : null,
                           ),
                           const Spacer(),
-                          Text(reason, style: GoogleFonts.tajawal(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                          Text(reason, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                         ],
                       ),
                     ),
@@ -116,7 +116,7 @@ class ComplaintScreen extends StatelessWidget {
               const SizedBox(height: 16),
 
               // Description
-              Text('وصف المشكلة بالتفصيل', style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+              Text('وصف المشكلة بالتفصيل', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
               const SizedBox(height: 8),
               Container(
                 height: 120,
@@ -126,13 +126,13 @@ class ComplaintScreen extends StatelessWidget {
                 child: Text(
                   'اشرح المشكلة بالتفصيل هنا...',
                   textAlign: TextAlign.right,
-                  style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textMuted),
+                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textMuted),
                 ),
               ),
               const SizedBox(height: 16),
 
               // Attachments
-              Text('إرفاق صور (اختياري)', style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+              Text('إرفاق صور (اختياري)', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
               const SizedBox(height: 8),
               GestureDetector(
                 onTap: () {},
@@ -148,7 +148,7 @@ class ComplaintScreen extends StatelessWidget {
                     children: [
                       const Icon(Icons.add_photo_alternate_outlined, color: AppColors.textMuted, size: 28),
                       const SizedBox(height: 6),
-                      Text('اضغط لإضافة صور', style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+                      Text('اضغط لإضافة صور', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
                     ],
                   ),
                 ),

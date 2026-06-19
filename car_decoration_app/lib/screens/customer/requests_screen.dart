@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
@@ -35,13 +35,13 @@ class RequestsScreen extends StatelessWidget {
                         children: [
                           const Icon(Icons.add, color: AppColors.dark, size: 17),
                           const SizedBox(width: 4),
-                          Text('طلب جديد', style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.dark)),
+                          Text('طلب جديد', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.dark)),
                         ],
                       ),
                     ),
                   ),
                   const Spacer(),
-                  Text('طلباتي', style: GoogleFonts.tajawal(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                  Text('طلباتي', style: TextStyle(fontFamily: 'Tajawal', fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
                 ],
               ),
             ),
@@ -54,7 +54,7 @@ class RequestsScreen extends StatelessWidget {
                         children: [
                           const Icon(Icons.inbox_outlined, color: AppColors.textMuted, size: 52),
                           const SizedBox(height: 12),
-                          Text('لا توجد طلبات بعد', style: GoogleFonts.tajawal(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+                          Text('لا توجد طلبات بعد', style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
                         ],
                       ),
                     )
@@ -106,7 +106,7 @@ class _RequestCard extends StatelessWidget {
                     children: [
                       StatusBadge(label: request.status.label, type: request.status.colorType),
                       const Spacer(),
-                      Text('طلب #${request.id}', style: GoogleFonts.tajawal(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                      Text('طلب #${request.id}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -116,9 +116,9 @@ class _RequestCard extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text(request.serviceType, style: GoogleFonts.tajawal(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                          Text(request.serviceType, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                           const SizedBox(height: 3),
-                          Text('${request.vehicleBrand} ${request.vehicleModel}', style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                          Text('${request.vehicleBrand} ${request.vehicleModel}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                         ],
                       ),
                     ],
@@ -135,7 +135,7 @@ class _RequestCard extends StatelessWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text('${request.quotationCount} عروض', style: GoogleFonts.tajawal(fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.goldText)),
+                              Text('${request.quotationCount} عروض', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.goldText)),
                               const SizedBox(width: 4),
                               const Icon(Icons.local_offer_outlined, color: AppColors.goldText, size: 13),
                             ],
@@ -143,7 +143,7 @@ class _RequestCard extends StatelessWidget {
                         ),
                       ],
                       const Spacer(),
-                      Text(request.dateLabel, style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+                      Text(request.dateLabel, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
                       const SizedBox(width: 5),
                       const Icon(Icons.access_time, color: AppColors.textMuted, size: 13),
                     ],

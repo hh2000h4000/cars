@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
@@ -26,7 +26,7 @@ class ReviewScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     const Spacer(),
-                    Text('تقييم الخدمة', style: GoogleFonts.tajawal(fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    Text('تقييم الخدمة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                     const SizedBox(width: 14),
                     const AppBackButton(),
                   ],
@@ -45,16 +45,16 @@ class ReviewScreen extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('تظليل زجاج', style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.goldMuted)),
-                        Text('طلب #1038', style: GoogleFonts.tajawal(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white38)),
+                        Text('تظليل زجاج', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.goldMuted)),
+                        Text('طلب #1038', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white38)),
                       ],
                     ),
                     const Spacer(),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('لمسات الفخامة', style: GoogleFonts.tajawal(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
-                        Text('خدمة مكتملة', style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.goldMuted)),
+                        Text('لمسات الفخامة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
+                        Text('خدمة مكتملة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.goldMuted)),
                       ],
                     ),
                     const SizedBox(width: 12),
@@ -70,7 +70,7 @@ class ReviewScreen extends StatelessWidget {
                 decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(18)),
                 child: Column(
                   children: [
-                    Text('التقييم العام', style: GoogleFonts.tajawal(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    Text('التقييم العام', style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -89,7 +89,7 @@ class ReviewScreen extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       review.overall >= 5 ? 'ممتاز!' : review.overall >= 4 ? 'جيد جداً' : review.overall >= 3 ? 'جيد' : review.overall >= 2 ? 'مقبول' : 'ضعيف',
-                      style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.goldText),
+                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.goldText),
                     ),
                   ],
                 ),
@@ -129,7 +129,7 @@ class ReviewScreen extends StatelessWidget {
               const SizedBox(height: 14),
 
               // Comment
-              Text('تعليق إضافي', style: GoogleFonts.tajawal(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+              Text('تعليق إضافي', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
               const SizedBox(height: 8),
               Container(
                 height: 110,
@@ -139,7 +139,7 @@ class ReviewScreen extends StatelessWidget {
                 child: Text(
                   review.comment.isEmpty ? 'شاركنا تجربتك مع الخدمة...' : review.comment,
                   textAlign: TextAlign.right,
-                  style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w500, color: review.comment.isEmpty ? AppColors.textMuted : AppColors.textPrimary),
+                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: review.comment.isEmpty ? AppColors.textMuted : AppColors.textPrimary),
                 ),
               ),
               const SizedBox(height: 28),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
@@ -36,7 +36,7 @@ class AdminDashboardScreen extends StatelessWidget {
                         children: [
                           Container(width: 7, height: 7, decoration: const BoxDecoration(color: AppColors.green, shape: BoxShape.circle)),
                           const SizedBox(width: 6),
-                          Text('مباشر', style: GoogleFonts.tajawal(fontSize: 11.5, fontWeight: FontWeight.w700, color: Colors.white60)),
+                          Text('مباشر', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: Colors.white60)),
                         ],
                       ),
                     ),
@@ -44,8 +44,8 @@ class AdminDashboardScreen extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('لوحة الإدارة', style: GoogleFonts.tajawal(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
-                        Text('المشرف العام', style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white38)),
+                        Text('لوحة الإدارة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
+                        Text('المشرف العام', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white38)),
                       ],
                     ),
                     const SizedBox(width: 12),
@@ -56,7 +56,7 @@ class AdminDashboardScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(13),
                       ),
                       alignment: Alignment.center,
-                      child: Text('م', style: GoogleFonts.tajawal(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.dark)),
+                      child: Text('م', style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.dark)),
                     ),
                   ],
                 ),
@@ -92,7 +92,7 @@ class AdminDashboardScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('إجراءات سريعة', style: GoogleFonts.tajawal(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
+                  Text('إجراءات سريعة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -128,10 +128,10 @@ class AdminDashboardScreen extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: () => Navigator.pushNamed(context, '/admin/pending'),
-                    child: Text('عرض الكل', style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.goldText)),
+                    child: Text('عرض الكل', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.goldText)),
                   ),
                   const Spacer(),
-                  Text('طلبات التسجيل الأخيرة', style: GoogleFonts.tajawal(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
+                  Text('طلبات التسجيل الأخيرة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
                 ],
               ),
             ),
@@ -156,15 +156,15 @@ class AdminDashboardScreen extends StatelessWidget {
                           children: [
                             _AdminStatusBadge(shop.status.label, shop.status.color),
                             const SizedBox(height: 4),
-                            Text(shop.submittedAt, style: GoogleFonts.tajawal(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white30)),
+                            Text(shop.submittedAt, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white30)),
                           ],
                         ),
                         const Spacer(),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text(shop.name, style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white)),
-                            Text(shop.city, style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white38)),
+                            Text(shop.name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white)),
+                            Text(shop.city, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white38)),
                           ],
                         ),
                         const SizedBox(width: 10),
@@ -200,8 +200,8 @@ class _KpiCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(value, style: GoogleFonts.tajawal(fontSize: 28, fontWeight: FontWeight.w900, color: textColor)),
-        Text(label, style: GoogleFonts.tajawal(fontSize: 11.5, fontWeight: FontWeight.w700, color: textColor.withOpacity(.7))),
+        Text(value, style: TextStyle(fontFamily: 'Tajawal', fontSize: 28, fontWeight: FontWeight.w900, color: textColor)),
+        Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: textColor.withOpacity(.7))),
       ],
     ),
   );
@@ -235,13 +235,13 @@ class _ActionButton extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: const BoxDecoration(color: AppColors.red, shape: BoxShape.circle),
-                    child: Text(badge!, style: GoogleFonts.tajawal(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.white)),
+                    child: Text(badge!, style: TextStyle(fontFamily: 'Tajawal', fontSize: 10, fontWeight: FontWeight.w900, color: Colors.white)),
                   ),
                 ),
             ],
           ),
           const SizedBox(height: 6),
-          Text(label, style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.white70)),
+          Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.white70)),
         ],
       ),
     ),
@@ -257,6 +257,6 @@ class _AdminStatusBadge extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
     decoration: BoxDecoration(color: color.withOpacity(.15), borderRadius: BorderRadius.circular(999)),
-    child: Text(label, style: GoogleFonts.tajawal(fontSize: 11, fontWeight: FontWeight.w800, color: color)),
+    child: Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w800, color: color)),
   );
 }

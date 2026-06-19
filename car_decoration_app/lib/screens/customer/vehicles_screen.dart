@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../providers/app_provider.dart';
@@ -33,13 +33,13 @@ class VehiclesScreen extends StatelessWidget {
                         children: [
                           const Icon(Icons.add, color: AppColors.dark, size: 18),
                           const SizedBox(width: 5),
-                          Text('إضافة مركبة', style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.dark)),
+                          Text('إضافة مركبة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.dark)),
                         ],
                       ),
                     ),
                   ),
                   const Spacer(),
-                  Text('مركباتي', style: GoogleFonts.tajawal(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                  Text('مركباتي', style: TextStyle(fontFamily: 'Tajawal', fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
                 ],
               ),
             ),
@@ -83,19 +83,19 @@ class VehiclesScreen extends StatelessWidget {
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                   decoration: BoxDecoration(color: const Color(0xFF15140F), border: Border.all(color: Colors.white12), borderRadius: BorderRadius.circular(10)),
-                                  child: Text(v.year.toString(), style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.goldMuted)),
+                                  child: Text(v.year.toString(), style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.goldMuted)),
                                 ),
                               ),
                               Center(
-                                child: Text(v.mono, style: GoogleFonts.tajawal(fontSize: 40, fontWeight: FontWeight.w900, color: Colors.white.withOpacity(.08))),
+                                child: Text(v.mono, style: TextStyle(fontFamily: 'Tajawal', fontSize: 40, fontWeight: FontWeight.w900, color: Colors.white.withOpacity(.08))),
                               ),
                               Positioned(
                                 bottom: 10, right: 14,
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Text('${v.brand} ${v.model}', style: GoogleFonts.tajawal(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
-                                    Text(v.color, style: GoogleFonts.tajawal(fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.goldMuted)),
+                                    Text('${v.brand} ${v.model}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
+                                    Text(v.color, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.goldMuted)),
                                   ],
                                 ),
                               ),
@@ -105,7 +105,7 @@ class VehiclesScreen extends StatelessWidget {
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                                     decoration: BoxDecoration(color: AppColors.goldLight, borderRadius: BorderRadius.circular(999)),
-                                    child: Text('رئيسية', style: GoogleFonts.tajawal(fontSize: 10.5, fontWeight: FontWeight.w800, color: AppColors.dark)),
+                                    child: Text('رئيسية', style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w800, color: AppColors.dark)),
                                   ),
                                 ),
                             ],
@@ -125,19 +125,19 @@ class VehiclesScreen extends StatelessWidget {
                                       border: Border.all(color: AppColors.border),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
-                                    child: Text('جعلها رئيسية', style: GoogleFonts.tajawal(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+                                    child: Text('جعلها رئيسية', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
                                   ),
                                 ),
                               const Spacer(),
                               if (v.plateNumber != null)
                                 Row(
                                   children: [
-                                    Text(v.plateNumber!, style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                    Text(v.plateNumber!, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                                     const SizedBox(width: 6),
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                       decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(7)),
-                                      child: Text('لوحة', style: GoogleFonts.tajawal(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.goldText)),
+                                      child: Text('لوحة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.goldText)),
                                     ),
                                   ],
                                 ),

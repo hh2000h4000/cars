@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
@@ -43,10 +43,10 @@ class ChatScreen extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(shop.name, style: GoogleFonts.tajawal(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                      Text(shop.name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                       Row(
                         children: [
-                          Text('متصل الآن', style: GoogleFonts.tajawal(fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.green)),
+                          Text('متصل الآن', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.green)),
                           const SizedBox(width: 5),
                           Container(width: 6, height: 6, decoration: const BoxDecoration(color: AppColors.green, shape: BoxShape.circle)),
                         ],
@@ -106,7 +106,7 @@ class ChatScreen extends StatelessWidget {
                               child: Text(
                                 msg.text,
                                 textAlign: msg.isMe ? TextAlign.right : TextAlign.right,
-                                style: GoogleFonts.tajawal(
+                                style: TextStyle(fontFamily: 'Tajawal', 
                                   fontSize: 13.5,
                                   fontWeight: FontWeight.w500,
                                   color: msg.isMe ? Colors.white : AppColors.textPrimary,
@@ -115,7 +115,7 @@ class ChatScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 3),
-                            Text(msg.time, style: GoogleFonts.tajawal(fontSize: 10.5, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+                            Text(msg.time, style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
                           ],
                         ),
                         if (msg.isMe) ...[
@@ -161,10 +161,10 @@ class ChatScreen extends StatelessWidget {
                         controller: controller,
                         textAlign: TextAlign.right,
                         textDirection: TextDirection.rtl,
-                        style: GoogleFonts.tajawal(fontSize: 13.5, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
+                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
                         decoration: InputDecoration.collapsed(
                           hintText: 'اكتب رسالة...',
-                          hintStyle: GoogleFonts.tajawal(fontSize: 13.5, fontWeight: FontWeight.w500, color: AppColors.textMuted),
+                          hintStyle: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w500, color: AppColors.textMuted),
                         ),
                       ),
                     ),

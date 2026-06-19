@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 
 class AppColors {
   static const dark = Color(0xFF15140F);
@@ -32,20 +32,20 @@ class AppColors {
 
 class AppTheme {
   static TextTheme _buildTextTheme() => TextTheme(
-        displayLarge: GoogleFonts.tajawal(fontWeight: FontWeight.w900),
-        displayMedium: GoogleFonts.tajawal(fontWeight: FontWeight.w800),
-        headlineLarge: GoogleFonts.tajawal(fontWeight: FontWeight.w900),
-        headlineMedium: GoogleFonts.tajawal(fontWeight: FontWeight.w800),
-        headlineSmall: GoogleFonts.tajawal(fontWeight: FontWeight.w800),
-        titleLarge: GoogleFonts.tajawal(fontWeight: FontWeight.w800),
-        titleMedium: GoogleFonts.tajawal(fontWeight: FontWeight.w700),
-        titleSmall: GoogleFonts.tajawal(fontWeight: FontWeight.w700),
-        bodyLarge: GoogleFonts.tajawal(fontWeight: FontWeight.w600),
-        bodyMedium: GoogleFonts.tajawal(fontWeight: FontWeight.w600),
-        bodySmall: GoogleFonts.tajawal(fontWeight: FontWeight.w600),
-        labelLarge: GoogleFonts.tajawal(fontWeight: FontWeight.w800),
-        labelMedium: GoogleFonts.tajawal(fontWeight: FontWeight.w700),
-        labelSmall: GoogleFonts.tajawal(fontWeight: FontWeight.w700),
+        displayLarge: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w900),
+        displayMedium: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w800),
+        headlineLarge: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w900),
+        headlineMedium: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w800),
+        headlineSmall: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w800),
+        titleLarge: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w800),
+        titleMedium: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700),
+        titleSmall: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700),
+        bodyLarge: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w600),
+        bodyMedium: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w600),
+        bodySmall: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w600),
+        labelLarge: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w800),
+        labelMedium: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700),
+        labelSmall: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700),
       );
 
   static ThemeData get light => ThemeData(
@@ -60,7 +60,7 @@ class AppTheme {
           backgroundColor: AppColors.surface,
           elevation: 0,
           scrolledUnderElevation: 0,
-          titleTextStyle: GoogleFonts.tajawal(
+          titleTextStyle: TextStyle(fontFamily: 'Tajawal', 
             color: AppColors.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.w800,

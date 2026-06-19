@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
@@ -27,7 +27,7 @@ class ShopRequestDetailScreen extends StatelessWidget {
                 children: [
                   StatusBadge(label: request.status.label, type: request.status.colorType),
                   const Spacer(),
-                  Text('طلب #${request.id}', style: GoogleFonts.tajawal(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                  Text('طلب #${request.id}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
                   const SizedBox(width: 14),
                   const AppBackButton(),
                 ],
@@ -50,12 +50,12 @@ class ShopRequestDetailScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('تفاصيل المركبة', style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.goldMuted)),
+                          Text('تفاصيل المركبة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.goldMuted)),
                           const SizedBox(height: 8),
                           Text('${request.vehicleBrand} ${request.vehicleModel} ${request.vehicleYear}',
-                            style: GoogleFonts.tajawal(fontSize: 17, fontWeight: FontWeight.w900, color: Colors.white)),
+                            style: TextStyle(fontFamily: 'Tajawal', fontSize: 17, fontWeight: FontWeight.w900, color: Colors.white)),
                           const SizedBox(height: 4),
-                          Text(request.vehicleColor, style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white54)),
+                          Text(request.vehicleColor, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white54)),
                         ],
                       ),
                     ),
@@ -71,19 +71,19 @@ class ShopRequestDetailScreen extends StatelessWidget {
                           Row(
                             children: [
                               const Spacer(),
-                              Text('نوع الخدمة المطلوبة', style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
+                              Text('نوع الخدمة المطلوبة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
                             ],
                           ),
                           const SizedBox(height: 6),
-                          Text(request.serviceType, style: GoogleFonts.tajawal(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                          Text(request.serviceType, style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                           if (request.notes != null) ...[
                             const SizedBox(height: 12),
                             const Divider(height: 1, color: AppColors.border),
                             const SizedBox(height: 12),
-                            Text('ملاحظات العميل', style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
+                            Text('ملاحظات العميل', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
                             const SizedBox(height: 6),
                             Text(request.notes!, textAlign: TextAlign.right,
-                              style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary, height: 1.6)),
+                              style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary, height: 1.6)),
                           ],
                         ],
                       ),
@@ -106,8 +106,8 @@ class ShopRequestDetailScreen extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                Text('موقع الخدمة (منزلية)', style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
-                                Text('العليا، الرياض', style: GoogleFonts.tajawal(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                                Text('موقع الخدمة (منزلية)', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
+                                Text('العليا، الرياض', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                               ],
                             ),
                           ),
@@ -119,7 +119,7 @@ class ShopRequestDetailScreen extends StatelessWidget {
                     // Timeline info
                     Text('تاريخ الطلب: ${request.dateLabel}',
                       textAlign: TextAlign.right,
-                      style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
 
                     if (hasSentQuote) ...[
                       const SizedBox(height: 16),
@@ -134,7 +134,7 @@ class ShopRequestDetailScreen extends StatelessWidget {
                           children: [
                             const Spacer(),
                             Text('تم إرسال عرضك بنجاح — في انتظار رد العميل',
-                              style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.green)),
+                              style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.green)),
                             const SizedBox(width: 8),
                             const Icon(Icons.check_circle, color: AppColors.green, size: 18),
                           ],

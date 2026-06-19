@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
@@ -35,7 +35,7 @@ class ShopDashboardScreen extends StatelessWidget {
                         children: [
                           Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.green, shape: BoxShape.circle)),
                           const SizedBox(width: 6),
-                          Text('مفتوح', style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.goldText)),
+                          Text('مفتوح', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.goldText)),
                         ],
                       ),
                     ),
@@ -43,8 +43,8 @@ class ShopDashboardScreen extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('لمسات الفخامة', style: GoogleFonts.tajawal(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
-                        Text('لوحة التحكم', style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                        Text('لمسات الفخامة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                        Text('لوحة التحكم', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                       ],
                     ),
                     const SizedBox(width: 12),
@@ -119,24 +119,24 @@ class ShopDashboardScreen extends StatelessWidget {
                                       ),
                                       child: Text(
                                         item.urgency == 'high' ? 'عاجل' : 'عادي',
-                                        style: GoogleFonts.tajawal(fontSize: 11, fontWeight: FontWeight.w800,
+                                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w800,
                                           color: item.urgency == 'high' ? AppColors.red : AppColors.goldText),
                                       ),
                                     ),
                                     const Spacer(),
-                                    Text('طلب #${item.requestId}', style: GoogleFonts.tajawal(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                    Text('طلب #${item.requestId}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                                   ],
                                 ),
                                 const SizedBox(height: 10),
                                 Row(
                                   children: [
-                                    Text(item.timeAgo, style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+                                    Text(item.timeAgo, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
                                     const Spacer(),
                                     Column(
                                       crossAxisAlignment: CrossAxisAlignment.end,
                                       children: [
-                                        Text(item.serviceType, style: GoogleFonts.tajawal(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                                        Text(item.vehicleInfo, style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                                        Text(item.serviceType, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                                        Text(item.vehicleInfo, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                                       ],
                                     ),
                                   ],
@@ -153,7 +153,7 @@ class ShopDashboardScreen extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(11),
                                       ),
                                       alignment: Alignment.center,
-                                      child: Text('إرسال عرض سعر', style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.dark)),
+                                      child: Text('إرسال عرض سعر', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.dark)),
                                     ),
                                   ),
                                 ),
@@ -197,8 +197,8 @@ class _StatCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(value, style: GoogleFonts.tajawal(fontSize: 22, fontWeight: FontWeight.w900, color: textColor)),
-            Text(label, style: GoogleFonts.tajawal(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+            Text(value, style: TextStyle(fontFamily: 'Tajawal', fontSize: 22, fontWeight: FontWeight.w900, color: textColor)),
+            Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
           ],
         ),
       ],

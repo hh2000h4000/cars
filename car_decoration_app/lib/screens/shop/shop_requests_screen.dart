@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
@@ -23,7 +23,7 @@ class ShopRequestsScreen extends StatelessWidget {
               child: Row(
                 children: [
                   const Spacer(),
-                  Text('الطلبات', style: GoogleFonts.tajawal(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                  Text('الطلبات', style: TextStyle(fontFamily: 'Tajawal', fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
                 ],
               ),
             ),
@@ -68,21 +68,21 @@ class ShopRequestsScreen extends StatelessWidget {
                             children: [
                               StatusBadge(label: req.status.label, type: req.status.colorType),
                               const Spacer(),
-                              Text('طلب #${req.id}', style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                              Text('طلب #${req.id}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                             ],
                           ),
                           const SizedBox(height: 10),
-                          Text(req.serviceType, style: GoogleFonts.tajawal(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                          Text(req.serviceType, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                           const SizedBox(height: 3),
                           Text('${req.vehicleBrand} ${req.vehicleModel} ${req.vehicleYear}',
-                            style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                            style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                           const SizedBox(height: 10),
                           Row(
                             children: [
                               const Icon(Icons.chevron_left, color: AppColors.goldText, size: 16),
-                              Text('عرض التفاصيل', style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.goldText)),
+                              Text('عرض التفاصيل', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.goldText)),
                               const Spacer(),
-                              Text(req.dateLabel, style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+                              Text(req.dateLabel, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
                               const SizedBox(width: 4),
                               const Icon(Icons.access_time, color: AppColors.textMuted, size: 12),
                             ],
@@ -115,6 +115,6 @@ class _FilterTab extends StatelessWidget {
       border: Border.all(color: active ? AppColors.dark : AppColors.border),
       borderRadius: BorderRadius.circular(999),
     ),
-    child: Text(label, style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w700, color: active ? Colors.white : AppColors.textSecondary)),
+    child: Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: active ? Colors.white : AppColors.textSecondary)),
   );
 }

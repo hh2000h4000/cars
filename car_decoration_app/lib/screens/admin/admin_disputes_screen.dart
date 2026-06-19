@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../providers/app_provider.dart';
@@ -25,10 +25,10 @@ class AdminDisputesScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
                     decoration: BoxDecoration(color: AppColors.red.withOpacity(.15), borderRadius: BorderRadius.circular(10)),
                     child: Text('${disputes.where((d) => d.status == DisputeStatus.underReview).length} مفتوح',
-                      style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.red)),
+                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.red)),
                   ),
                   const Spacer(),
-                  Text('إدارة النزاعات', style: GoogleFonts.tajawal(fontSize: 19, fontWeight: FontWeight.w900, color: Colors.white)),
+                  Text('إدارة النزاعات', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w900, color: Colors.white)),
                 ],
               ),
             ),
@@ -83,35 +83,35 @@ class _DisputeCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     _StatusBadge(dispute.status),
                     const Spacer(),
-                    Text('طلب #${dispute.requestId}', style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white)),
+                    Text('طلب #${dispute.requestId}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white)),
                   ],
                 ),
                 const SizedBox(height: 12),
                 Text(dispute.reason, textAlign: TextAlign.right,
-                  style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white)),
+                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white)),
                 const SizedBox(height: 6),
                 Text(dispute.description, textAlign: TextAlign.right,
-                  style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w500, color: Colors.white54, height: 1.5)),
+                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w500, color: Colors.white54, height: 1.5)),
                 const SizedBox(height: 12),
                 const Divider(height: 1, color: Colors.white10),
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Text(dispute.submittedAt, style: GoogleFonts.tajawal(fontSize: 11.5, fontWeight: FontWeight.w600, color: Colors.white30)),
+                    Text(dispute.submittedAt, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: Colors.white30)),
                     const Spacer(),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Row(
                           children: [
-                            Text(dispute.customerName, style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.white70)),
+                            Text(dispute.customerName, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.white70)),
                             const SizedBox(width: 4),
                             const Icon(Icons.person_outline, color: Colors.white38, size: 14),
                           ],
                         ),
                         Row(
                           children: [
-                            Text(dispute.shopName, style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.white70)),
+                            Text(dispute.shopName, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.white70)),
                             const SizedBox(width: 4),
                             const Icon(Icons.storefront_outlined, color: Colors.white38, size: 14),
                           ],
@@ -131,7 +131,7 @@ class _DisputeCard extends StatelessWidget {
                             height: 40,
                             decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(11)),
                             alignment: Alignment.center,
-                            child: Text('طلب توضيح', style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.white70)),
+                            child: Text('طلب توضيح', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.white70)),
                           ),
                         ),
                       ),
@@ -147,7 +147,7 @@ class _DisputeCard extends StatelessWidget {
                               borderRadius: BorderRadius.circular(11),
                             ),
                             alignment: Alignment.center,
-                            child: Text('حل النزاع', style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.dark)),
+                            child: Text('حل النزاع', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.dark)),
                           ),
                         ),
                       ),
@@ -187,7 +187,7 @@ class _SeverityBadge extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
     decoration: BoxDecoration(color: color.withOpacity(.15), borderRadius: BorderRadius.circular(999)),
-    child: Text(label, style: GoogleFonts.tajawal(fontSize: 11, fontWeight: FontWeight.w800, color: color)),
+    child: Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w800, color: color)),
   );
 }
 
@@ -201,7 +201,7 @@ class _StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(color: color.withOpacity(.12), borderRadius: BorderRadius.circular(999)),
-      child: Text(status.label, style: GoogleFonts.tajawal(fontSize: 11, fontWeight: FontWeight.w800, color: color)),
+      child: Text(status.label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w800, color: color)),
     );
   }
 }

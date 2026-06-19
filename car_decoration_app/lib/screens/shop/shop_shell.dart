@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../../theme.dart';
 import 'shop_dashboard_screen.dart';
 import 'shop_requests_screen.dart';
@@ -64,7 +64,7 @@ class _NavItem extends StatelessWidget {
         children: [
           Icon(active ? fillIcon : outIcon, color: active ? AppColors.dark : AppColors.textMuted, size: 22),
           const SizedBox(height: 3),
-          Text(label, style: GoogleFonts.tajawal(fontSize: 10.5, fontWeight: active ? FontWeight.w800 : FontWeight.w600, color: active ? AppColors.dark : AppColors.textMuted)),
+          Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: active ? FontWeight.w800 : FontWeight.w600, color: active ? AppColors.dark : AppColors.textMuted)),
           const SizedBox(height: 2),
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),

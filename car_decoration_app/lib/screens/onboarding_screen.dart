@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:provider/provider.dart';
 import '../theme.dart';
 import '../widgets/widgets.dart';
@@ -58,8 +58,8 @@ class OnboardingScreen extends StatelessWidget {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                Text('تزيين', style: GoogleFonts.tajawal(fontSize: 19, fontWeight: FontWeight.w900, color: const Color(0xFFF7F1E2))),
-                                Text('CAR DECORATION', style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.goldMuted, letterSpacing: 1)),
+                                Text('تزيين', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w900, color: const Color(0xFFF7F1E2))),
+                                Text('CAR DECORATION', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.goldMuted, letterSpacing: 1)),
                               ],
                             ),
                             const SizedBox(width: 11),
@@ -70,13 +70,13 @@ class OnboardingScreen extends StatelessWidget {
                         Text(
                           'العناية بسيارتك\nتصلك أينما كنت',
                           textAlign: TextAlign.right,
-                          style: GoogleFonts.tajawal(fontSize: 30, fontWeight: FontWeight.w900, color: const Color(0xFFFBF7EC), height: 1.25, letterSpacing: -.5),
+                          style: TextStyle(fontFamily: 'Tajawal', fontSize: 30, fontWeight: FontWeight.w900, color: const Color(0xFFFBF7EC), height: 1.25, letterSpacing: -.5),
                         ),
                         const SizedBox(height: 10),
                         Text(
                           'منصة احترافية تربطك بأفضل مراكز تزيين السيارات في مدينتك.',
                           textAlign: TextAlign.right,
-                          style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.goldMuted, height: 1.6),
+                          style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.goldMuted, height: 1.6),
                         ),
                       ],
                     ),
@@ -99,9 +99,9 @@ class OnboardingScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('اختر نوع الحساب', style: GoogleFonts.tajawal(fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                  Text('اختر نوع الحساب', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                   const SizedBox(height: 5),
-                  Text('كيف تريد استخدام التطبيق؟', style: GoogleFonts.tajawal(fontSize: 13.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                  Text('كيف تريد استخدام التطبيق؟', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                   const SizedBox(height: 22),
 
                   // Customer option
@@ -131,10 +131,10 @@ class OnboardingScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('لديك حساب بالفعل؟ ', style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                      Text('لديك حساب بالفعل؟ ', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                       GestureDetector(
                         onTap: () => Navigator.pushNamed(context, '/customer/home'),
-                        child: Text('تسجيل الدخول', style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.goldText)),
+                        child: Text('تسجيل الدخول', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.goldText)),
                       ),
                     ],
                   ),
@@ -147,7 +147,7 @@ class OnboardingScreen extends StatelessWidget {
                         context.read<AppProvider>().userType = UserType.admin;
                         Navigator.pushNamed(context, '/admin/dashboard');
                       },
-                      child: Text('دخول الإدارة (تجريبي)', style: GoogleFonts.tajawal(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+                      child: Text('دخول الإدارة (تجريبي)', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
                     ),
                   ),
                 ],
@@ -187,9 +187,9 @@ class _AccountTypeCard extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(title, style: GoogleFonts.tajawal(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                Text(title, style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                 const SizedBox(height: 2),
-                Text(subtitle, style: GoogleFonts.tajawal(fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                Text(subtitle, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
               ],
             ),
             const SizedBox(width: 15),
