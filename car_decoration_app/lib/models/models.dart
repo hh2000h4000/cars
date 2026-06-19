@@ -1,0 +1,8 @@
+export 'shop.dart';
+export 'vehicle.dart';
+export 'service_request.dart';
+export 'quotation.dart';
+export 'chat_message.dart';
+export 'review.dart';
+export 'dispute.dart';
+export 'pending_shop.dart';
