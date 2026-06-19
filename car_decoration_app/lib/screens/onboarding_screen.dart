@@ -55,17 +55,17 @@ class OnboardingScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
+                            const AppLogoMark(size: 52),
+                            const SizedBox(width: 11),
                             Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('تزيين', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w900, color: const Color(0xFFF7F1E2))),
                                 Text('CAR DECORATION', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.goldMuted, letterSpacing: 1)),
                               ],
                             ),
-                            const SizedBox(width: 11),
-                            const AppLogoMark(size: 52),
                           ],
                         ),
                         const Spacer(),
