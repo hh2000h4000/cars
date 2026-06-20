@@ -34,21 +34,21 @@ class ShopRequestDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(22, 14, 22, 16),
               child: Row(
                 children: [
-                  // balance spacer (same width as back button)
                   const SizedBox(width: 40),
-                  // title + subtitle centered
                   Expanded(
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text('طلب وارد #$requestId',
+                          textAlign: TextAlign.center,
                           style: TextStyle(fontFamily: 'Tajawal', fontSize: 17, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
                         const SizedBox(height: 2),
                         Text('${item.timeAgo} · ${item.area}',
+                          textAlign: TextAlign.center,
                           style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                       ],
                     ),
                   ),
-                  // back button (visual left in RTL)
                   const AppBackButton(),
                 ],
               ),
