@@ -120,46 +120,49 @@ class _ChatScreenState extends State<ChatScreen> {
 
             // ── Input bar ──
             Container(
-              padding: EdgeInsets.fromLTRB(12, 10, 12, MediaQuery.of(context).padding.bottom + 10),
-              color: AppColors.surface,
+              padding: EdgeInsets.fromLTRB(12, 8, 12, MediaQuery.of(context).padding.bottom + 8),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                border: Border(top: BorderSide(color: AppColors.border)),
+              ),
               child: Row(
                 children: [
                   // Attachment (visual RIGHT in RTL)
                   Container(
-                    width: 44, height: 44,
+                    width: 38, height: 38,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(color: AppColors.border),
-                      borderRadius: BorderRadius.circular(13),
+                      borderRadius: BorderRadius.circular(11),
                     ),
-                    child: const Icon(Icons.image_outlined, color: AppColors.textMuted, size: 20),
+                    child: const Icon(Icons.image_outlined, color: AppColors.textMuted, size: 18),
                   ),
                   const SizedBox(width: 8),
-                  // Text field
+                  // Text field (pill shape)
                   Expanded(
                     child: Container(
-                      height: 44,
+                      height: 40,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(color: AppColors.border),
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(999),
                       ),
                       alignment: Alignment.centerRight,
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: TextField(
                         controller: _controller,
                         textAlign: TextAlign.right,
                         textDirection: TextDirection.rtl,
-                        style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
+                        style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
                         decoration: const InputDecoration.collapsed(
                           hintText: 'اكتب رسالة...',
-                          hintStyle: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w500, color: AppColors.textMuted),
+                          hintStyle: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textMuted),
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  // Send button (visual LEFT in RTL)
+                  // Send button - gold (visual LEFT in RTL)
                   GestureDetector(
                     onTap: () {
                       if (_controller.text.trim().isNotEmpty) {
@@ -168,11 +171,14 @@ class _ChatScreenState extends State<ChatScreen> {
                       }
                     },
                     child: Container(
-                      width: 44, height: 44,
-                      decoration: BoxDecoration(color: AppColors.dark, borderRadius: BorderRadius.circular(14)),
+                      width: 40, height: 40,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(colors: [AppColors.goldLight, AppColors.gold]),
+                        borderRadius: BorderRadius.circular(13),
+                      ),
                       child: const Directionality(
                         textDirection: TextDirection.ltr,
-                        child: Icon(Icons.send_rounded, color: Colors.white, size: 18),
+                        child: Icon(Icons.send_rounded, color: AppColors.dark, size: 18),
                       ),
                     ),
                   ),
