@@ -130,7 +130,24 @@ class _DisputeCard extends StatelessWidget {
                 padding: const EdgeInsets.all(12),
                 child: Row(
                   children: [
-                    // RIGHT: اتخاذ قرار (gold, wider)
+                    // RIGHT: مراجعة المحادثة (dark)
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {},
+                        child: Container(
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(.07),
+                            borderRadius: BorderRadius.circular(11),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text('مراجعة المحادثة',
+                            style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white60)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // LEFT: اتخاذ قرار (gold, wider)
                     Expanded(
                       flex: 2,
                       child: GestureDetector(
@@ -145,23 +162,6 @@ class _DisputeCard extends StatelessWidget {
                           alignment: Alignment.center,
                           child: Text('اتخاذ قرار',
                             style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.goldText)),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    // LEFT: مراجعة المحادثة (dark)
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(.07),
-                            borderRadius: BorderRadius.circular(11),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text('مراجعة المحادثة',
-                            style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white60)),
                         ),
                       ),
                     ),
