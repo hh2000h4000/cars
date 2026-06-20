@@ -45,7 +45,7 @@ class ShopChatsScreen extends StatelessWidget {
                 itemBuilder: (_, i) {
                   final (mono, name, service, lastMsg, time, isUnread) = _conversations[i];
                   return GestureDetector(
-                    onTap: () {},
+                    onTap: () => Navigator.pushNamed(context, '/customer/chat', arguments: 'sh1'),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                       decoration: BoxDecoration(
