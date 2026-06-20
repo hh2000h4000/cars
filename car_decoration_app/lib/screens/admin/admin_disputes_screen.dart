@@ -11,23 +11,41 @@ class AdminDisputesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final disputes = context.watch<AppProvider>().disputes;
+    final openCount = disputes.where((d) => d.status != DisputeStatus.resolved).length;
 
     return Scaffold(
       backgroundColor: AppColors.dark,
       body: SafeArea(
         child: Column(
           children: [
+            // ── Header ──
             Padding(
-              padding: const EdgeInsets.fromLTRB(22, 14, 22, 16),
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
               child: Row(
                 children: [
-                  Text('إدارة النزاعات', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w900, color: Colors.white)),
+                  // RIGHT: title + open count
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('إدارة النزاعات',
+                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w900, color: Colors.white)),
+                      const SizedBox(height: 2),
+                      Text('$openCount نزاع مفتوح',
+                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white38)),
+                    ],
+                  ),
                   const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
-                    decoration: BoxDecoration(color: AppColors.red.withOpacity(.15), borderRadius: BorderRadius.circular(10)),
-                    child: Text('${disputes.where((d) => d.status == DisputeStatus.underReview).length} مفتوح',
-                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.red)),
+                  // LEFT: back button
+                  GestureDetector(
+                    onTap: () => Navigator.maybePop(context),
+                    child: Container(
+                      width: 38, height: 38,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(.08),
+                        borderRadius: BorderRadius.circular(11),
+                      ),
+                      child: const Icon(Icons.chevron_left, color: Colors.white70, size: 22),
+                    ),
                   ),
                 ],
               ),
@@ -35,7 +53,7 @@ class AdminDisputesScreen extends StatelessWidget {
 
             Expanded(
               child: ListView.separated(
-                padding: const EdgeInsets.fromLTRB(22, 0, 22, 24),
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
                 itemCount: disputes.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (_, i) => _DisputeCard(dispute: disputes[i]),
@@ -52,156 +70,139 @@ class _DisputeCard extends StatelessWidget {
   final Dispute dispute;
   const _DisputeCard({required this.dispute});
 
+  Color get _accentColor {
+    switch (dispute.status) {
+      case DisputeStatus.underReview: return AppColors.red;
+      case DisputeStatus.waitingShop: return AppColors.goldText;
+      case DisputeStatus.resolved: return AppColors.green;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E1D17),
-        border: Border.all(color: dispute.severity == DisputeSeverity.high ? AppColors.red.withOpacity(.3) : Colors.white10),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        children: [
-          // Top accent
-          if (dispute.severity == DisputeSeverity.high)
-            Container(
-              height: 3,
-              decoration: const BoxDecoration(
-                color: AppColors.red,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-            ),
+    final accent = _accentColor;
 
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+    return Stack(
+      children: [
+        // ── Card body ──
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1912),
+            border: Border.all(color: accent.withOpacity(.22)),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Column(
+            children: [
+              // Content
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('طلب #${dispute.requestId}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white)),
-                    const Spacer(),
-                    _SeverityBadge(dispute.severity),
-                    const SizedBox(width: 8),
-                    _StatusBadge(dispute.status),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(dispute.reason, textAlign: TextAlign.right,
-                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white)),
-                const SizedBox(height: 6),
-                Text(dispute.description, textAlign: TextAlign.right,
-                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w500, color: Colors.white54, height: 1.5)),
-                const SizedBox(height: 12),
-                const Divider(height: 1, color: Colors.white10),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    // TOP: status badge | dispute ID
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.person_outline, color: Colors.white38, size: 14),
-                            const SizedBox(width: 4),
-                            Text(dispute.customerName, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.white70)),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            const Icon(Icons.storefront_outlined, color: Colors.white38, size: 14),
-                            const SizedBox(width: 4),
-                            Text(dispute.shopName, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.white70)),
-                          ],
-                        ),
+                        _StatusBadge(dispute.status, accent),
+                        const Spacer(),
+                        Text(dispute.id,
+                          style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.white38)),
                       ],
                     ),
-                    const Spacer(),
-                    Text(dispute.submittedAt, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: Colors.white30)),
+                    const SizedBox(height: 8),
+                    // Dispute title
+                    Text(dispute.reason,
+                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
+                    const SizedBox(height: 6),
+                    // Info: request · customer ← shop
+                    Text(
+                      'الطلب #${dispute.requestId} · ${dispute.customerName} ← ${dispute.shopName}',
+                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: Colors.white38),
+                    ),
                   ],
                 ),
-                if (dispute.status == DisputeStatus.underReview) ...[
-                  const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {},
-                          child: Container(
-                            height: 40,
-                            decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(11)),
-                            alignment: Alignment.center,
-                            child: Text('طلب توضيح', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.white70)),
+              ),
+
+              Container(height: 1, color: Colors.white10),
+
+              // ── Action buttons ──
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    // RIGHT: اتخاذ قرار (gold, wider)
+                    Expanded(
+                      flex: 2,
+                      child: GestureDetector(
+                        onTap: () {},
+                        child: Container(
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: AppColors.goldText.withOpacity(.14),
+                            border: Border.all(color: AppColors.goldLight.withOpacity(.25)),
+                            borderRadius: BorderRadius.circular(11),
                           ),
+                          alignment: Alignment.center,
+                          child: Text('اتخاذ قرار',
+                            style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.goldText)),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        flex: 2,
-                        child: GestureDetector(
-                          onTap: () {},
-                          child: Container(
-                            height: 40,
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(colors: [AppColors.goldLight, AppColors.gold]),
-                              borderRadius: BorderRadius.circular(11),
-                            ),
-                            alignment: Alignment.center,
-                            child: Text('حل النزاع', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.dark)),
+                    ),
+                    const SizedBox(width: 8),
+                    // LEFT: مراجعة المحادثة (dark)
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {},
+                        child: Container(
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(.07),
+                            borderRadius: BorderRadius.circular(11),
                           ),
+                          alignment: Alignment.center,
+                          child: Text('مراجعة المحادثة',
+                            style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white60)),
                         ),
                       ),
-                    ],
-                  ),
-                ],
-              ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // ── Left accent bar ──
+        Positioned(
+          left: 0, top: 0, bottom: 0,
+          child: Container(
+            width: 4,
+            decoration: BoxDecoration(
+              color: accent,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(18),
+                bottomLeft: Radius.circular(18),
+              ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
-}
-
-class _SeverityBadge extends StatelessWidget {
-  final DisputeSeverity severity;
-  const _SeverityBadge(this.severity);
-
-  Color get color {
-    switch (severity) {
-      case DisputeSeverity.high: return AppColors.red;
-      case DisputeSeverity.medium: return const Color(0xFFFF9800);
-      case DisputeSeverity.low: return AppColors.textSecondary;
-    }
-  }
-
-  String get label {
-    switch (severity) {
-      case DisputeSeverity.high: return 'عالي';
-      case DisputeSeverity.medium: return 'متوسط';
-      case DisputeSeverity.low: return 'منخفض';
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-    decoration: BoxDecoration(color: color.withOpacity(.15), borderRadius: BorderRadius.circular(999)),
-    child: Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w800, color: color)),
-  );
 }
 
 class _StatusBadge extends StatelessWidget {
   final DisputeStatus status;
-  const _StatusBadge(this.status);
+  final Color color;
+  const _StatusBadge(this.status, this.color);
 
   @override
-  Widget build(BuildContext context) {
-    final color = status == DisputeStatus.resolved ? AppColors.green : status == DisputeStatus.underReview ? AppColors.goldText : Colors.blue;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-      decoration: BoxDecoration(color: color.withOpacity(.12), borderRadius: BorderRadius.circular(999)),
-      child: Text(status.label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w800, color: color)),
-    );
-  }
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+    decoration: BoxDecoration(
+      color: color.withOpacity(.15),
+      borderRadius: BorderRadius.circular(999),
+    ),
+    child: Text(status.label,
+      style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w800, color: color)),
+  );
 }
