@@ -23,7 +23,19 @@ class AdminPendingScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
               child: Row(
                 children: [
-                  // Back button (RIGHT in RTL)
+                  // RIGHT: title (right-aligned in RTL)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('اعتماد المتاجر',
+                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w900, color: Colors.white)),
+                      const SizedBox(height: 2),
+                      Text('$pendingCount طلبات بانتظار المراجعة',
+                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white38)),
+                    ],
+                  ),
+                  const Spacer(),
+                  // LEFT: back button
                   GestureDetector(
                     onTap: () => Navigator.maybePop(context),
                     child: Container(
@@ -32,23 +44,9 @@ class AdminPendingScreen extends StatelessWidget {
                         color: Colors.white.withOpacity(.08),
                         borderRadius: BorderRadius.circular(11),
                       ),
-                      child: const Icon(Icons.chevron_right, color: Colors.white70, size: 22),
+                      child: const Icon(Icons.chevron_left, color: Colors.white70, size: 22),
                     ),
                   ),
-                  // Centered title
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Text('اعتماد المتاجر',
-                          style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w900, color: Colors.white)),
-                        const SizedBox(height: 2),
-                        Text('$pendingCount طلبات بانتظار المراجعة',
-                          style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white38)),
-                      ],
-                    ),
-                  ),
-                  // Balance (LEFT in RTL)
-                  const SizedBox(width: 38),
                 ],
               ),
             ),
@@ -139,34 +137,41 @@ class _ShopCard extends StatelessWidget {
             ),
           ),
 
-          // ── Docs badge + CR number ──
+          // ── Inner box: CR + docs badge ──
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
-            child: Row(
-              children: [
-                // RIGHT: docs status badge
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: docsColor.withOpacity(.15),
-                    borderRadius: BorderRadius.circular(999),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(.06),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  // RIGHT: CR label + number
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('السجل التجاري',
+                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w600, color: Colors.white38)),
+                      const SizedBox(height: 2),
+                      Text(shop.crNumber.isNotEmpty ? shop.crNumber : '–',
+                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white70)),
+                    ],
                   ),
-                  child: Text(docsLabel,
-                    style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w800, color: docsColor)),
-                ),
-                const Spacer(),
-                // LEFT: CR number
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text('السجل التجاري',
-                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w600, color: Colors.white38)),
-                    const SizedBox(height: 2),
-                    Text(shop.crNumber.isNotEmpty ? shop.crNumber : '–',
-                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white70)),
-                  ],
-                ),
-              ],
+                  const Spacer(),
+                  // LEFT: docs status badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: docsColor.withOpacity(.15),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(docsLabel,
+                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w800, color: docsColor)),
+                  ),
+                ],
+              ),
             ),
           ),
 
