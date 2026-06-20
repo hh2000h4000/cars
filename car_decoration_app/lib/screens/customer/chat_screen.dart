@@ -120,7 +120,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
             // ── Input bar ──
             Container(
-              padding: EdgeInsets.fromLTRB(12, 8, 12, MediaQuery.of(context).padding.bottom + 8),
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
               decoration: BoxDecoration(
                 color: Colors.white,
                 border: Border(top: BorderSide(color: AppColors.border)),
@@ -152,9 +152,14 @@ class _ChatScreenState extends State<ChatScreen> {
                         textAlign: TextAlign.right,
                         textDirection: TextDirection.rtl,
                         style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
-                        decoration: const InputDecoration.collapsed(
+                        decoration: InputDecoration(
                           hintText: 'اكتب رسالة...',
-                          hintStyle: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textMuted),
+                          hintStyle: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textMuted),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
                         ),
                       ),
                     ),
