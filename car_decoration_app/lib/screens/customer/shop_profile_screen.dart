@@ -186,36 +186,22 @@ class ShopProfileScreen extends StatelessWidget {
               ),
 
               // Services
-              const SliverToBoxAdapter(child: SectionHeader(title: 'الخدمات المتاحة')),
+              const SliverToBoxAdapter(child: SectionHeader(title: 'الخدمات المقدّمة')),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(22, 0, 22, 4),
-                  child: Column(
+                  child: Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    alignment: WrapAlignment.start,
                     children: shop.services.map((s) => Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: AppColors.border),
-                        borderRadius: BorderRadius.circular(14),
+                        color: AppColors.goldBg,
+                        border: Border.all(color: AppColors.goldLight),
+                        borderRadius: BorderRadius.circular(999),
                       ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(s.name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                                if (s.description != null) ...[
-                                  const SizedBox(height: 3),
-                                  Text(s.description!, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
-                                ],
-                              ],
-                            ),
-                          ),
-                          const Icon(Icons.chevron_left, color: AppColors.textMuted, size: 18),
-                        ],
-                      ),
+                      child: Text(s.name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.goldText)),
                     )).toList(),
                   ),
                 ),
