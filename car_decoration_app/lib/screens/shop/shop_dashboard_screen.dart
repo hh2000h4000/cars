@@ -87,9 +87,7 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                           Row(
                             children: [
                               _HeaderStat(value: '4.9', sub: '312 عملية', hasStar: true),
-                              _HeaderDivider(),
                               _HeaderStat(value: '8', sub: 'طلبات جديدة'),
-                              _HeaderDivider(),
                               _HeaderStat(value: '12,840', sub: 'إيراد الشهر (ر.س)'),
                             ],
                           ),
@@ -216,24 +214,32 @@ class _HeaderStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Expanded(
-    child: Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(value,
-              style: TextStyle(fontFamily: 'Tajawal', fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white)),
-            if (hasStar) ...[
-              const SizedBox(width: 3),
-              const Icon(Icons.star_rounded, color: AppColors.star, size: 18),
+    child: Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(value,
+                style: TextStyle(fontFamily: 'Tajawal', fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white)),
+              if (hasStar) ...[
+                const SizedBox(width: 3),
+                const Icon(Icons.star_rounded, color: AppColors.star, size: 18),
             ],
           ],
         ),
-        const SizedBox(height: 3),
-        Text(sub,
-          style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w600, color: Colors.white54)),
-      ],
+          const SizedBox(height: 3),
+          Text(sub,
+            style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w600, color: Colors.white54)),
+        ],
+      ),
     ),
   );
 }
