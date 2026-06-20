@@ -37,14 +37,12 @@ class ShopRequestDetailScreen extends StatelessWidget {
                   const AppBackButton(),
                   Expanded(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('طلب وارد #$requestId',
-                          textAlign: TextAlign.center,
                           style: TextStyle(fontFamily: 'Tajawal', fontSize: 17, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
                         const SizedBox(height: 2),
                         Text('${item.timeAgo} · ${item.area}',
-                          textAlign: TextAlign.center,
                           style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                       ],
                     ),
@@ -127,18 +125,18 @@ class ShopRequestDetailScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
 
-                    // ── Vehicle + Date side by side ──
-                    Row(
-                      children: [
-                        // Vehicle (visual RIGHT)
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              border: Border.all(color: AppColors.border),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
+                    // ── Vehicle + Date in one card ──
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: AppColors.border),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        children: [
+                          // Vehicle (visual RIGHT in RTL)
+                          Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -150,30 +148,25 @@ class ShopRequestDetailScreen extends StatelessWidget {
                               ],
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 10),
-                        // Preferred date (visual LEFT)
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              border: Border.all(color: AppColors.border),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('الموعد المفضّل',
-                                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
-                                const SizedBox(height: 5),
-                                Text('٢٢ يونيو · ٤:٠٠ م',
-                                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                              ],
+                          Container(width: 1, height: 36, color: AppColors.border),
+                          // Preferred date (visual LEFT in RTL)
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 14),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('الموعد المفضّل',
+                                    style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+                                  const SizedBox(height: 5),
+                                  Text('٢٢ يونيو · ٤:٠٠ م',
+                                    style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 20),
 
