@@ -145,7 +145,6 @@ class _ChatScreenState extends State<ChatScreen> {
                         color: AppColors.surface,
                         borderRadius: BorderRadius.circular(999),
                       ),
-                      alignment: Alignment.centerRight,
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: TextField(
                         controller: _controller,
@@ -158,8 +157,9 @@ class _ChatScreenState extends State<ChatScreen> {
                           border: InputBorder.none,
                           enabledBorder: InputBorder.none,
                           focusedBorder: InputBorder.none,
+                          filled: false,
                           isDense: true,
-                          contentPadding: EdgeInsets.zero,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 10),
                         ),
                       ),
                     ),
