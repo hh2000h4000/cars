@@ -92,10 +92,13 @@ class ShopRequestDetailScreen extends StatelessWidget {
                             ),
                           ),
                           // Chat icon (visual LEFT in RTL)
-                          Container(
-                            width: 42, height: 42,
-                            decoration: BoxDecoration(color: AppColors.dark, borderRadius: BorderRadius.circular(13)),
-                            child: const Icon(Icons.chat_bubble_outline_rounded, color: Colors.white, size: 18),
+                          GestureDetector(
+                            onTap: () => Navigator.pushNamed(context, '/customer/chat', arguments: item.requestId),
+                            child: Container(
+                              width: 42, height: 42,
+                              decoration: BoxDecoration(color: AppColors.dark, borderRadius: BorderRadius.circular(13)),
+                              child: const Icon(Icons.chat_bubble_outline_rounded, color: Colors.white, size: 18),
+                            ),
                           ),
                         ],
                       ),
