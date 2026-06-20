@@ -122,7 +122,7 @@ class _ChatScreenState extends State<ChatScreen> {
             Container(
               padding: EdgeInsets.fromLTRB(12, 8, 12, MediaQuery.of(context).padding.bottom + 8),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: Colors.white,
                 border: Border(top: BorderSide(color: AppColors.border)),
               ),
               child: Row(
@@ -131,20 +131,18 @@ class _ChatScreenState extends State<ChatScreen> {
                   Container(
                     width: 38, height: 38,
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: AppColors.border),
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(11),
                     ),
                     child: const Icon(Icons.image_outlined, color: AppColors.textMuted, size: 18),
                   ),
                   const SizedBox(width: 8),
-                  // Text field (pill shape)
+                  // Text field (single pill shape, no border)
                   Expanded(
                     child: Container(
                       height: 40,
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: AppColors.border),
+                        color: AppColors.surface,
                         borderRadius: BorderRadius.circular(999),
                       ),
                       alignment: Alignment.centerRight,
