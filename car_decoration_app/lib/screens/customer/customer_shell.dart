@@ -24,10 +24,10 @@ class _CustomerShellState extends State<CustomerShell> {
   ];
 
   static const _items = [
-    (Icons.person_outline_rounded, Icons.person_rounded, 'حسابي'),
-    (Icons.directions_car_outlined, Icons.directions_car_rounded, 'مركباتي'),
-    (Icons.list_alt_outlined, Icons.list_alt_rounded, 'طلباتي'),
     (Icons.home_outlined, Icons.home_rounded, 'الرئيسية'),
+    (Icons.list_alt_outlined, Icons.list_alt_rounded, 'طلباتي'),
+    (Icons.directions_car_outlined, Icons.directions_car_rounded, 'مركباتي'),
+    (Icons.person_outline_rounded, Icons.person_rounded, 'حسابي'),
   ];
 
   @override
@@ -50,10 +50,10 @@ class _CustomerShellState extends State<CustomerShell> {
             child: Row(
               children: List.generate(_items.length, (i) {
                 final (outlinedIcon, filledIcon, label) = _items[i];
-                final active = _index == (3 - i); // RTL order
+                final active = _index == i;
                 return Expanded(
                   child: GestureDetector(
-                    onTap: () => setState(() => _index = 3 - i),
+                    onTap: () => setState(() => _index = i),
                     behavior: HitTestBehavior.opaque,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
