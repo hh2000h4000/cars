@@ -4,25 +4,45 @@ import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../../data/mock_data.dart';
+import '../../models/chat_message.dart';
 import '../../providers/app_provider.dart';
 
-class ChatScreen extends StatelessWidget {
+class ChatScreen extends StatefulWidget {
   final String shopId;
   const ChatScreen({super.key, required this.shopId});
+
+  @override
+  State<ChatScreen> createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends State<ChatScreen> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<AppProvider>();
     final messages = provider.messages;
-    final shop = MockData.shops.firstWhere((s) => s.id == shopId, orElse: () => MockData.shops.first);
-    final controller = TextEditingController();
+    final shop = MockData.shops.firstWhere(
+      (s) => s.id == widget.shopId,
+      orElse: () => MockData.shops.first,
+    );
+    final isRequestId = int.tryParse(widget.shopId) != null;
+    final chipLabel = isRequestId
+        ? 'المحادثة بخصوص الطلب #${widget.shopId}'
+        : 'المحادثة بخصوص الطلب';
 
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Column(
           children: [
-            // Chat header
+            // ── Header ──
             Container(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
               decoration: BoxDecoration(
@@ -31,146 +51,107 @@ class ChatScreen extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  ShopAvatar(mono: shop.mono, size: 42, fontSize: 16),
-                  const SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(shop.name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                      Row(
-                        children: [
-                          Text('متصل الآن', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.green)),
-                          const SizedBox(width: 5),
-                          Container(width: 6, height: 6, decoration: const BoxDecoration(color: AppColors.green, shape: BoxShape.circle)),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      width: 38, height: 38,
-                      decoration: BoxDecoration(border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(11)),
-                      child: const Icon(Icons.chevron_right, color: AppColors.dark, size: 20),
+                  // Back button (visual RIGHT in RTL)
+                  const AppBackButton(),
+                  const SizedBox(width: 12),
+                  // Name + status
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(shop.name,
+                          style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            Container(width: 7, height: 7,
+                              decoration: const BoxDecoration(color: AppColors.green, shape: BoxShape.circle)),
+                            const SizedBox(width: 5),
+                            Text('متصل الآن',
+                              style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.green)),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
+                  // Phone button
+                  Container(
+                    width: 38, height: 38,
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      border: Border.all(color: AppColors.border),
+                      borderRadius: BorderRadius.circular(11),
+                    ),
+                    child: const Icon(Icons.call_outlined, color: AppColors.textSecondary, size: 18),
+                  ),
+                  const SizedBox(width: 8),
+                  // Shop avatar (visual LEFT in RTL)
+                  ShopAvatar(mono: shop.mono, size: 40, fontSize: 15),
                 ],
               ),
             ),
 
-            // Messages
+            // ── Messages ──
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-                itemCount: messages.length,
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                itemCount: messages.length + 1,
                 itemBuilder: (_, i) {
-                  final msg = messages[i];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: Row(
-                      mainAxisAlignment: msg.isMe ? MainAxisAlignment.start : MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (msg.isMe) ...[
-                          const CircleAvatar(
-                            radius: 14,
-                            backgroundColor: AppColors.goldBg,
-                            child: Text('ع', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.goldText)),
+                  if (i == 0) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: AppColors.dark.withOpacity(0.55),
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                          const SizedBox(width: 7),
-                        ],
-                        Column(
-                          crossAxisAlignment: msg.isMe ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-                          children: [
-                            if (msg.hasImage)
-                              Container(
-                                width: 200, height: 130,
-                                margin: const EdgeInsets.only(bottom: 4),
-                                decoration: BoxDecoration(
-                                  gradient: const LinearGradient(colors: [Color(0xFF23211A), Color(0xFF3A3320)]),
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                alignment: Alignment.center,
-                                child: const Icon(Icons.image_outlined, color: Colors.white24, size: 36),
-                              ),
-                            Container(
-                              constraints: const BoxConstraints(maxWidth: 250),
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                              decoration: BoxDecoration(
-                                color: msg.isMe ? AppColors.dark : Colors.white,
-                                border: msg.isMe ? null : Border.all(color: AppColors.border),
-                                borderRadius: BorderRadius.only(
-                                  topLeft: const Radius.circular(16),
-                                  topRight: const Radius.circular(16),
-                                  bottomLeft: Radius.circular(msg.isMe ? 16 : 4),
-                                  bottomRight: Radius.circular(msg.isMe ? 4 : 16),
-                                ),
-                              ),
-                              child: Text(
-                                msg.text,
-                                textAlign: msg.isMe ? TextAlign.right : TextAlign.right,
-                                style: TextStyle(fontFamily: 'Tajawal', 
-                                  fontSize: 13.5,
-                                  fontWeight: FontWeight.w500,
-                                  color: msg.isMe ? Colors.white : AppColors.textPrimary,
-                                  height: 1.5,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 3),
-                            Text(msg.time, style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
-                          ],
+                          child: Text(chipLabel,
+                            style: const TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: Colors.white)),
                         ),
-                        if (!msg.isMe) ...[
-                          const SizedBox(width: 7),
-                          ShopAvatar(mono: shop.mono, size: 28, fontSize: 11),
-                        ],
-                      ],
-                    ),
-                  );
+                      ),
+                    );
+                  }
+                  return _MessageBubble(msg: messages[i - 1]);
                 },
               ),
             ),
 
-            // Input bar
+            // ── Input bar ──
             Container(
               padding: EdgeInsets.fromLTRB(12, 10, 12, MediaQuery.of(context).padding.bottom + 10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border(top: BorderSide(color: AppColors.border)),
-              ),
+              color: AppColors.surface,
               child: Row(
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      if (controller.text.trim().isNotEmpty) {
-                        provider.sendMessage(controller.text.trim());
-                        controller.clear();
-                      }
-                    },
-                    child: Container(
-                      width: 42, height: 42,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(colors: [AppColors.goldLight, AppColors.gold]),
-                        borderRadius: BorderRadius.circular(13),
-                      ),
-                      child: const Icon(Icons.send_rounded, color: AppColors.dark, size: 18),
+                  // Attachment (visual RIGHT in RTL)
+                  Container(
+                    width: 44, height: 44,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: AppColors.border),
+                      borderRadius: BorderRadius.circular(13),
                     ),
+                    child: const Icon(Icons.image_outlined, color: AppColors.textMuted, size: 20),
                   ),
                   const SizedBox(width: 8),
+                  // Text field
                   Expanded(
                     child: Container(
-                      height: 42,
-                      decoration: BoxDecoration(color: AppColors.surface, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(14)),
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: AppColors.border),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                       alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
                       child: TextField(
-                        controller: controller,
+                        controller: _controller,
                         textAlign: TextAlign.right,
                         textDirection: TextDirection.rtl,
-                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
-                        decoration: InputDecoration.collapsed(
+                        style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
+                        decoration: const InputDecoration.collapsed(
                           hintText: 'اكتب رسالة...',
                           hintStyle: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w500, color: AppColors.textMuted),
                         ),
@@ -178,12 +159,18 @@ class ChatScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
+                  // Send button (visual LEFT in RTL)
                   GestureDetector(
-                    onTap: () => provider.sendImageMessage(),
+                    onTap: () {
+                      if (_controller.text.trim().isNotEmpty) {
+                        provider.sendMessage(_controller.text.trim());
+                        _controller.clear();
+                      }
+                    },
                     child: Container(
-                      width: 40, height: 40,
-                      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(11)),
-                      child: const Icon(Icons.image_outlined, color: AppColors.textMuted, size: 20),
+                      width: 44, height: 44,
+                      decoration: const BoxDecoration(color: AppColors.dark, shape: BoxShape.circle),
+                      child: const Icon(Icons.send_rounded, color: Colors.white, size: 18),
                     ),
                   ),
                 ],
@@ -194,4 +181,88 @@ class ChatScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+class _MessageBubble extends StatelessWidget {
+  final ChatMessage msg;
+  const _MessageBubble({required this.msg});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        mainAxisAlignment: msg.isMe ? MainAxisAlignment.start : MainAxisAlignment.end,
+        children: [
+          Column(
+            crossAxisAlignment: msg.isMe ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+            children: [
+              if (msg.hasImage)
+                Container(
+                  width: 210, height: 160,
+                  clipBehavior: Clip.hardEdge,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E1C14),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      CustomPaint(painter: _StripePainter()),
+                      Positioned(
+                        bottom: 10, right: 12, left: 12,
+                        child: Text(msg.text,
+                          style: const TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w600, color: Colors.white)),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Container(
+                  constraints: const BoxConstraints(maxWidth: 240),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: msg.isMe ? AppColors.dark : Colors.white,
+                    border: msg.isMe ? null : Border.all(color: AppColors.border),
+                    borderRadius: BorderRadius.only(
+                      topLeft: const Radius.circular(16),
+                      topRight: const Radius.circular(16),
+                      bottomLeft: Radius.circular(msg.isMe ? 16 : 4),
+                      bottomRight: Radius.circular(msg.isMe ? 4 : 16),
+                    ),
+                  ),
+                  child: Text(msg.text,
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      fontFamily: 'Tajawal',
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w500,
+                      color: msg.isMe ? Colors.white : AppColors.textPrimary,
+                      height: 1.5,
+                    )),
+                ),
+              const SizedBox(height: 3),
+              Text(msg.time,
+                style: const TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StripePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.06)
+      ..strokeWidth = 14;
+    for (double i = -size.height; i < size.width + size.height; i += 26) {
+      canvas.drawLine(Offset(i, 0), Offset(i + size.height, size.height), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_StripePainter old) => false;
 }
