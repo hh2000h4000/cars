@@ -54,7 +54,10 @@ class _ChatScreenState extends State<ChatScreen> {
                   // Back button (visual RIGHT in RTL)
                   const AppBackButton(),
                   const SizedBox(width: 10),
-                  // Name + status (natural width, right-grouped)
+                  // Shop avatar (before name)
+                  ShopAvatar(mono: shop.mono, size: 40, fontSize: 15),
+                  const SizedBox(width: 10),
+                  // Name + status
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -72,9 +75,6 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(width: 10),
-                  // Shop avatar (beside name)
-                  ShopAvatar(mono: shop.mono, size: 40, fontSize: 15),
                   // Spacer pushes phone to FAR LEFT
                   const Spacer(),
                   // Phone button (visual FAR LEFT in RTL)
