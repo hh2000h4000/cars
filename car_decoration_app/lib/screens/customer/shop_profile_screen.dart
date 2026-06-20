@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../../data/mock_data.dart';
+import 'dart:math' as math;
 
 class ShopProfileScreen extends StatelessWidget {
   final String shopId;
@@ -23,25 +24,36 @@ class ShopProfileScreen extends StatelessWidget {
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    Container(
-                      height: 200,
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Color(0xFF1B1A14), Color(0xFF2E2917)],
-                        ),
-                      ),
+                    // Cover background
+                    SizedBox(
+                      height: 210,
                       child: Stack(
+                        fit: StackFit.expand,
                         children: [
-                          Positioned(
-                            top: -30, right: -20,
-                            child: Container(
-                              width: 200, height: 200,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: RadialGradient(colors: [AppColors.goldLight.withOpacity(.25), Colors.transparent]),
+                          // Dark gradient
+                          Container(
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topRight,
+                                end: Alignment.bottomLeft,
+                                colors: [Color(0xFF1B1A14), Color(0xFF2E2917)],
                               ),
                             ),
                           ),
+                          // Golden diagonal lines
+                          CustomPaint(painter: _GoldenLinesPainter()),
+                          // Radial glow
+                          Positioned(
+                            top: -40, right: -20,
+                            child: Container(
+                              width: 220, height: 220,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: RadialGradient(colors: [AppColors.goldLight.withOpacity(.22), Colors.transparent]),
+                              ),
+                            ),
+                          ),
+                          // Back button — top right
                           Positioned(
                             top: 48, right: 16,
                             child: GestureDetector(
@@ -57,26 +69,43 @@ class ShopProfileScreen extends StatelessWidget {
                               ),
                             ),
                           ),
+                          // Heart + Share buttons — top left
+                          Positioned(
+                            top: 48, left: 16,
+                            child: Row(
+                              children: [
+                                _TopIconButton(icon: Icons.favorite_border, onTap: () {}),
+                                const SizedBox(width: 8),
+                                _TopIconButton(icon: Icons.ios_share_outlined, onTap: () {}),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
+                    // Profile avatar — overlaps cover
                     Positioned(
-                      bottom: -36,
+                      bottom: -38,
                       right: 22,
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.white, width: 3),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(22),
                           boxShadow: [BoxShadow(color: AppColors.dark.withOpacity(.25), blurRadius: 16, offset: const Offset(0, 6))],
                         ),
-                        child: ShopAvatar(mono: shop.mono, size: 66, fontSize: 26),
+                        child: shop.profileImageUrl != null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: Image.network(shop.profileImageUrl!, width: 72, height: 72, fit: BoxFit.cover),
+                              )
+                            : ShopAvatar(mono: shop.mono, size: 72, fontSize: 28),
                       ),
                     ),
                   ],
                 ),
               ),
 
-              const SliverToBoxAdapter(child: SizedBox(height: 48)),
+              const SliverToBoxAdapter(child: SizedBox(height: 52)),
 
               // Name + tags
               SliverToBoxAdapter(
@@ -164,7 +193,7 @@ class ShopProfileScreen extends StatelessWidget {
                   child: Column(
                     children: shop.services.map((s) => Container(
                       margin: const EdgeInsets.only(bottom: 10),
-                      padding: const EdgeInsets.all(14),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(color: AppColors.border),
@@ -172,22 +201,19 @@ class ShopProfileScreen extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(s.name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                              if (s.description != null)
-                                Text(s.description!, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
-                            ],
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(s.name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                if (s.description != null) ...[
+                                  const SizedBox(height: 3),
+                                  Text(s.description!, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
+                                ],
+                              ],
+                            ),
                           ),
-                          const Spacer(),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('${s.price} ريال', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.goldText)),
-                              Text(s.duration, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
-                            ],
-                          ),
+                          const Icon(Icons.chevron_left, color: AppColors.textMuted, size: 18),
                         ],
                       ),
                     )).toList(),
@@ -363,4 +389,48 @@ class _StatItem extends StatelessWidget {
 class _Divider extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(width: 1, height: 32, color: AppColors.border);
+}
+
+class _TopIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  const _TopIconButton({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: Container(
+      width: 40, height: 40,
+      decoration: BoxDecoration(
+        color: Colors.black38,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white24),
+      ),
+      child: Icon(icon, color: Colors.white, size: 20),
+    ),
+  );
+}
+
+class _GoldenLinesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFFD4B96A).withOpacity(0.11)
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
+
+    const spacing = 22.0;
+    final count = (size.width + size.height) ~/ spacing + 2;
+    for (int i = 0; i < count; i++) {
+      final x = i * spacing - size.height;
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x + size.height * math.tan(math.pi / 4), size.height),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_GoldenLinesPainter oldDelegate) => false;
 }

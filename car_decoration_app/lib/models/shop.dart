@@ -24,6 +24,7 @@ class Shop {
   final List<String> gallery;
   final bool verified;
   final List<ShopReview> reviews;
+  final String? profileImageUrl;
 
   const Shop({
     required this.id,
@@ -42,6 +43,7 @@ class Shop {
     required this.gallery,
     required this.verified,
     required this.reviews,
+    this.profileImageUrl,
   });
 }
 
