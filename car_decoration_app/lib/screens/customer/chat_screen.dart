@@ -74,7 +74,10 @@ class _ChatScreenState extends State<ChatScreen> {
                       ],
                     ),
                   ),
-                  // Phone button
+                  // Shop avatar (next to name)
+                  ShopAvatar(mono: shop.mono, size: 40, fontSize: 15),
+                  const SizedBox(width: 8),
+                  // Phone button (visual LEFT in RTL)
                   Container(
                     width: 38, height: 38,
                     decoration: BoxDecoration(
@@ -84,9 +87,6 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                     child: const Icon(Icons.call_outlined, color: AppColors.textSecondary, size: 18),
                   ),
-                  const SizedBox(width: 8),
-                  // Shop avatar (visual LEFT in RTL)
-                  ShopAvatar(mono: shop.mono, size: 40, fontSize: 15),
                 ],
               ),
             ),
@@ -169,8 +169,11 @@ class _ChatScreenState extends State<ChatScreen> {
                     },
                     child: Container(
                       width: 44, height: 44,
-                      decoration: const BoxDecoration(color: AppColors.dark, shape: BoxShape.circle),
-                      child: const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+                      decoration: BoxDecoration(color: AppColors.dark, borderRadius: BorderRadius.circular(14)),
+                      child: const Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: Icon(Icons.send_rounded, color: Colors.white, size: 18),
+                      ),
                     ),
                   ),
                 ],
