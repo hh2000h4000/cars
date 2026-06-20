@@ -294,46 +294,30 @@ class ShopProfileScreen extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    flex: 2,
                     child: GestureDetector(
                       onTap: () => Navigator.pushNamed(context, '/customer/requests/new'),
                       child: Container(
                         height: 50,
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(colors: [AppColors.goldLight, AppColors.gold]),
+                          color: AppColors.dark,
                           borderRadius: BorderRadius.circular(14),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.add_circle_outline, size: 18, color: AppColors.dark),
-                            const SizedBox(width: 6),
-                            Text('طلب خدمة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.dark)),
-                          ],
-                        ),
+                        alignment: Alignment.center,
+                        child: Text('اطلب عرض سعر', style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
                       ),
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => Navigator.pushNamed(context, '/customer/chat', arguments: shopId),
-                      child: Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(color: AppColors.borderStrong),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.chat_bubble_outline, size: 18, color: AppColors.textPrimary),
-                            const SizedBox(width: 6),
-                            Text('مراسلة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                          ],
-                        ),
+                  GestureDetector(
+                    onTap: () => Navigator.pushNamed(context, '/customer/chat', arguments: shopId),
+                    child: Container(
+                      width: 50, height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: AppColors.borderStrong),
+                        borderRadius: BorderRadius.circular(14),
                       ),
+                      child: const Icon(Icons.chat_bubble_outline, size: 20, color: AppColors.textPrimary),
                     ),
                   ),
                 ],
