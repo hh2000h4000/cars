@@ -33,9 +33,8 @@ class NewRequestScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(22, 12, 22, 18),
               child: Row(
                 children: [
-                  const Spacer(),
                   Text('طلب خدمة جديد', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                  const SizedBox(width: 14),
+                  const Spacer(),
                   const AppBackButton(),
                 ],
               ),
@@ -45,7 +44,7 @@ class NewRequestScreen extends StatelessWidget {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(22, 0, 22, 100),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Vehicle selector
                     Text('المركبة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
@@ -59,17 +58,6 @@ class NewRequestScreen extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.keyboard_arrow_down, color: AppColors.textMuted),
-                          const Spacer(),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text('${vehicle.brand} ${vehicle.model} ${vehicle.year}',
-                                style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                              Text(vehicle.color, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
-                            ],
-                          ),
-                          const SizedBox(width: 12),
                           Container(
                             width: 44, height: 44,
                             decoration: BoxDecoration(
@@ -79,6 +67,17 @@ class NewRequestScreen extends StatelessWidget {
                             alignment: Alignment.center,
                             child: Text(vehicle.mono, style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.goldLight)),
                           ),
+                          const SizedBox(width: 12),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('${vehicle.brand} ${vehicle.model} ${vehicle.year}',
+                                style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                              Text(vehicle.color, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                            ],
+                          ),
+                          const Spacer(),
+                          const Icon(Icons.keyboard_arrow_down, color: AppColors.textMuted),
                         ],
                       ),
                     ),
@@ -108,17 +107,17 @@ class NewRequestScreen extends StatelessWidget {
                             ),
                             child: Row(
                               children: [
-                                const Spacer(),
+                                Icon(icon, color: selected ? AppColors.goldText : AppColors.textMuted, size: 20),
+                                const SizedBox(width: 8),
                                 Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: selected ? AppColors.goldText : AppColors.textPrimary)),
                                     Text(sub, style: TextStyle(fontFamily: 'Tajawal', fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
                                   ],
                                 ),
-                                const SizedBox(width: 8),
-                                Icon(icon, color: selected ? AppColors.goldText : AppColors.textMuted, size: 20),
+                                const Spacer(),
                               ],
                             ),
                           ),
@@ -159,7 +158,7 @@ class NewRequestScreen extends StatelessWidget {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('العليا، الرياض', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                                 Text('طريق الملك فهد، مبنى الأعمال', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),

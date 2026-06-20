@@ -22,14 +22,14 @@ class AdminPendingScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(22, 14, 22, 16),
               child: Row(
                 children: [
+                  Text('موافقة المتاجر', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w900, color: Colors.white)),
+                  const Spacer(),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
                     decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(10)),
                     child: Text('${shops.where((s) => s.status == AdminShopStatus.pending).length} بانتظار',
                       style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.goldText)),
                   ),
-                  const Spacer(),
-                  Text('موافقة المتاجر', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w900, color: Colors.white)),
                 ],
               ),
             ),
@@ -71,17 +71,17 @@ class _ShopCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
             child: Row(
               children: [
-                _StatusBadge(shop.status),
-                const Spacer(),
+                ShopAvatar(mono: shop.mono, size: 46, fontSize: 18),
+                const SizedBox(width: 12),
                 Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(shop.name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w900, color: Colors.white)),
                     Text('${shop.city} · ${shop.submittedAt}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white38)),
                   ],
                 ),
-                const SizedBox(width: 12),
-                ShopAvatar(mono: shop.mono, size: 46, fontSize: 18),
+                const Spacer(),
+                _StatusBadge(shop.status),
               ],
             ),
           ),
@@ -109,7 +109,7 @@ class _ShopCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
             child: Wrap(
               spacing: 6, runSpacing: 6,
-              alignment: WrapAlignment.end,
+              alignment: WrapAlignment.start,
               children: shop.services.map((s) => Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(color: Colors.white.withOpacity(.08), borderRadius: BorderRadius.circular(999)),
@@ -207,10 +207,10 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(
     children: [
-      const Spacer(),
-      Text(text, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w600, color: Colors.white60)),
-      const SizedBox(width: 8),
       Icon(icon, color: Colors.white38, size: 16),
+      const SizedBox(width: 8),
+      Text(text, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w600, color: Colors.white60)),
+      const Spacer(),
     ],
   );
 }

@@ -20,15 +20,14 @@ class AddVehicleScreen extends StatelessWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(22, 8, 22, 40),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Row(
                   children: [
-                    const Spacer(),
                     Text('إضافة مركبة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                    const SizedBox(width: 14),
+                    const Spacer(),
                     const AppBackButton(),
                   ],
                 ),
@@ -61,7 +60,7 @@ class AddVehicleScreen extends StatelessWidget {
                     Positioned(
                       bottom: 14, right: 18,
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('اسم المركبة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white54)),
                           Text('السنة · اللون', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.goldMuted.withOpacity(.5))),
@@ -161,9 +160,9 @@ class _DropdownBox extends StatelessWidget {
     padding: const EdgeInsets.symmetric(horizontal: 16),
     child: Row(
       children: [
-        const Icon(Icons.keyboard_arrow_down, color: AppColors.textMuted, size: 20),
-        const Spacer(),
         Text(hint, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+        const Spacer(),
+        const Icon(Icons.keyboard_arrow_down, color: AppColors.textMuted, size: 20),
       ],
     ),
   );

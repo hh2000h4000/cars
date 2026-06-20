@@ -38,7 +38,7 @@ class ShopRequestDetailScreen extends StatelessWidget {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(22, 0, 22, 100),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Vehicle card
                     Container(
@@ -48,7 +48,7 @@ class ShopRequestDetailScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(18),
                       ),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('تفاصيل المركبة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.goldMuted)),
                           const SizedBox(height: 8),
@@ -66,14 +66,9 @@ class ShopRequestDetailScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(16)),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              const Spacer(),
-                              Text('نوع الخدمة المطلوبة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
-                            ],
-                          ),
+                          Text('نوع الخدمة المطلوبة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
                           const SizedBox(height: 6),
                           Text(request.serviceType, style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                           if (request.notes != null) ...[
@@ -104,7 +99,7 @@ class ShopRequestDetailScreen extends StatelessWidget {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('موقع الخدمة (منزلية)', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
                                 Text('العليا، الرياض', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
@@ -132,11 +127,11 @@ class ShopRequestDetailScreen extends StatelessWidget {
                         ),
                         child: Row(
                           children: [
-                            const Spacer(),
+                            const Icon(Icons.check_circle, color: AppColors.green, size: 18),
+                            const SizedBox(width: 8),
                             Text('تم إرسال عرضك بنجاح — في انتظار رد العميل',
                               style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.green)),
-                            const SizedBox(width: 8),
-                            const Icon(Icons.check_circle, color: AppColors.green, size: 18),
+                            const Spacer(),
                           ],
                         ),
                       ),

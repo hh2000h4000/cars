@@ -14,16 +14,15 @@ class CustomerRegisterScreen extends StatelessWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(22, 8, 22, 40),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Row(
                   children: [
-                    const Spacer(),
                     Text('إنشاء حساب عميل', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                    const SizedBox(width: 14),
+                    const Spacer(),
                     const AppBackButton(),
                   ],
                 ),
@@ -46,9 +45,9 @@ class CustomerRegisterScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    Text('+966 50 123 4567', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-                    const Spacer(),
                     Text('🇸🇦 +966', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.goldText)),
+                    const Spacer(),
+                    Text('+966 50 123 4567', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
                   ],
                 ),
               ),
@@ -65,9 +64,9 @@ class CustomerRegisterScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    const Icon(Icons.visibility_outlined, color: AppColors.textMuted, size: 20),
-                    const Spacer(),
                     Text('••••••••', style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary, letterSpacing: 3)),
+                    const Spacer(),
+                    const Icon(Icons.visibility_outlined, color: AppColors.textMuted, size: 20),
                   ],
                 ),
               ),

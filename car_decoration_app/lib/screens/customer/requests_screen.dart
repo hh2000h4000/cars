@@ -22,6 +22,8 @@ class RequestsScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(22, 14, 22, 16),
               child: Row(
                 children: [
+                  Text('طلباتي', style: TextStyle(fontFamily: 'Tajawal', fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                  const Spacer(),
                   GestureDetector(
                     onTap: () => Navigator.pushNamed(context, '/customer/requests/new'),
                     child: Container(
@@ -33,15 +35,13 @@ class RequestsScreen extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.add, color: AppColors.dark, size: 17),
-                          const SizedBox(width: 4),
                           Text('طلب جديد', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.dark)),
+                          const SizedBox(width: 4),
+                          const Icon(Icons.add, color: AppColors.dark, size: 17),
                         ],
                       ),
                     ),
                   ),
-                  const Spacer(),
-                  Text('طلباتي', style: TextStyle(fontFamily: 'Tajawal', fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
                 ],
               ),
             ),
@@ -100,27 +100,22 @@ class _RequestCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      StatusBadge(label: request.status.label, type: request.status.colorType),
-                      const Spacer(),
                       Text('طلب #${request.id}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                      const Spacer(),
+                      StatusBadge(label: request.status.label, type: request.status.colorType),
                     ],
                   ),
                   const SizedBox(height: 10),
-                  Row(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Spacer(),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(request.serviceType, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                          const SizedBox(height: 3),
-                          Text('${request.vehicleBrand} ${request.vehicleModel}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
-                        ],
-                      ),
+                      Text(request.serviceType, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                      const SizedBox(height: 3),
+                      Text('${request.vehicleBrand} ${request.vehicleModel}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                     ],
                   ),
                   const SizedBox(height: 12),

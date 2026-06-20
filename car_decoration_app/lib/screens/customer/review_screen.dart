@@ -19,15 +19,14 @@ class ReviewScreen extends StatelessWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(22, 8, 22, 40),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Row(
                   children: [
-                    const Spacer(),
                     Text('تقييم الخدمة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                    const SizedBox(width: 14),
+                    const Spacer(),
                     const AppBackButton(),
                   ],
                 ),
@@ -42,6 +41,16 @@ class ReviewScreen extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
+                    ShopAvatar(mono: 'ل', size: 46, fontSize: 18),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('لمسات الفخامة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
+                        Text('خدمة مكتملة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.goldMuted)),
+                      ],
+                    ),
+                    const Spacer(),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -49,16 +58,6 @@ class ReviewScreen extends StatelessWidget {
                         Text('طلب #1038', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white38)),
                       ],
                     ),
-                    const Spacer(),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text('لمسات الفخامة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
-                        Text('خدمة مكتملة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.goldMuted)),
-                      ],
-                    ),
-                    const SizedBox(width: 12),
-                    ShopAvatar(mono: 'ل', size: 46, fontSize: 18),
                   ],
                 ),
               ),

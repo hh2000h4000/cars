@@ -20,6 +20,8 @@ class VehiclesScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(22, 12, 22, 18),
               child: Row(
                 children: [
+                  Text('مركباتي', style: TextStyle(fontFamily: 'Tajawal', fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                  const Spacer(),
                   GestureDetector(
                     onTap: () => Navigator.pushNamed(context, '/customer/vehicles/add'),
                     child: Container(
@@ -31,15 +33,13 @@ class VehiclesScreen extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.add, color: AppColors.dark, size: 18),
-                          const SizedBox(width: 5),
                           Text('إضافة مركبة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.dark)),
+                          const SizedBox(width: 5),
+                          const Icon(Icons.add, color: AppColors.dark, size: 18),
                         ],
                       ),
                     ),
                   ),
-                  const Spacer(),
-                  Text('مركباتي', style: TextStyle(fontFamily: 'Tajawal', fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
                 ],
               ),
             ),
@@ -92,7 +92,7 @@ class VehiclesScreen extends StatelessWidget {
                               Positioned(
                                 bottom: 10, right: 14,
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text('${v.brand} ${v.model}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
                                     Text(v.color, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.goldMuted)),
@@ -116,6 +116,19 @@ class VehiclesScreen extends StatelessWidget {
                           padding: const EdgeInsets.fromLTRB(15, 12, 15, 14),
                           child: Row(
                             children: [
+                              if (v.plateNumber != null)
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                      decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(7)),
+                                      child: Text('لوحة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.goldText)),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(v.plateNumber!, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                  ],
+                                ),
+                              const Spacer(),
                               if (!v.isMain)
                                 GestureDetector(
                                   onTap: () {},
@@ -127,19 +140,6 @@ class VehiclesScreen extends StatelessWidget {
                                     ),
                                     child: Text('جعلها رئيسية', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
                                   ),
-                                ),
-                              const Spacer(),
-                              if (v.plateNumber != null)
-                                Row(
-                                  children: [
-                                    Text(v.plateNumber!, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                                    const SizedBox(width: 6),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                      decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(7)),
-                                      child: Text('لوحة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.goldText)),
-                                    ),
-                                  ],
                                 ),
                             ],
                           ),

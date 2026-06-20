@@ -23,7 +23,7 @@ class ProfileScreen extends StatelessWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(22, 14, 22, 30),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('الحساب', style: TextStyle(fontFamily: 'Tajawal', fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
               const SizedBox(height: 20),
@@ -51,7 +51,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     const Spacer(),
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('عبدالله الحربي', style: TextStyle(fontFamily: 'Tajawal', fontSize: 17, fontWeight: FontWeight.w900, color: Colors.white)),
                         Text('abdullah@email.com', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w500, color: Colors.white38)),
@@ -99,11 +99,11 @@ class ProfileScreen extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                             child: Row(
                               children: [
-                                const Icon(Icons.chevron_left, color: AppColors.textMuted, size: 18),
-                                const Spacer(),
-                                Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                                const SizedBox(width: 12),
                                 Icon(icon, color: AppColors.goldText, size: 20),
+                                const SizedBox(width: 12),
+                                Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                                const Spacer(),
+                                const Icon(Icons.chevron_right, color: AppColors.textMuted, size: 18),
                               ],
                             ),
                           ),

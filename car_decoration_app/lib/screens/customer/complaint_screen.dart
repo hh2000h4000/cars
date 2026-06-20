@@ -21,15 +21,14 @@ class ComplaintScreen extends StatelessWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(22, 8, 22, 40),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Row(
                   children: [
-                    const Spacer(),
                     Text('تقديم شكوى', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                    const SizedBox(width: 14),
+                    const Spacer(),
                     const AppBackButton(),
                   ],
                 ),
@@ -46,17 +45,15 @@ class ComplaintScreen extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    const Spacer(),
+                    const Icon(Icons.warning_amber_rounded, color: AppColors.red, size: 22),
+                    const SizedBox(width: 10),
                     Expanded(
-                      flex: 5,
                       child: Text(
                         'سيتم مراجعة شكواك من قبل فريق الإدارة وسيتم التواصل معك خلال ٢٤ ساعة.',
                         textAlign: TextAlign.right,
                         style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.red, height: 1.5),
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    const Icon(Icons.warning_amber_rounded, color: AppColors.red, size: 22),
                   ],
                 ),
               ),

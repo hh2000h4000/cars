@@ -24,9 +24,8 @@ class QuotationDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(22, 12, 22, 16),
               child: Row(
                 children: [
-                  const Spacer(),
                   Text('تفاصيل العرض', style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
-                  const SizedBox(width: 14),
+                  const Spacer(),
                   const AppBackButton(),
                 ],
               ),
@@ -36,7 +35,7 @@ class QuotationDetailScreen extends StatelessWidget {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(22, 0, 22, 100),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Shop header
                     Container(
@@ -48,6 +47,17 @@ class QuotationDetailScreen extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
+                          ShopAvatar(mono: q.shopMono, size: 52, fontSize: 20),
+                          const SizedBox(width: 12),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(q.shopName, style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                              const SizedBox(height: 3),
+                              const Text('متجر معتمد', style: TextStyle(fontSize: 12)),
+                            ],
+                          ),
+                          const Spacer(),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -74,17 +84,6 @@ class QuotationDetailScreen extends StatelessWidget {
                                 ),
                             ],
                           ),
-                          const Spacer(),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(q.shopName, style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
-                              const SizedBox(height: 3),
-                              const Text('متجر معتمد', style: TextStyle(fontSize: 12)),
-                            ],
-                          ),
-                          const SizedBox(width: 12),
-                          ShopAvatar(mono: q.shopMono, size: 52, fontSize: 20),
                         ],
                       ),
                     ),
@@ -101,9 +100,9 @@ class QuotationDetailScreen extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              Text('${q.price} ريال', style: TextStyle(fontFamily: 'Tajawal', fontSize: 28, fontWeight: FontWeight.w900, color: AppColors.goldLight)),
-                              const Spacer(),
                               Text('السعر الإجمالي', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white54)),
+                              const Spacer(),
+                              Text('${q.price} ريال', style: TextStyle(fontFamily: 'Tajawal', fontSize: 28, fontWeight: FontWeight.w900, color: AppColors.goldLight)),
                             ],
                           ),
                           const SizedBox(height: 12),
@@ -125,7 +124,7 @@ class QuotationDetailScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(16)),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('تفاصيل الخدمة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                           const SizedBox(height: 10),
@@ -143,7 +142,7 @@ class QuotationDetailScreen extends StatelessWidget {
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(16)),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('المواد والقطع المستخدمة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                             const SizedBox(height: 10),
@@ -151,13 +150,13 @@ class QuotationDetailScreen extends StatelessWidget {
                               padding: const EdgeInsets.only(bottom: 8),
                               child: Row(
                                 children: [
-                                  const Spacer(),
-                                  Text(p, textAlign: TextAlign.right, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
-                                  const SizedBox(width: 8),
                                   Container(
                                     width: 6, height: 6,
                                     decoration: const BoxDecoration(color: AppColors.goldText, shape: BoxShape.circle),
                                   ),
+                                  const SizedBox(width: 8),
+                                  Text(p, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                                  const Spacer(),
                                 ],
                               ),
                             )),
@@ -205,9 +204,9 @@ class _PriceRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(
     children: [
-      Text(value, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white70)),
-      const Spacer(),
       Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white38)),
+      const Spacer(),
+      Text(value, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white70)),
     ],
   );
 }

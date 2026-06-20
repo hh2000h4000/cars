@@ -26,23 +26,8 @@ class AdminDashboardScreen extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(22, 14, 22, 20),
                 child: Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.white12),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(width: 7, height: 7, decoration: const BoxDecoration(color: AppColors.green, shape: BoxShape.circle)),
-                          const SizedBox(width: 6),
-                          Text('مباشر', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: Colors.white60)),
-                        ],
-                      ),
-                    ),
-                    const Spacer(),
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('لوحة الإدارة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
                         Text('المشرف العام', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white38)),
@@ -57,6 +42,21 @@ class AdminDashboardScreen extends StatelessWidget {
                       ),
                       alignment: Alignment.center,
                       child: Text('م', style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.dark)),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.white12),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(width: 7, height: 7, decoration: const BoxDecoration(color: AppColors.green, shape: BoxShape.circle)),
+                          const SizedBox(width: 6),
+                          Text('مباشر', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: Colors.white60)),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -90,7 +90,7 @@ class AdminDashboardScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(22, 0, 22, 20),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('إجراءات سريعة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
                   const SizedBox(height: 12),
@@ -126,12 +126,12 @@ class AdminDashboardScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(22, 0, 22, 10),
               child: Row(
                 children: [
+                  Text('طلبات التسجيل الأخيرة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
+                  const Spacer(),
                   GestureDetector(
                     onTap: () => Navigator.pushNamed(context, '/admin/pending'),
                     child: Text('عرض الكل', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.goldText)),
                   ),
-                  const Spacer(),
-                  Text('طلبات التسجيل الأخيرة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
                 ],
               ),
             ),
@@ -151,6 +151,16 @@ class AdminDashboardScreen extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
+                        ShopAvatar(mono: shop.mono, size: 40, fontSize: 16),
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(shop.name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white)),
+                            Text(shop.city, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white38)),
+                          ],
+                        ),
+                        const Spacer(),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -159,16 +169,6 @@ class AdminDashboardScreen extends StatelessWidget {
                             Text(shop.submittedAt, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white30)),
                           ],
                         ),
-                        const Spacer(),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(shop.name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white)),
-                            Text(shop.city, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white38)),
-                          ],
-                        ),
-                        const SizedBox(width: 10),
-                        ShopAvatar(mono: shop.mono, size: 40, fontSize: 16),
                       ],
                     ),
                   ),
@@ -197,7 +197,7 @@ class _KpiCard extends StatelessWidget {
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(16)),
     child: Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(value, style: TextStyle(fontFamily: 'Tajawal', fontSize: 28, fontWeight: FontWeight.w900, color: textColor)),

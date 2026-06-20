@@ -62,7 +62,7 @@ class ShopRequestsScreen extends StatelessWidget {
                         boxShadow: [BoxShadow(color: AppColors.dark.withOpacity(.04), blurRadius: 12, offset: const Offset(0, 4))],
                       ),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
@@ -79,12 +79,12 @@ class ShopRequestsScreen extends StatelessWidget {
                           const SizedBox(height: 10),
                           Row(
                             children: [
-                              const Icon(Icons.chevron_left, color: AppColors.goldText, size: 16),
-                              Text('عرض التفاصيل', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.goldText)),
-                              const Spacer(),
-                              Text(req.dateLabel, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
-                              const SizedBox(width: 4),
                               const Icon(Icons.access_time, color: AppColors.textMuted, size: 12),
+                              const SizedBox(width: 4),
+                              Text(req.dateLabel, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+                              const Spacer(),
+                              Text('عرض التفاصيل', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.goldText)),
+                              const Icon(Icons.chevron_right, color: AppColors.goldText, size: 16),
                             ],
                           ),
                         ],

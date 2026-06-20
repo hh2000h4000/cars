@@ -17,15 +17,14 @@ class SendQuoteScreen extends StatelessWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(22, 8, 22, 40),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Row(
                   children: [
-                    const Spacer(),
                     Text('إرسال عرض سعر', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                    const SizedBox(width: 14),
+                    const Spacer(),
                     const AppBackButton(),
                   ],
                 ),
@@ -38,16 +37,16 @@ class SendQuoteScreen extends StatelessWidget {
                 decoration: BoxDecoration(color: AppColors.goldBg, border: Border.all(color: AppColors.goldLight), borderRadius: BorderRadius.circular(14)),
                 child: Row(
                   children: [
-                    const Spacer(),
+                    const Icon(Icons.description_outlined, color: AppColors.goldText, size: 22),
+                    const SizedBox(width: 10),
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('طلب #$requestId', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.goldText)),
                         Text('تظليل زجاج · لاند كروزر 2023', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                       ],
                     ),
-                    const SizedBox(width: 10),
-                    const Icon(Icons.description_outlined, color: AppColors.goldText, size: 22),
+                    const Spacer(),
                   ],
                 ),
               ),
@@ -61,7 +60,7 @@ class SendQuoteScreen extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _Label('رسوم الزيارة'),
                         _NumberBox('50'),
@@ -71,7 +70,7 @@ class SendQuoteScreen extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _Label('مدة التنفيذ'),
                         _TextBox('٣-٤ ساعات'),
@@ -126,10 +125,10 @@ class SendQuoteScreen extends StatelessWidget {
                     onTap: () {},
                     child: Row(
                       children: [
-                        const Spacer(),
-                        Text('+ إضافة مادة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.goldText)),
-                        const SizedBox(width: 4),
                         const Icon(Icons.add_circle_outline, color: AppColors.goldText, size: 16),
+                        const SizedBox(width: 4),
+                        Text('+ إضافة مادة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.goldText)),
+                        const Spacer(),
                       ],
                     ),
                   ),
@@ -200,9 +199,9 @@ class _PartRow extends StatelessWidget {
     decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(11)),
     child: Row(
       children: [
-        const Icon(Icons.remove_circle_outline, color: AppColors.red, size: 16),
-        const Spacer(),
         Text(text, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+        const Spacer(),
+        const Icon(Icons.remove_circle_outline, color: AppColors.red, size: 16),
       ],
     ),
   );

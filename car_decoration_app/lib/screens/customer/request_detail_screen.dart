@@ -40,7 +40,7 @@ class RequestDetailScreen extends StatelessWidget {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(22, 0, 22, 30),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Vehicle info card
                     Container(
@@ -54,18 +54,18 @@ class RequestDetailScreen extends StatelessWidget {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(request.serviceType, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.goldMuted)),
-                              Text(request.dateLabel, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white38)),
-                            ],
-                          ),
-                          const Spacer(),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
                               Text('${request.vehicleBrand} ${request.vehicleModel}',
                                 style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
                               Text('${request.vehicleYear} · ${request.vehicleColor}',
                                 style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.goldMuted)),
+                            ],
+                          ),
+                          const Spacer(),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(request.serviceType, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.goldMuted)),
+                              Text(request.dateLabel, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white38)),
                             ],
                           ),
                         ],
@@ -80,7 +80,7 @@ class RequestDetailScreen extends StatelessWidget {
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(14)),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('ملاحظات الطلب', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                             const SizedBox(height: 7),
@@ -95,13 +95,13 @@ class RequestDetailScreen extends StatelessWidget {
                     if (hasOffers) ...[
                       Row(
                         children: [
+                          Text('العروض الواردة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                          const Spacer(),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(999)),
                             child: Text('${quotations.length} عروض وصلت', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.goldText)),
                           ),
-                          const Spacer(),
-                          Text('العروض الواردة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                         ],
                       ),
                       const SizedBox(height: 12),
@@ -206,18 +206,12 @@ class _QuotationCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('${quotation.price} ريال', style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
-                          Text('+ ${quotation.visitFee} رسوم زيارة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
-                        ],
-                      ),
-                      const Spacer(),
                       Row(
                         children: [
+                          ShopAvatar(mono: quotation.shopMono, size: 40, fontSize: 16),
+                          const SizedBox(width: 10),
                           Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(quotation.shopName, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                               Row(
@@ -229,8 +223,14 @@ class _QuotationCard extends StatelessWidget {
                               ),
                             ],
                           ),
-                          const SizedBox(width: 10),
-                          ShopAvatar(mono: quotation.shopMono, size: 40, fontSize: 16),
+                        ],
+                      ),
+                      const Spacer(),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('${quotation.price} ريال', style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                          Text('+ ${quotation.visitFee} رسوم زيارة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
                         ],
                       ),
                     ],

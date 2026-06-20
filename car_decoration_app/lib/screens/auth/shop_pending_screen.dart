@@ -50,7 +50,7 @@ class ShopPendingScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(18)),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('حتى يتم الاعتماد، لا يمكن لمتجرك:', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.goldText)),
                     const SizedBox(height: 13),
@@ -79,11 +79,11 @@ class _RestrictedItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(
-    mainAxisAlignment: MainAxisAlignment.end,
+    mainAxisAlignment: MainAxisAlignment.start,
     children: [
-      Text(text, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF3A382F))),
-      const SizedBox(width: 9),
       Text('✕', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.red)),
+      const SizedBox(width: 9),
+      Text(text, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF3A382F))),
     ],
   );
 }

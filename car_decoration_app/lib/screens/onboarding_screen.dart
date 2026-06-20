@@ -52,20 +52,20 @@ class OnboardingScreen extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(26, 24, 26, 30),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
+                            const AppLogoMark(size: 52),
+                            const SizedBox(width: 11),
                             Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('تزيين', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w900, color: const Color(0xFFF7F1E2))),
                                 Text('CAR DECORATION', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.goldMuted, letterSpacing: 1)),
                               ],
                             ),
-                            const SizedBox(width: 11),
-                            const AppLogoMark(size: 52),
                           ],
                         ),
                         const Spacer(),
@@ -106,7 +106,7 @@ class OnboardingScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(24, 30, 24, 28),
               child: SingleChildScrollView(
                 child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('اختر نوع الحساب', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                   const SizedBox(height: 5),
@@ -193,23 +193,23 @@ class _AccountTypeCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(Icons.chevron_left, color: Color(0xFFC9C4B8), size: 22),
-            const Spacer(),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(title, style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                const SizedBox(height: 2),
-                Text(subtitle, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
-              ],
-            ),
-            const SizedBox(width: 15),
             Container(
               width: 54,
               height: 54,
               decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(16)),
               child: Icon(icon, color: AppColors.goldText, size: 26),
             ),
+            const SizedBox(width: 15),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                const SizedBox(height: 2),
+                Text(subtitle, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+              ],
+            ),
+            const Spacer(),
+            const Icon(Icons.chevron_left, color: Color(0xFFC9C4B8), size: 22),
           ],
         ),
       ),

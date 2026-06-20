@@ -31,17 +31,10 @@ class ChatScreen extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      width: 38, height: 38,
-                      decoration: BoxDecoration(border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(11)),
-                      child: const Icon(Icons.chevron_right, color: AppColors.dark, size: 20),
-                    ),
-                  ),
-                  const Spacer(),
+                  ShopAvatar(mono: shop.mono, size: 42, fontSize: 16),
+                  const SizedBox(width: 10),
                   Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(shop.name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                       Row(
@@ -53,8 +46,15 @@ class ChatScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(width: 10),
-                  ShopAvatar(mono: shop.mono, size: 42, fontSize: 16),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      width: 38, height: 38,
+                      decoration: BoxDecoration(border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(11)),
+                      child: const Icon(Icons.chevron_right, color: AppColors.dark, size: 20),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -69,15 +69,19 @@ class ChatScreen extends StatelessWidget {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 10),
                     child: Row(
-                      mainAxisAlignment: msg.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: msg.isMe ? MainAxisAlignment.start : MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (!msg.isMe) ...[
-                          ShopAvatar(mono: shop.mono, size: 28, fontSize: 11),
+                        if (msg.isMe) ...[
+                          const CircleAvatar(
+                            radius: 14,
+                            backgroundColor: AppColors.goldBg,
+                            child: Text('ع', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.goldText)),
+                          ),
                           const SizedBox(width: 7),
                         ],
                         Column(
-                          crossAxisAlignment: msg.isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                          crossAxisAlignment: msg.isMe ? CrossAxisAlignment.start : CrossAxisAlignment.end,
                           children: [
                             if (msg.hasImage)
                               Container(
@@ -118,13 +122,9 @@ class ChatScreen extends StatelessWidget {
                             Text(msg.time, style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
                           ],
                         ),
-                        if (msg.isMe) ...[
+                        if (!msg.isMe) ...[
                           const SizedBox(width: 7),
-                          const CircleAvatar(
-                            radius: 14,
-                            backgroundColor: AppColors.goldBg,
-                            child: Text('ع', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.goldText)),
-                          ),
+                          ShopAvatar(mono: shop.mono, size: 28, fontSize: 11),
                         ],
                       ],
                     ),
@@ -143,11 +143,19 @@ class ChatScreen extends StatelessWidget {
               child: Row(
                 children: [
                   GestureDetector(
-                    onTap: () => provider.sendImageMessage(),
+                    onTap: () {
+                      if (controller.text.trim().isNotEmpty) {
+                        provider.sendMessage(controller.text.trim());
+                        controller.clear();
+                      }
+                    },
                     child: Container(
-                      width: 40, height: 40,
-                      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(11)),
-                      child: const Icon(Icons.image_outlined, color: AppColors.textMuted, size: 20),
+                      width: 42, height: 42,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(colors: [AppColors.goldLight, AppColors.gold]),
+                        borderRadius: BorderRadius.circular(13),
+                      ),
+                      child: const Icon(Icons.send_rounded, color: AppColors.dark, size: 18),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -171,19 +179,11 @@ class ChatScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   GestureDetector(
-                    onTap: () {
-                      if (controller.text.trim().isNotEmpty) {
-                        provider.sendMessage(controller.text.trim());
-                        controller.clear();
-                      }
-                    },
+                    onTap: () => provider.sendImageMessage(),
                     child: Container(
-                      width: 42, height: 42,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(colors: [AppColors.goldLight, AppColors.gold]),
-                        borderRadius: BorderRadius.circular(13),
-                      ),
-                      child: const Icon(Icons.send_rounded, color: AppColors.dark, size: 18),
+                      width: 40, height: 40,
+                      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(11)),
+                      child: const Icon(Icons.image_outlined, color: AppColors.textMuted, size: 20),
                     ),
                   ),
                 ],

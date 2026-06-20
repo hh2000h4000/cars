@@ -22,15 +22,14 @@ class ShopSelectScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(22, 12, 22, 8),
               child: Row(
                 children: [
-                  const Spacer(),
                   Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('اختر المتاجر', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                       Text('سيتلقى كل متجر طلبك ويرسل عرضه', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                     ],
                   ),
-                  const SizedBox(width: 14),
+                  const Spacer(),
                   const AppBackButton(),
                 ],
               ),
@@ -44,10 +43,10 @@ class ShopSelectScreen extends StatelessWidget {
                 decoration: BoxDecoration(color: AppColors.goldBg, border: Border.all(color: AppColors.goldLight), borderRadius: BorderRadius.circular(12)),
                 child: Row(
                   children: [
-                    const Spacer(),
-                    Text('اختر حتى ٥ متاجر للحصول على أفضل عرض', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.goldText)),
-                    const SizedBox(width: 8),
                     const Icon(Icons.info_outline, color: AppColors.goldText, size: 16),
+                    const SizedBox(width: 8),
+                    Text('اختر حتى ٥ متاجر للحصول على أفضل عرض', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.goldText)),
+                    const Spacer(),
                   ],
                 ),
               ),
@@ -58,9 +57,9 @@ class ShopSelectScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(22, 0, 22, 10),
               child: Row(
                 children: [
-                  const Spacer(),
                   Text('تم اختيار ${provider.selectedShops.length} متجر',
                     style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+                  const Spacer(),
                 ],
               ),
             ),
@@ -87,6 +86,40 @@ class ShopSelectScreen extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
+                          ShopAvatar(mono: shop.mono, size: 46, fontSize: 18),
+                          const SizedBox(width: 12),
+                          // Info
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Text(shop.name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                    const SizedBox(width: 5),
+                                    if (shop.verified) const Icon(Icons.verified, color: AppColors.goldText, size: 13),
+                                  ],
+                                ),
+                                const SizedBox(height: 2),
+                                Text(shop.area, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                                const SizedBox(height: 6),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    const Icon(Icons.location_on_outlined, color: AppColors.textMuted, size: 12),
+                                    const SizedBox(width: 3),
+                                    Text(shop.distance, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+                                    const SizedBox(width: 10),
+                                    const Icon(Icons.star, color: AppColors.star, size: 12),
+                                    const SizedBox(width: 3),
+                                    Text(shop.rating.toString(), style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
                           // Checkbox
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 180),
@@ -98,40 +131,6 @@ class ShopSelectScreen extends StatelessWidget {
                             ),
                             child: selected ? const Icon(Icons.check, color: Colors.white, size: 14) : null,
                           ),
-                          const SizedBox(width: 12),
-                          // Info
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    if (shop.verified) const Icon(Icons.verified, color: AppColors.goldText, size: 13),
-                                    const SizedBox(width: 5),
-                                    Text(shop.name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                                  ],
-                                ),
-                                const SizedBox(height: 2),
-                                Text(shop.area, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
-                                const SizedBox(height: 6),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Text(shop.distance, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
-                                    const SizedBox(width: 3),
-                                    const Icon(Icons.location_on_outlined, color: AppColors.textMuted, size: 12),
-                                    const SizedBox(width: 10),
-                                    Text(shop.rating.toString(), style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                                    const SizedBox(width: 3),
-                                    const Icon(Icons.star, color: AppColors.star, size: 12),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          ShopAvatar(mono: shop.mono, size: 46, fontSize: 18),
                         ],
                       ),
                     ),

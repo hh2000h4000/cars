@@ -24,6 +24,16 @@ class ShopDashboardScreen extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(22, 12, 22, 16),
                 child: Row(
                   children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('لمسات الفخامة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                        Text('لوحة التحكم', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                      ],
+                    ),
+                    const SizedBox(width: 12),
+                    ShopAvatar(mono: 'ل', size: 46, fontSize: 18),
+                    const Spacer(),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                       decoration: BoxDecoration(
@@ -39,16 +49,6 @@ class ShopDashboardScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const Spacer(),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text('لمسات الفخامة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
-                        Text('لوحة التحكم', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
-                      ],
-                    ),
-                    const SizedBox(width: 12),
-                    ShopAvatar(mono: 'ل', size: 46, fontSize: 18),
                   ],
                 ),
               ),
@@ -107,10 +107,12 @@ class ShopDashboardScreen extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.all(14),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
                                   children: [
+                                    Text('طلب #${item.requestId}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                    const Spacer(),
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                                       decoration: BoxDecoration(
@@ -123,22 +125,20 @@ class ShopDashboardScreen extends StatelessWidget {
                                           color: item.urgency == 'high' ? AppColors.red : AppColors.goldText),
                                       ),
                                     ),
-                                    const Spacer(),
-                                    Text('طلب #${item.requestId}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                                   ],
                                 ),
                                 const SizedBox(height: 10),
                                 Row(
                                   children: [
-                                    Text(item.timeAgo, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
-                                    const Spacer(),
                                     Column(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(item.serviceType, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                                         Text(item.vehicleInfo, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                                       ],
                                     ),
+                                    const Spacer(),
+                                    Text(item.timeAgo, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
                                   ],
                                 ),
                                 const SizedBox(height: 10),
@@ -191,16 +191,16 @@ class _StatCard extends StatelessWidget {
     decoration: BoxDecoration(color: bg, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(16)),
     child: Row(
       children: [
-        Icon(icon, color: textColor, size: 26),
-        const Spacer(),
         Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(value, style: TextStyle(fontFamily: 'Tajawal', fontSize: 22, fontWeight: FontWeight.w900, color: textColor)),
             Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
           ],
         ),
+        const Spacer(),
+        Icon(icon, color: textColor, size: 26),
       ],
     ),
   );

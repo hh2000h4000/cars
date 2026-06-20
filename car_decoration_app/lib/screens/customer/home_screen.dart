@@ -32,17 +32,22 @@ class HomeScreen extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(22, 6, 22, 16),
                 child: Row(
                   children: [
-                    // Avatar
-                    Container(
-                      width: 42, height: 42,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(colors: [AppColors.goldLight, AppColors.gold]),
-                        borderRadius: BorderRadius.circular(13),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text('ع', style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.dark)),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('مساء الخير،', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                        Row(
+                          children: [
+                            const Icon(Icons.location_on_outlined, color: AppColors.goldText, size: 15),
+                            const SizedBox(width: 5),
+                            Text('العليا، الرياض', style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                            const SizedBox(width: 5),
+                            Text('▾', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textMuted)),
+                          ],
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 10),
+                    const Spacer(),
                     // Notification
                     Stack(
                       children: [
@@ -60,21 +65,16 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const Spacer(),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text('مساء الخير،', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
-                        Row(
-                          children: [
-                            Text('▾', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textMuted)),
-                            const SizedBox(width: 5),
-                            Text('العليا، الرياض', style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                            const SizedBox(width: 5),
-                            const Icon(Icons.location_on_outlined, color: AppColors.goldText, size: 15),
-                          ],
-                        ),
-                      ],
+                    const SizedBox(width: 10),
+                    // Avatar
+                    Container(
+                      width: 42, height: 42,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(colors: [AppColors.goldLight, AppColors.gold]),
+                        borderRadius: BorderRadius.circular(13),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text('ع', style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.dark)),
                     ),
                   ],
                 ),
@@ -92,9 +92,10 @@ class HomeScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
+                    const Icon(Icons.search, color: AppColors.textMuted, size: 20),
+                    const SizedBox(width: 8),
                     Text('ابحث عن خدمة أو متجر تزيين...', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
                     const Spacer(),
-                    const Icon(Icons.search, color: AppColors.textMuted, size: 20),
                   ],
                 ),
               ),
@@ -127,7 +128,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                       Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -143,9 +144,9 @@ class HomeScreen extends StatelessWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.chevron_left, color: AppColors.dark, size: 18),
-                                const SizedBox(width: 4),
                                 Text('اطلب الآن', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.dark)),
+                                const SizedBox(width: 4),
+                                const Icon(Icons.chevron_left, color: AppColors.dark, size: 18),
                               ],
                             ),
                           ),
@@ -231,9 +232,9 @@ class HomeScreen extends StatelessWidget {
                                     decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(999)),
                                     child: Row(
                                       children: [
-                                        Text(shop.distance, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w700, color: const Color(0xFFFBF7EC))),
-                                        const SizedBox(width: 4),
                                         const Icon(Icons.location_on, color: AppColors.goldLight, size: 13),
+                                        const SizedBox(width: 4),
+                                        Text(shop.distance, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w700, color: const Color(0xFFFBF7EC))),
                                       ],
                                     ),
                                   ),
@@ -247,48 +248,6 @@ class HomeScreen extends StatelessWidget {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
-                                        children: [
-                                          if (shop.verified) const Icon(Icons.verified, color: AppColors.goldText, size: 15),
-                                          const SizedBox(width: 6),
-                                          Text(shop.name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 15.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(shop.area, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
-                                      const SizedBox(height: 8),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
-                                        children: [
-                                          Text('${shop.completedJobs} عملية مكتملة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
-                                          const SizedBox(width: 12),
-                                          Row(children: [
-                                            Text(shop.rating.toString(), style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                                            const SizedBox(width: 3),
-                                            const Icon(Icons.star, color: AppColors.star, size: 14),
-                                          ]),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 10),
-                                      Wrap(
-                                        spacing: 6,
-                                        runSpacing: 6,
-                                        alignment: WrapAlignment.end,
-                                        children: shop.tags.map((t) => Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                          decoration: BoxDecoration(color: const Color(0xFFF4F1EA), borderRadius: BorderRadius.circular(999)),
-                                          child: Text(t, style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w700, color: const Color(0xFF6B675E))),
-                                        )).toList(),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
                                 // Logo overlaps cover
                                 Transform.translate(
                                   offset: const Offset(0, -32),
@@ -299,6 +258,48 @@ class HomeScreen extends StatelessWidget {
                                       boxShadow: [BoxShadow(color: AppColors.dark.withOpacity(.2), blurRadius: 12, offset: const Offset(0, 4))],
                                     ),
                                     child: ShopAvatar(mono: shop.mono, size: 50, fontSize: 20),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          Text(shop.name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 15.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                          const SizedBox(width: 6),
+                                          if (shop.verified) const Icon(Icons.verified, color: AppColors.goldText, size: 15),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(shop.area, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          Row(children: [
+                                            Text(shop.rating.toString(), style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                            const SizedBox(width: 3),
+                                            const Icon(Icons.star, color: AppColors.star, size: 14),
+                                          ]),
+                                          const SizedBox(width: 12),
+                                          Text('${shop.completedJobs} عملية مكتملة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Wrap(
+                                        spacing: 6,
+                                        runSpacing: 6,
+                                        alignment: WrapAlignment.start,
+                                        children: shop.tags.map((t) => Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                          decoration: BoxDecoration(color: const Color(0xFFF4F1EA), borderRadius: BorderRadius.circular(999)),
+                                          child: Text(t, style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w700, color: const Color(0xFF6B675E))),
+                                        )).toList(),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],

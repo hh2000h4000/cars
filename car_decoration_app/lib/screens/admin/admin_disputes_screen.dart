@@ -21,14 +21,14 @@ class AdminDisputesScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(22, 14, 22, 16),
               child: Row(
                 children: [
+                  Text('إدارة النزاعات', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w900, color: Colors.white)),
+                  const Spacer(),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
                     decoration: BoxDecoration(color: AppColors.red.withOpacity(.15), borderRadius: BorderRadius.circular(10)),
                     child: Text('${disputes.where((d) => d.status == DisputeStatus.underReview).length} مفتوح',
                       style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.red)),
                   ),
-                  const Spacer(),
-                  Text('إدارة النزاعات', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w900, color: Colors.white)),
                 ],
               ),
             ),
@@ -75,15 +75,15 @@ class _DisputeCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
+                    Text('طلب #${dispute.requestId}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white)),
+                    const Spacer(),
                     _SeverityBadge(dispute.severity),
                     const SizedBox(width: 8),
                     _StatusBadge(dispute.status),
-                    const Spacer(),
-                    Text('طلب #${dispute.requestId}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white)),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -97,27 +97,27 @@ class _DisputeCard extends StatelessWidget {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Text(dispute.submittedAt, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: Colors.white30)),
-                    const Spacer(),
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            Text(dispute.customerName, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.white70)),
-                            const SizedBox(width: 4),
                             const Icon(Icons.person_outline, color: Colors.white38, size: 14),
+                            const SizedBox(width: 4),
+                            Text(dispute.customerName, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.white70)),
                           ],
                         ),
                         Row(
                           children: [
-                            Text(dispute.shopName, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.white70)),
-                            const SizedBox(width: 4),
                             const Icon(Icons.storefront_outlined, color: Colors.white38, size: 14),
+                            const SizedBox(width: 4),
+                            Text(dispute.shopName, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.white70)),
                           ],
                         ),
                       ],
                     ),
+                    const Spacer(),
+                    Text(dispute.submittedAt, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: Colors.white30)),
                   ],
                 ),
                 if (dispute.status == DisputeStatus.underReview) ...[
