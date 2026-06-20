@@ -53,31 +53,31 @@ class _ChatScreenState extends State<ChatScreen> {
                 children: [
                   // Back button (visual RIGHT in RTL)
                   const AppBackButton(),
-                  const SizedBox(width: 12),
-                  // Name + status
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(shop.name,
-                          style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                        const SizedBox(height: 2),
-                        Row(
-                          children: [
-                            Container(width: 7, height: 7,
-                              decoration: const BoxDecoration(color: AppColors.green, shape: BoxShape.circle)),
-                            const SizedBox(width: 5),
-                            Text('متصل الآن',
-                              style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.green)),
-                          ],
-                        ),
-                      ],
-                    ),
+                  const SizedBox(width: 10),
+                  // Name + status (natural width, right-grouped)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(shop.name,
+                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Container(width: 7, height: 7,
+                            decoration: const BoxDecoration(color: AppColors.green, shape: BoxShape.circle)),
+                          const SizedBox(width: 5),
+                          Text('متصل الآن',
+                            style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.green)),
+                        ],
+                      ),
+                    ],
                   ),
-                  // Shop avatar (next to name)
+                  const SizedBox(width: 10),
+                  // Shop avatar (beside name)
                   ShopAvatar(mono: shop.mono, size: 40, fontSize: 15),
-                  const SizedBox(width: 8),
-                  // Phone button (visual LEFT in RTL)
+                  // Spacer pushes phone to FAR LEFT
+                  const Spacer(),
+                  // Phone button (visual FAR LEFT in RTL)
                   Container(
                     width: 38, height: 38,
                     decoration: BoxDecoration(
