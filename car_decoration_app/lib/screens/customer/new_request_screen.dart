@@ -8,27 +8,17 @@ import '../../providers/app_provider.dart';
 class NewRequestScreen extends StatelessWidget {
   const NewRequestScreen({super.key});
 
-  static const _services = [
-    ('تظليل زجاج', Icons.gradient, 'حماية من الأشعة وخصوصية'),
-    ('حماية PPF', Icons.shield_outlined, 'طبقة حماية شفافة للطلاء'),
-    ('تلميع وسيراميك', Icons.auto_fix_high_outlined, 'لمعة واحترافية عالية'),
-    ('تنظيف داخلي وخارجي', Icons.water_drop_outlined, 'غسيل شامل للسيارة'),
-    ('إضاءة LED', Icons.lightbulb_outline, 'تحسين أنظمة الإضاءة'),
-    ('صوتيات وشاشات', Icons.speaker_outlined, 'نظام ترفيهي احترافي'),
-    ('تنجيد جلود', Icons.airline_seat_recline_normal_outlined, 'تجديد المقاعد الجلدية'),
-    ('ملصقات وتصميم', Icons.style_outlined, 'ملصقات خارجية مخصصة'),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<AppProvider>();
-    final vehicle = provider.vehicles.firstWhere((v) => v.isMain, orElse: () => provider.vehicles.first);
+    final vehicles = provider.vehicles;
 
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Column(
           children: [
+            // Header
             Padding(
               padding: const EdgeInsets.fromLTRB(22, 12, 22, 18),
               child: Row(
@@ -42,126 +32,170 @@ class NewRequestScreen extends StatelessWidget {
 
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(22, 0, 22, 100),
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 100),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Vehicle selector
-                    Text('المركبة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: AppColors.goldLight, width: 1.5),
-                        borderRadius: BorderRadius.circular(16),
+
+                    // ── اختر المركبة ──
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(22, 0, 22, 10),
+                      child: Text('اختر المركبة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    ),
+                    SizedBox(
+                      height: 100,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.fromLTRB(22, 0, 22, 0),
+                        itemCount: vehicles.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 10),
+                        itemBuilder: (_, i) {
+                          final v = vehicles[i];
+                          final selected = v.isMain;
+                          return Container(
+                            width: 130,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: selected ? Colors.white : Colors.white,
+                              border: Border.all(
+                                color: selected ? AppColors.dark : AppColors.border,
+                                width: selected ? 2 : 1,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 36, height: 36,
+                                      decoration: BoxDecoration(
+                                        color: selected ? AppColors.dark : AppColors.surface,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(v.mono, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w900, color: selected ? AppColors.goldLight : AppColors.textMuted)),
+                                    ),
+                                    const Spacer(),
+                                    if (selected)
+                                      Container(
+                                        width: 8, height: 8,
+                                        decoration: const BoxDecoration(color: AppColors.dark, shape: BoxShape.circle),
+                                      ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Text('${v.brand} ${v.model}',
+                                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                                  maxLines: 1, overflow: TextOverflow.ellipsis),
+                                Text(v.year.toString(), style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                              ],
+                            ),
+                          );
+                        },
                       ),
+                    ),
+                    const SizedBox(height: 22),
+
+                    // ── وصف الخدمة ──
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(22, 0, 22, 8),
+                      child: Text('وصف الخدمة المطلوبة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(22, 0, 22, 0),
+                      child: Container(
+                        height: 110,
+                        decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(16)),
+                        padding: const EdgeInsets.all(14),
+                        alignment: Alignment.topRight,
+                        child: Text(
+                          'تظليل حراري كامل (٥٠٪ جوانب + ٧٠٪ أمامي) مع تركيب فيلم حماية شفاف على الواجهة الأمامية.',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary, height: 1.6),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 22),
+
+                    // ── صور توضيحية ──
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(22, 0, 22, 10),
+                      child: Text('صور توضيحية', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(22, 0, 22, 0),
                       child: Row(
                         children: [
-                          Container(
-                            width: 44, height: 44,
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(colors: [Color(0xFF1B1A14), Color(0xFF2E2917)]),
-                              borderRadius: BorderRadius.circular(12),
+                          // Add photo button
+                          GestureDetector(
+                            onTap: () {},
+                            child: Container(
+                              width: 90, height: 90,
+                              decoration: BoxDecoration(
+                                color: AppColors.goldBg,
+                                border: Border.all(color: AppColors.goldLight, width: 1.5, style: BorderStyle.solid),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: const Icon(Icons.add, color: AppColors.goldText, size: 28),
                             ),
-                            alignment: Alignment.center,
-                            child: Text(vehicle.mono, style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.goldLight)),
                           ),
-                          const SizedBox(width: 12),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('${vehicle.brand} ${vehicle.model} ${vehicle.year}',
-                                style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                              Text(vehicle.color, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
-                            ],
-                          ),
-                          const Spacer(),
-                          const Icon(Icons.keyboard_arrow_down, color: AppColors.textMuted),
+                          const SizedBox(width: 10),
+                          // Placeholder slots
+                          _PhotoPlaceholder(),
+                          const SizedBox(width: 10),
+                          _PhotoPlaceholder(),
                         ],
                       ),
                     ),
                     const SizedBox(height: 22),
 
-                    // Service type
-                    Text('نوع الخدمة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                    const SizedBox(height: 10),
-                    GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2, mainAxisSpacing: 10, crossAxisSpacing: 10, childAspectRatio: 2.4,
-                      ),
-                      itemCount: _services.length,
-                      itemBuilder: (_, i) {
-                        final (name, icon, sub) = _services[i];
-                        final selected = i == 0;
-                        return GestureDetector(
-                          onTap: () {},
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                            decoration: BoxDecoration(
-                              color: selected ? AppColors.goldBg : Colors.white,
-                              border: Border.all(color: selected ? AppColors.goldLight : AppColors.border, width: selected ? 1.5 : 1),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(icon, color: selected ? AppColors.goldText : AppColors.textMuted, size: 20),
-                                const SizedBox(width: 8),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: selected ? AppColors.goldText : AppColors.textPrimary)),
-                                    Text(sub, style: TextStyle(fontFamily: 'Tajawal', fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
-                                  ],
-                                ),
-                                const Spacer(),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 22),
-
-                    // Notes
-                    Text('ملاحظات إضافية', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                    const SizedBox(height: 8),
-                    Container(
-                      height: 100,
-                      decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(14)),
-                      padding: const EdgeInsets.all(14),
-                      alignment: Alignment.topRight,
-                      child: Text(
-                        'أريد تظليل النوافذ الجانبية والخلفية فقط مع الحفاظ على الزجاج الأمامي شفافاً...',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textMuted),
-                      ),
-                    ),
-                    const SizedBox(height: 22),
-
-                    // Location
-                    Text('موقع الخدمة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(14)),
+                    // ── التاريخ والوقت ──
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(22, 0, 22, 0),
                       child: Row(
                         children: [
-                          Container(
-                            width: 38, height: 38,
-                            decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(10)),
-                            child: const Icon(Icons.location_on_outlined, color: AppColors.goldText, size: 20),
-                          ),
-                          const SizedBox(width: 10),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('العليا، الرياض', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                                Text('طريق الملك فهد، مبنى الأعمال', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
+                                Text('التاريخ المفضّل', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                const SizedBox(height: 8),
+                                Container(
+                                  height: 50,
+                                  decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(14)),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: Row(
+                                    children: [
+                                      Text('٢٢ يونيو', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                                      const Spacer(),
+                                      const Icon(Icons.calendar_today_outlined, color: AppColors.goldText, size: 18),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('الوقت المفضّل', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                const SizedBox(height: 8),
+                                Container(
+                                  height: 50,
+                                  decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(14)),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: Row(
+                                    children: [
+                                      Text('٤:٠٠ م', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                                      const Spacer(),
+                                      const Icon(Icons.access_time_outlined, color: AppColors.goldText, size: 18),
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -170,47 +204,80 @@ class NewRequestScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 22),
 
-                    // Service mode
-                    Text('طريقة الخدمة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              border: Border.all(color: AppColors.border),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Column(
-                              children: [
-                                const Icon(Icons.storefront_outlined, color: AppColors.textSecondary, size: 22),
-                                const SizedBox(height: 5),
-                                Text('في المركز', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
-                              ],
-                            ),
-                          ),
+                    // ── موقع تنفيذ الخدمة ──
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(22, 0, 22, 10),
+                      child: Text('موقع تنفيذ الخدمة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(22, 0, 22, 0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: AppColors.border),
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            decoration: BoxDecoration(
-                              color: AppColors.goldBg,
-                              border: Border.all(color: AppColors.goldLight, width: 1.5),
-                              borderRadius: BorderRadius.circular(14),
+                        clipBehavior: Clip.hardEdge,
+                        child: Column(
+                          children: [
+                            // Mock map
+                            Container(
+                              height: 140,
+                              color: const Color(0xFFF5F0E8),
+                              child: Stack(
+                                children: [
+                                  // Grid lines
+                                  CustomPaint(painter: _MapGridPainter(), size: Size.infinite),
+                                  // Pin
+                                  const Center(
+                                    child: Icon(Icons.location_on, color: AppColors.goldText, size: 38),
+                                  ),
+                                ],
+                              ),
                             ),
-                            child: Column(
-                              children: [
-                                const Icon(Icons.home_outlined, color: AppColors.goldText, size: 22),
-                                const SizedBox(height: 5),
-                                Text('خدمة منزلية', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.goldText)),
-                              ],
+                            // Address
+                            Padding(
+                              padding: const EdgeInsets.all(14),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text('المنزل – حي الياسمين', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                        const SizedBox(height: 2),
+                                        Text('طريق الأمير محمد بن سلمان، الرياض', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
+                                      ],
+                                    ),
+                                  ),
+                                  const Icon(Icons.home_outlined, color: AppColors.goldText, size: 22),
+                                ],
+                              ),
                             ),
-                          ),
+                          ],
                         ),
-                      ],
+                      ),
+                    ),
+                    const SizedBox(height: 22),
+
+                    // ── ملاحظات إضافية ──
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(22, 0, 22, 8),
+                      child: Text('ملاحظات إضافية', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(22, 0, 22, 0),
+                      child: Container(
+                        height: 95,
+                        decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(16)),
+                        padding: const EdgeInsets.all(14),
+                        alignment: Alignment.topRight,
+                        child: Text(
+                          'يفضّل التنفيذ في المرآب المغطى. السيارة متوفرة طوال اليوم.',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary, height: 1.6),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -221,15 +288,59 @@ class NewRequestScreen extends StatelessWidget {
       ),
       bottomNavigationBar: Container(
         padding: EdgeInsets.fromLTRB(22, 14, 22, MediaQuery.of(context).padding.bottom + 14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: AppColors.border)),
-        ),
+        decoration: BoxDecoration(color: Colors.white, border: Border(top: BorderSide(color: AppColors.border))),
         child: DarkButton(
-          label: 'التالي: اختيار المتاجر',
+          label: 'التالي · اختيار المتاجر',
           onTap: () => Navigator.pushNamed(context, '/customer/requests/shop-select'),
         ),
       ),
     );
   }
+}
+
+class _PhotoPlaceholder extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 90, height: 90,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(14),
+      color: const Color(0xFFE8E3D8),
+    ),
+    clipBehavior: Clip.hardEdge,
+    child: CustomPaint(painter: _DiagonalStripePainter()),
+  );
+}
+
+class _DiagonalStripePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFFD4CFC4)
+      ..strokeWidth = 8;
+    for (double i = -size.height; i < size.width + size.height; i += 16) {
+      canvas.drawLine(Offset(i, 0), Offset(i + size.height, size.height), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DiagonalStripePainter old) => false;
+}
+
+class _MapGridPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFFDDD8CC)
+      ..strokeWidth = 1;
+    const step = 28.0;
+    for (double x = 0; x < size.width; x += step) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+    for (double y = 0; y < size.height; y += step) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_MapGridPainter old) => false;
 }
