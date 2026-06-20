@@ -155,13 +155,12 @@ class _DisputeCard extends StatelessWidget {
                         child: Container(
                           height: 40,
                           decoration: BoxDecoration(
-                            color: AppColors.goldText.withOpacity(.14),
-                            border: Border.all(color: AppColors.goldLight.withOpacity(.25)),
+                            gradient: const LinearGradient(colors: [AppColors.goldLight, AppColors.gold]),
                             borderRadius: BorderRadius.circular(11),
                           ),
                           alignment: Alignment.center,
                           child: Text('اتخاذ قرار',
-                            style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.goldText)),
+                            style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.dark)),
                         ),
                       ),
                     ),
