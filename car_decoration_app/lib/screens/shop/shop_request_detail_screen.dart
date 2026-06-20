@@ -34,7 +34,7 @@ class ShopRequestDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(22, 14, 22, 16),
               child: Row(
                 children: [
-                  const SizedBox(width: 40),
+                  const AppBackButton(),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -49,7 +49,7 @@ class ShopRequestDetailScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const AppBackButton(),
+                  const SizedBox(width: 40),
                 ],
               ),
             ),
