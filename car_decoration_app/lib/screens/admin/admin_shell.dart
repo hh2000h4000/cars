@@ -37,10 +37,10 @@ class _AdminShellState extends State<AdminShell> {
             height: 58,
             child: Row(
               children: [
-                _DarkNavItem(Icons.more_horiz, Icons.more_horiz, 'المزيد', _index == 3, () => setState(() => _index = 3)),
-                _DarkNavItem(Icons.gavel_outlined, Icons.gavel_rounded, 'النزاعات', _index == 2, () => setState(() => _index = 2)),
-                _DarkNavItem(Icons.storefront_outlined, Icons.storefront_rounded, 'المتاجر', _index == 1, () => setState(() => _index = 1)),
                 _DarkNavItem(Icons.dashboard_outlined, Icons.dashboard_rounded, 'الرئيسية', _index == 0, () => setState(() => _index = 0)),
+                _DarkNavItem(Icons.storefront_outlined, Icons.storefront_rounded, 'المتاجر', _index == 1, () => setState(() => _index = 1)),
+                _DarkNavItem(Icons.gavel_outlined, Icons.gavel_rounded, 'النزاعات', _index == 2, () => setState(() => _index = 2)),
+                _DarkNavItem(Icons.more_horiz, Icons.more_horiz, 'المزيد', _index == 3, () => setState(() => _index = 3)),
               ],
             ),
           ),
