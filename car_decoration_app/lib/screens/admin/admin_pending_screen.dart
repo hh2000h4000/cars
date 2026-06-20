@@ -97,13 +97,22 @@ class _ShopCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // ── Top: name + logo placeholder ──
+          // ── Top: logo + name + time ──
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // RIGHT: name + owner · city
+                // RIGHT: logo placeholder (before name in RTL)
+                Container(
+                  width: 46, height: 46,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(.07),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // name + owner · city
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,23 +125,9 @@ class _ShopCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 10),
-                // LEFT: image placeholder + time
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Container(
-                      width: 46, height: 46,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(.07),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(shop.submittedAt,
-                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w600, color: Colors.white30)),
-                  ],
-                ),
+                // LEFT: time
+                Text(shop.submittedAt,
+                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w600, color: Colors.white30)),
               ],
             ),
           ),
