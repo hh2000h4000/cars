@@ -6,93 +6,77 @@ import '../../widgets/widgets.dart';
 import '../../providers/app_provider.dart';
 import '../../models/models.dart';
 
-class ShopRequestsScreen extends StatelessWidget {
+class ShopRequestsScreen extends StatefulWidget {
   const ShopRequestsScreen({super.key});
 
   @override
+  State<ShopRequestsScreen> createState() => _ShopRequestsScreenState();
+}
+
+class _ShopRequestsScreenState extends State<ShopRequestsScreen> {
+  int _tab = 0;
+
+  @override
   Widget build(BuildContext context) {
-    final requests = context.watch<AppProvider>().requests;
+    final provider = context.watch<AppProvider>();
+    final inbox = provider.shopInbox;
+    final newCount = inbox.length;
+
+    final tabs = ['جديدة ($newCount)', 'بانتظار العميل', 'قيد التنفيذ'];
 
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ── Header ──
             Padding(
-              padding: const EdgeInsets.fromLTRB(22, 14, 22, 16),
-              child: Row(
-                children: [
-                  const Spacer(),
-                  Text('الطلبات', style: TextStyle(fontFamily: 'Tajawal', fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
-                ],
-              ),
+              padding: const EdgeInsets.fromLTRB(22, 18, 22, 16),
+              child: Text('الطلبات الواردة',
+                style: TextStyle(fontFamily: 'Tajawal', fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
             ),
 
-            // Filter tabs
+            // ── Filter tabs ──
             SizedBox(
-              height: 38,
-              child: ListView(
+              height: 40,
+              child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 22),
-                children: [
-                  _FilterTab('الكل', true),
-                  _FilterTab('جديدة', false),
-                  _FilterTab('قيد التنفيذ', false),
-                  _FilterTab('مكتملة', false),
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
-
-            Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.fromLTRB(22, 0, 22, 24),
-                itemCount: requests.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemCount: tabs.length,
                 itemBuilder: (_, i) {
-                  final req = requests[i];
+                  final active = _tab == i;
                   return GestureDetector(
-                    onTap: () => Navigator.pushNamed(context, '/shop/request-detail', arguments: req.id),
-                    child: Container(
-                      padding: const EdgeInsets.all(15),
+                    onTap: () => setState(() => _tab = i),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      margin: EdgeInsets.only(left: i < tabs.length - 1 ? 8 : 0),
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: AppColors.border),
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: [BoxShadow(color: AppColors.dark.withOpacity(.04), blurRadius: 12, offset: const Offset(0, 4))],
+                        color: active ? AppColors.dark : Colors.white,
+                        border: Border.all(color: active ? AppColors.dark : AppColors.border),
+                        borderRadius: BorderRadius.circular(999),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              StatusBadge(label: req.status.label, type: req.status.colorType),
-                              const Spacer(),
-                              Text('طلب #${req.id}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          Text(req.serviceType, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                          const SizedBox(height: 3),
-                          Text('${req.vehicleBrand} ${req.vehicleModel} ${req.vehicleYear}',
-                            style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              const Icon(Icons.access_time, color: AppColors.textMuted, size: 12),
-                              const SizedBox(width: 4),
-                              Text(req.dateLabel, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
-                              const Spacer(),
-                              Text('عرض التفاصيل', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.goldText)),
-                              const Icon(Icons.chevron_right, color: AppColors.goldText, size: 16),
-                            ],
-                          ),
-                        ],
-                      ),
+                      child: Text(tabs[i],
+                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700,
+                          color: active ? Colors.white : AppColors.textSecondary)),
                     ),
                   );
                 },
               ),
+            ),
+            const SizedBox(height: 14),
+
+            // ── Content ──
+            Expanded(
+              child: _tab == 0
+                  ? ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(22, 0, 22, 32),
+                      itemCount: inbox.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (_, i) => _RequestCard(item: inbox[i]),
+                    )
+                  : _EmptyTab(),
             ),
           ],
         ),
@@ -101,20 +85,153 @@ class ShopRequestsScreen extends StatelessWidget {
   }
 }
 
-class _FilterTab extends StatelessWidget {
-  final String label;
-  final bool active;
-  const _FilterTab(this.label, this.active);
+// ── Request card ──────────────────────────────────────────────────────────────
+class _RequestCard extends StatelessWidget {
+  final ShopInboxItem item;
+  const _RequestCard({required this.item});
 
   @override
   Widget build(BuildContext context) => Container(
-    margin: const EdgeInsets.only(left: 8),
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     decoration: BoxDecoration(
-      color: active ? AppColors.dark : Colors.white,
-      border: Border.all(color: active ? AppColors.dark : AppColors.border),
-      borderRadius: BorderRadius.circular(999),
+      color: Colors.white,
+      border: Border.all(color: AppColors.border),
+      borderRadius: BorderRadius.circular(18),
     ),
-    child: Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: active ? Colors.white : AppColors.textSecondary)),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Customer row
+              Row(
+                children: [
+                  // Avatar (visual RIGHT)
+                  Container(
+                    width: 46, height: 46,
+                    decoration: BoxDecoration(color: AppColors.dark, borderRadius: BorderRadius.circular(14)),
+                    alignment: Alignment.center,
+                    child: Text(item.mono,
+                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 17, fontWeight: FontWeight.w900, color: AppColors.goldLight)),
+                  ),
+                  const SizedBox(width: 10),
+                  // Name + area/distance/time
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(item.customerName,
+                          style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                        const SizedBox(height: 2),
+                        Text('${item.area} · ${item.distance} · ${item.timeAgo}',
+                          style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                      ],
+                    ),
+                  ),
+                  // Badge (visual LEFT)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AppColors.goldBg,
+                      border: Border.all(color: AppColors.goldLight),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text('جديد',
+                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.goldText)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              // Service type
+              Text(item.serviceType,
+                style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+              const SizedBox(height: 5),
+
+              // Vehicle with icon
+              Row(
+                children: [
+                  const Icon(Icons.directions_car_outlined, color: AppColors.textMuted, size: 14),
+                  const SizedBox(width: 4),
+                  Text(item.vehicleInfo,
+                    style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                ],
+              ),
+            ],
+          ),
+        ),
+
+        // Divider
+        const Divider(height: 1, color: AppColors.border),
+
+        // Buttons
+        Padding(
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+          child: Row(
+            children: [
+              // View details (visual RIGHT)
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => Navigator.pushNamed(context, '/shop/request-detail', arguments: item.requestId),
+                  child: Container(
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: AppColors.border),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text('عرض التفاصيل',
+                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              // Send quote (visual LEFT)
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => Navigator.pushNamed(context, '/shop/send-quote', arguments: item.requestId),
+                  child: Container(
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: AppColors.dark,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text('إرسال عرض',
+                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+class _EmptyTab extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          width: 68, height: 68,
+          decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(20)),
+          child: const Icon(Icons.inbox_outlined, color: AppColors.goldText, size: 32),
+        ),
+        const SizedBox(height: 14),
+        Text('لا توجد طلبات',
+          style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+        const SizedBox(height: 6),
+        Text('ستظهر هنا الطلبات عند وصولها',
+          style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
+      ],
+    ),
   );
 }
