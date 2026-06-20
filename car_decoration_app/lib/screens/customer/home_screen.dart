@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../../data/mock_data.dart';
+import 'dart:math' as math;
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -218,15 +219,33 @@ class HomeScreen extends StatelessWidget {
                       child: Column(
                         children: [
                           // Cover
-                          Container(
+                          SizedBox(
                             height: 96,
-                            decoration: const BoxDecoration(
-                              gradient: LinearGradient(colors: [Color(0xFF23211A), Color(0xFF3A3320)]),
-                            ),
                             child: Stack(
+                              fit: StackFit.expand,
                               children: [
+                                // Dark gradient background
+                                Container(
+                                  decoration: const BoxDecoration(
+                                    gradient: LinearGradient(colors: [Color(0xFF1E1C15), Color(0xFF35300A)]),
+                                  ),
+                                ),
+                                // Golden diagonal lines pattern
+                                CustomPaint(painter: _GoldenLinesPainter()),
+                                // Radial glow top-right
                                 Positioned(
-                                  bottom: 8, right: 12,
+                                  top: -30, right: -20,
+                                  child: Container(
+                                    width: 120, height: 120,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: RadialGradient(colors: [AppColors.goldLight.withOpacity(.18), Colors.transparent]),
+                                    ),
+                                  ),
+                                ),
+                                // Distance badge — bottom left
+                                Positioned(
+                                  bottom: 8, left: 12,
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                     decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(999)),
@@ -320,4 +339,28 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+class _GoldenLinesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFFD4B96A).withOpacity(0.13)
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
+
+    const spacing = 20.0;
+    final count = (size.width + size.height) ~/ spacing + 2;
+    for (int i = 0; i < count; i++) {
+      final x = i * spacing - size.height;
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x + size.height * math.tan(math.pi / 4), size.height),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_GoldenLinesPainter oldDelegate) => false;
 }
