@@ -6,120 +6,253 @@ import '../../widgets/widgets.dart';
 import '../../providers/app_provider.dart';
 import '../../models/vehicle.dart';
 
-class AddVehicleScreen extends StatelessWidget {
+class AddVehicleScreen extends StatefulWidget {
   const AddVehicleScreen({super.key});
 
+  @override
+  State<AddVehicleScreen> createState() => _AddVehicleScreenState();
+}
+
+class _AddVehicleScreenState extends State<AddVehicleScreen> {
   static const _brands = ['تويوتا', 'لكزس', 'مرسيدس', 'BMW', 'نيسان', 'هوندا', 'كيا', 'هيونداي'];
-  static const _colors = ['أبيض', 'أسود', 'رمادي', 'أزرق', 'أحمر', 'فضي', 'ذهبي', 'بيج'];
+  static const _models = ['لاند كروزر', 'كامري', 'كورولا', 'برادو', 'يارس', 'هايلكس'];
+  static const _years = ['2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017'];
+  static const _colors = [
+    ('أبيض لؤلؤي', Color(0xFFF5F0E8)),
+    ('أسود', Color(0xFF1A1A1A)),
+    ('رمادي', Color(0xFF9E9E9E)),
+    ('أزرق', Color(0xFF1565C0)),
+    ('أحمر', Color(0xFFC62828)),
+    ('فضي', Color(0xFFBDBDBD)),
+    ('ذهبي', Color(0xFFD4A017)),
+    ('بيج', Color(0xFFD7C9A7)),
+  ];
+
+  String _brand = 'تويوتا';
+  String _model = 'لاند كروزر';
+  String _year = '2023';
+  int _colorIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(22, 8, 22, 40),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Row(
-                  children: [
-                    Text('إضافة مركبة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                    const Spacer(),
-                    const AppBackButton(),
-                  ],
-                ),
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22, 12, 22, 18),
+              child: Row(
+                children: [
+                  Text('إضافة مركبة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                  const Spacer(),
+                  const AppBackButton(),
+                ],
               ),
+            ),
 
-              // Vehicle preview card
-              Container(
-                width: double.infinity,
-                height: 120,
-                margin: const EdgeInsets.only(bottom: 24),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFF1B1A14), Color(0xFF2E2917)]),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Stack(
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(22, 0, 22, 40),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Positioned(
-                      top: -30, right: -20,
-                      child: Container(
-                        width: 160, height: 160,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(colors: [AppColors.goldLight.withOpacity(.2), Colors.transparent]),
+
+                    // ── الماركة + الموديل ──
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _Label('الماركة'),
+                              _DropdownField(
+                                value: _brand,
+                                items: _brands,
+                                onChanged: (v) => setState(() => _brand = v!),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _Label('الموديل'),
+                              _DropdownField(
+                                value: _model,
+                                items: _models,
+                                onChanged: (v) => setState(() => _model = v!),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    const Center(
-                      child: Icon(Icons.directions_car_outlined, color: Colors.white10, size: 80),
+                    const SizedBox(height: 14),
+
+                    // ── سنة الصنع + اللون ──
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _Label('سنة الصنع'),
+                              _DropdownField(
+                                value: _year,
+                                items: _years,
+                                onChanged: (v) => setState(() => _year = v!),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _Label('اللون'),
+                              GestureDetector(
+                                onTap: () => _showColorPicker(context),
+                                child: Container(
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(color: AppColors.border),
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: Row(
+                                    children: [
+                                      Text(_colors[_colorIndex].$1,
+                                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                                      const Spacer(),
+                                      Container(
+                                        width: 20, height: 20,
+                                        decoration: BoxDecoration(
+                                          color: _colors[_colorIndex].$2,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(color: AppColors.border),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    Positioned(
-                      bottom: 14, right: 18,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('اسم المركبة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white54)),
-                          Text('السنة · اللون', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.goldMuted.withOpacity(.5))),
-                        ],
+                    const SizedBox(height: 14),
+
+                    // ── رقم اللوحة ──
+                    _Label('رقم اللوحة (اختياري)'),
+                    Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: AppColors.border),
+                        borderRadius: BorderRadius.circular(14),
                       ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      alignment: Alignment.centerRight,
+                      child: Text('ر ب ح ٤٨٢١',
+                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                    ),
+                    const SizedBox(height: 22),
+
+                    // ── صور المركبة ──
+                    _Label('صور المركبة'),
+                    const SizedBox(height: 4),
+                    GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: 3,
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                      childAspectRatio: 1,
+                      children: [
+                        _PhotoSlot(label: 'أمامية', isAdd: false),
+                        _PhotoSlot(label: 'خلفية', isAdd: false),
+                        _PhotoSlot(label: 'جانبية', isAdd: false),
+                        _PhotoSlot(label: 'داخلية', isAdd: false),
+                        _PhotoSlot(label: 'إضافية', isAdd: true),
+                      ],
+                    ),
+                    const SizedBox(height: 28),
+
+                    DarkButton(
+                      label: 'حفظ المركبة',
+                      onTap: () {
+                        context.read<AppProvider>().addVehicle(Vehicle(
+                          id: 'v${DateTime.now().millisecondsSinceEpoch}',
+                          brand: _brand,
+                          model: _model,
+                          year: int.parse(_year),
+                          color: _colors[_colorIndex].$1,
+                          mono: _brand[0],
+                          isMain: false,
+                        ));
+                        Navigator.pop(context);
+                      },
                     ),
                   ],
                 ),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-              _Label('الماركة'),
-              _DropdownBox(hint: 'اختر الماركة', items: _brands),
-              const SizedBox(height: 14),
-
-              _Label('الموديل'),
-              _FieldBox('مثال: لاند كروزر'),
-              const SizedBox(height: 14),
-
-              _Label('سنة الصنع'),
-              _DropdownBox(hint: 'اختر السنة', items: List.generate(10, (i) => '${2024 - i}')),
-              const SizedBox(height: 14),
-
-              _Label('اللون'),
-              SizedBox(
-                height: 44,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: _colors.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 8),
-                  itemBuilder: (_, i) => Container(
+  void _showColorPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.all(22),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('اختر اللون', style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 10, runSpacing: 10,
+              children: List.generate(_colors.length, (i) {
+                final (name, color) = _colors[i];
+                return GestureDetector(
+                  onTap: () {
+                    setState(() => _colorIndex = i);
+                    Navigator.pop(context);
+                  },
+                  child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
-                      color: i == 0 ? AppColors.goldBg : Colors.white,
-                      border: Border.all(color: i == 0 ? AppColors.goldLight : AppColors.border),
-                      borderRadius: BorderRadius.circular(11),
+                      color: _colorIndex == i ? AppColors.goldBg : AppColors.surface,
+                      border: Border.all(color: _colorIndex == i ? AppColors.goldLight : AppColors.border),
+                      borderRadius: BorderRadius.circular(999),
                     ),
-                    child: Text(_colors[i], style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: i == 0 ? AppColors.goldText : AppColors.textSecondary)),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(width: 14, height: 14, decoration: BoxDecoration(color: color, shape: BoxShape.circle, border: Border.all(color: AppColors.border))),
+                        const SizedBox(width: 7),
+                        Text(name, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                      ],
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 14),
-
-              _Label('رقم اللوحة (اختياري)'),
-              _FieldBox('أ ب ج 1234'),
-              const SizedBox(height: 28),
-
-              DarkButton(
-                label: 'إضافة المركبة',
-                onTap: () {
-                  context.read<AppProvider>().addVehicle(Vehicle(
-                    id: 'v${DateTime.now().millisecondsSinceEpoch}',
-                    brand: 'تويوتا', model: 'موديل جديد', year: 2024,
-                    color: 'أبيض', mono: 'ت', isMain: false,
-                  ));
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
+                );
+              }),
+            ),
+            const SizedBox(height: 10),
+          ],
         ),
       ),
     );
@@ -136,33 +269,58 @@ class _Label extends StatelessWidget {
   );
 }
 
-class _FieldBox extends StatelessWidget {
-  final String hint;
-  const _FieldBox(this.hint);
+class _DropdownField extends StatelessWidget {
+  final String value;
+  final List<String> items;
+  final ValueChanged<String?> onChanged;
+  const _DropdownField({required this.value, required this.items, required this.onChanged});
+
   @override
   Widget build(BuildContext context) => Container(
     height: 50,
     decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(14)),
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    alignment: Alignment.centerRight,
-    child: Text(hint, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+    padding: const EdgeInsets.symmetric(horizontal: 12),
+    child: DropdownButtonHideUnderline(
+      child: DropdownButton<String>(
+        value: value,
+        isExpanded: true,
+        icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.textMuted, size: 20),
+        style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF1A1916)),
+        items: items.map((e) => DropdownMenuItem(value: e, child: Text(e, textAlign: TextAlign.right))).toList(),
+        onChanged: onChanged,
+      ),
+    ),
   );
 }
 
-class _DropdownBox extends StatelessWidget {
-  final String hint;
-  final List<String> items;
-  const _DropdownBox({required this.hint, required this.items});
+class _PhotoSlot extends StatelessWidget {
+  final String label;
+  final bool isAdd;
+  const _PhotoSlot({required this.label, required this.isAdd});
+
   @override
   Widget build(BuildContext context) => Container(
-    height: 50,
-    decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(14)),
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    child: Row(
+    decoration: BoxDecoration(
+      color: isAdd ? AppColors.goldBg : const Color(0xFFEDE8DE),
+      border: Border.all(
+        color: isAdd ? AppColors.goldLight : Colors.transparent,
+        width: isAdd ? 1.5 : 0,
+        style: isAdd ? BorderStyle.solid : BorderStyle.none,
+      ),
+      borderRadius: BorderRadius.circular(14),
+    ),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(hint, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
-        const Spacer(),
-        const Icon(Icons.keyboard_arrow_down, color: AppColors.textMuted, size: 20),
+        isAdd
+            ? const Icon(Icons.add, color: AppColors.goldText, size: 28)
+            : Icon(Icons.photo_camera_outlined, color: Colors.brown.withOpacity(.35), size: 24),
+        const SizedBox(height: 6),
+        Text(label,
+          style: TextStyle(
+            fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700,
+            color: isAdd ? AppColors.goldText : Colors.brown.withOpacity(.45),
+          )),
       ],
     ),
   );
