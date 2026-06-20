@@ -43,7 +43,7 @@ class NewRequestScreen extends StatelessWidget {
                       child: Text('اختر المركبة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                     ),
                     SizedBox(
-                      height: 100,
+                      height: 108,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.fromLTRB(22, 0, 22, 0),
