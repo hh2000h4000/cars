@@ -23,7 +23,20 @@ class AdminDisputesScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
               child: Row(
                 children: [
-                  // RIGHT: title + open count
+                  // RIGHT: back button
+                  GestureDetector(
+                    onTap: () => Navigator.maybePop(context),
+                    child: Container(
+                      width: 38, height: 38,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(.08),
+                        borderRadius: BorderRadius.circular(11),
+                      ),
+                      child: const Icon(Icons.chevron_right, color: Colors.white70, size: 22),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  // LEFT: title + open count
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -35,18 +48,6 @@ class AdminDisputesScreen extends StatelessWidget {
                     ],
                   ),
                   const Spacer(),
-                  // LEFT: back button
-                  GestureDetector(
-                    onTap: () => Navigator.maybePop(context),
-                    child: Container(
-                      width: 38, height: 38,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(.08),
-                        borderRadius: BorderRadius.circular(11),
-                      ),
-                      child: const Icon(Icons.chevron_left, color: Colors.white70, size: 22),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -99,13 +100,13 @@ class _DisputeCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // TOP: status badge | dispute ID
+                    // TOP: dispute ID | status badge
                     Row(
                       children: [
-                        _StatusBadge(dispute.status, accent),
-                        const Spacer(),
                         Text(dispute.id,
                           style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.white38)),
+                        const Spacer(),
+                        _StatusBadge(dispute.status, accent),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -171,16 +172,16 @@ class _DisputeCard extends StatelessWidget {
           ),
         ),
 
-        // ── Left accent bar ──
+        // ── Right accent bar ──
         Positioned(
-          left: 0, top: 0, bottom: 0,
+          right: 0, top: 0, bottom: 0,
           child: Container(
             width: 4,
             decoration: BoxDecoration(
               color: accent,
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(18),
-                bottomLeft: Radius.circular(18),
+                topRight: Radius.circular(18),
+                bottomRight: Radius.circular(18),
               ),
             ),
           ),

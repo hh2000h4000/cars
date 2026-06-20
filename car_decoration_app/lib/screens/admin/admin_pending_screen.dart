@@ -23,7 +23,20 @@ class AdminPendingScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
               child: Row(
                 children: [
-                  // RIGHT: title (right-aligned in RTL)
+                  // RIGHT: back button
+                  GestureDetector(
+                    onTap: () => Navigator.maybePop(context),
+                    child: Container(
+                      width: 38, height: 38,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(.08),
+                        borderRadius: BorderRadius.circular(11),
+                      ),
+                      child: const Icon(Icons.chevron_right, color: Colors.white70, size: 22),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  // LEFT: title
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -35,18 +48,6 @@ class AdminPendingScreen extends StatelessWidget {
                     ],
                   ),
                   const Spacer(),
-                  // LEFT: back button
-                  GestureDetector(
-                    onTap: () => Navigator.maybePop(context),
-                    child: Container(
-                      width: 38, height: 38,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(.08),
-                        borderRadius: BorderRadius.circular(11),
-                      ),
-                      child: const Icon(Icons.chevron_left, color: Colors.white70, size: 22),
-                    ),
-                  ),
                 ],
               ),
             ),
