@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../theme.dart';
 import 'shop_dashboard_screen.dart';
 import 'shop_requests_screen.dart';
+import 'shop_chats_screen.dart';
+import 'shop_my_store_screen.dart';
 
 class ShopShell extends StatefulWidget {
   const ShopShell({super.key});
@@ -17,6 +19,15 @@ class _ShopShellState extends State<ShopShell> {
   static const _screens = [
     ShopDashboardScreen(),
     ShopRequestsScreen(),
+    ShopChatsScreen(),
+    ShopMyStoreScreen(),
+  ];
+
+  static const _items = [
+    (Icons.dashboard_outlined, Icons.dashboard_rounded, 'لوحتي'),
+    (Icons.list_alt_outlined, Icons.list_alt_rounded, 'الطلبات'),
+    (Icons.chat_bubble_outline_rounded, Icons.chat_bubble_rounded, 'المحادثات'),
+    (Icons.storefront_outlined, Icons.storefront_rounded, 'متجري'),
   ];
 
   @override
@@ -34,45 +45,41 @@ class _ShopShellState extends State<ShopShell> {
           child: SizedBox(
             height: 60,
             child: Row(
-              children: [
-                _NavItem(Icons.list_alt_outlined, Icons.list_alt_rounded, 'الطلبات', _index == 1, () => setState(() => _index = 1)),
-                _NavItem(Icons.home_outlined, Icons.home_rounded, 'الرئيسية', _index == 0, () => setState(() => _index = 0)),
-              ],
+              children: List.generate(_items.length, (i) {
+                final (outIcon, fillIcon, label) = _items[i];
+                final active = _index == i;
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _index = i),
+                    behavior: HitTestBehavior.opaque,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(active ? fillIcon : outIcon,
+                          color: active ? AppColors.dark : AppColors.textMuted, size: 22),
+                        const SizedBox(height: 3),
+                        Text(label,
+                          style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5,
+                            fontWeight: active ? FontWeight.w800 : FontWeight.w600,
+                            color: active ? AppColors.dark : AppColors.textMuted)),
+                        const SizedBox(height: 2),
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: active ? 16 : 0, height: 2.5,
+                          decoration: BoxDecoration(
+                            color: AppColors.goldText,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
             ),
           ),
         ),
       ),
     );
   }
-}
-
-class _NavItem extends StatelessWidget {
-  final IconData outIcon;
-  final IconData fillIcon;
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
-  const _NavItem(this.outIcon, this.fillIcon, this.label, this.active, this.onTap);
-
-  @override
-  Widget build(BuildContext context) => Expanded(
-    child: GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(active ? fillIcon : outIcon, color: active ? AppColors.dark : AppColors.textMuted, size: 22),
-          const SizedBox(height: 3),
-          Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: active ? FontWeight.w800 : FontWeight.w600, color: active ? AppColors.dark : AppColors.textMuted)),
-          const SizedBox(height: 2),
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: active ? 16 : 0, height: 2.5,
-            decoration: BoxDecoration(color: AppColors.goldText, borderRadius: BorderRadius.circular(999)),
-          ),
-        ],
-      ),
-    ),
-  );
 }
