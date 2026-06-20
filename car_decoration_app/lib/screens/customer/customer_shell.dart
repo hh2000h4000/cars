@@ -4,6 +4,7 @@ import '../../theme.dart';
 import 'home_screen.dart';
 import 'requests_screen.dart';
 import 'vehicles_screen.dart';
+import 'chats_screen.dart';
 import 'profile_screen.dart';
 
 class CustomerShell extends StatefulWidget {
@@ -20,13 +21,15 @@ class _CustomerShellState extends State<CustomerShell> {
     HomeScreen(),
     RequestsScreen(),
     VehiclesScreen(),
+    ChatsScreen(),
     ProfileScreen(),
   ];
 
   static const _items = [
     (Icons.home_outlined, Icons.home_rounded, 'الرئيسية'),
     (Icons.list_alt_outlined, Icons.list_alt_rounded, 'طلباتي'),
-    (Icons.directions_car_outlined, Icons.directions_car_rounded, 'مركباتي'),
+    (Icons.directions_car_outlined, Icons.directions_car_rounded, 'سياراتي'),
+    (Icons.chat_bubble_outline_rounded, Icons.chat_bubble_rounded, 'المحادثات'),
     (Icons.person_outline_rounded, Icons.person_rounded, 'حسابي'),
   ];
 
@@ -66,7 +69,7 @@ class _CustomerShellState extends State<CustomerShell> {
                         const SizedBox(height: 3),
                         Text(
                           label,
-                          style: TextStyle(fontFamily: 'Tajawal', 
+                          style: TextStyle(fontFamily: 'Tajawal',
                             fontSize: 10.5,
                             fontWeight: active ? FontWeight.w800 : FontWeight.w600,
                             color: active ? AppColors.dark : AppColors.textMuted,

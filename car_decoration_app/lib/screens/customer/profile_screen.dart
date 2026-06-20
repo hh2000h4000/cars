@@ -1,129 +1,164 @@
 import 'package:flutter/material.dart';
 
 import '../../theme.dart';
+import '../../widgets/widgets.dart';
+import '../../data/mock_data.dart';
+import 'dart:math' as math;
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   static const _menuItems = [
-    (Icons.directions_car_outlined, 'مركباتي', '/customer/vehicles'),
-    (Icons.history_outlined, 'سجل الخدمات', '/customer/requests'),
-    (Icons.favorite_border_outlined, 'المتاجر المفضلة', null),
-    (Icons.notifications_outlined, 'الإشعارات', null),
-    (Icons.location_on_outlined, 'عناويني', null),
-    (Icons.headset_mic_outlined, 'الدعم الفني', null),
-    (Icons.info_outline, 'عن التطبيق', null),
+    (Icons.person_outline, 'المعلومات الشخصية', null),
+    (Icons.directions_car_outlined, 'سياراتي', '/customer/vehicles'),
+    (Icons.list_alt_outlined, 'طلباتي وسجل الطلبات', '/customer/requests'),
+    (Icons.star_outline_rounded, 'تقييماتي', null),
+    (Icons.chat_bubble_outline, 'شكاوي ونزاعاتي', '/customer/complaint'),
+    (Icons.location_on_outlined, 'العناوين المحفوظة', null),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(22, 14, 22, 30),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('الحساب', style: TextStyle(fontFamily: 'Tajawal', fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
-              const SizedBox(height: 20),
-
-              // Profile card
-              Container(
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFF1B1A14), Color(0xFF2E2917)]),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(8)),
-                          child: Text('عميل', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.goldMuted)),
-                        ),
-                        const SizedBox(height: 8),
-                        Text('+966 50 123 4567', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white38)),
-                      ],
-                    ),
-                    const Spacer(),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('عبدالله الحربي', style: TextStyle(fontFamily: 'Tajawal', fontSize: 17, fontWeight: FontWeight.w900, color: Colors.white)),
-                        Text('abdullah@email.com', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w500, color: Colors.white38)),
-                      ],
-                    ),
-                    const SizedBox(width: 14),
-                    Container(
-                      width: 54, height: 54,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(colors: [AppColors.goldLight, AppColors.gold]),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text('ع', style: TextStyle(fontFamily: 'Tajawal', fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.dark)),
-                    ),
-                  ],
-                ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // ── Dark header ──
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(colors: [Color(0xFF1B1A14), Color(0xFF2E2917)]),
               ),
-              const SizedBox(height: 20),
-
-              // Stats row
-              Row(
+              child: Stack(
                 children: [
-                  Expanded(child: _StatCard('٤', 'طلبات مكتملة')),
-                  const SizedBox(width: 10),
-                  Expanded(child: _StatCard('٣', 'مركبات مسجلة')),
-                  const SizedBox(width: 10),
-                  Expanded(child: _StatCard('١٢', 'تقييم مُعطى')),
+                  // Diagonal lines
+                  Positioned.fill(child: CustomPaint(painter: _LinesPainter())),
+                  SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                      child: Column(
+                        children: [
+                          // Avatar + name + edit
+                          Row(
+                            children: [
+                              // Avatar
+                              Container(
+                                width: 56, height: 56,
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(colors: [AppColors.goldLight, AppColors.gold]),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text('ع', style: TextStyle(fontFamily: 'Tajawal', fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.dark)),
+                              ),
+                              const SizedBox(width: 14),
+                              // Name + phone
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('عبدالله الحربي', style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
+                                    const SizedBox(height: 3),
+                                    Text('+966 50 123 4567', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w500, color: Colors.white54)),
+                                  ],
+                                ),
+                              ),
+                              // Edit button
+                              GestureDetector(
+                                onTap: () {},
+                                child: Container(
+                                  width: 40, height: 40,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white12,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.white24),
+                                  ),
+                                  child: const Icon(Icons.edit_outlined, color: Colors.white70, size: 18),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          // Stats
+                          Row(
+                            children: [
+                              _DarkStat('8', 'تقييمات'),
+                              _DarkDivider(),
+                              _DarkStat('2', 'طلبات نشطة'),
+                              _DarkDivider(),
+                              _DarkStat('3', 'مركبات'),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
-              const SizedBox(height: 20),
+            ),
 
-              // Menu
-              Container(
-                decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(18)),
-                child: Column(
-                  children: List.generate(_menuItems.length, (i) {
-                    final (icon, label, route) = _menuItems[i];
-                    return Column(
-                      children: [
-                        if (i > 0) const Divider(height: 1, color: AppColors.border, indent: 16, endIndent: 16),
-                        GestureDetector(
-                          onTap: route != null ? () => Navigator.pushNamed(context, route) : null,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                            child: Row(
-                              children: [
-                                Icon(icon, color: AppColors.goldText, size: 20),
-                                const SizedBox(width: 12),
-                                Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                                const Spacer(),
-                                const Icon(Icons.chevron_right, color: AppColors.textMuted, size: 18),
-                              ],
-                            ),
+            const SizedBox(height: 16),
+
+            // ── Menu ──
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 22),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: AppColors.border),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Column(
+                children: List.generate(_menuItems.length, (i) {
+                  final (icon, label, route) = _menuItems[i];
+                  return Column(
+                    children: [
+                      if (i > 0) const Divider(height: 1, color: AppColors.border, indent: 16, endIndent: 16),
+                      GestureDetector(
+                        onTap: route != null ? () {
+                          if (route == '/customer/complaint') {
+                            Navigator.pushNamed(context, route, arguments: 'req1');
+                          } else {
+                            Navigator.pushNamed(context, route);
+                          }
+                        } : null,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+                          child: Row(
+                            children: [
+                              // Icon box
+                              Container(
+                                width: 36, height: 36,
+                                decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(10)),
+                                child: Icon(icon, color: AppColors.goldText, size: 18),
+                              ),
+                              const SizedBox(width: 14),
+                              Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                              const Spacer(),
+                              const Icon(Icons.chevron_left, color: AppColors.textMuted, size: 20),
+                            ],
                           ),
                         ),
-                      ],
-                    );
-                  }),
-                ),
+                      ),
+                    ],
+                  );
+                }),
               ),
-              const SizedBox(height: 20),
+            ),
 
-              // Logout
-              GestureDetector(
+            const SizedBox(height: 16),
+
+            // ── Logout ──
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22, 0, 22, 40),
+              child: GestureDetector(
                 onTap: () => Navigator.pushNamedAndRemoveUntil(context, '/onboarding', (_) => false),
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  padding: const EdgeInsets.symmetric(vertical: 15),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFF0EE),
-                    border: Border.all(color: AppColors.red.withOpacity(.3)),
+                    color: Colors.white,
+                    border: Border.all(color: AppColors.border),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Row(
@@ -136,29 +171,50 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _StatCard extends StatelessWidget {
+class _DarkStat extends StatelessWidget {
   final String value;
   final String label;
-  const _StatCard(this.value, this.label);
+  const _DarkStat(this.value, this.label);
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(vertical: 14),
-    decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(14)),
+  Widget build(BuildContext context) => Expanded(
     child: Column(
       children: [
-        Text(value, style: TextStyle(fontFamily: 'Tajawal', fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+        Text(value, style: TextStyle(fontFamily: 'Tajawal', fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white)),
         const SizedBox(height: 3),
-        Text(label, textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+        Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white54)),
       ],
     ),
   );
+}
+
+class _DarkDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => Container(width: 1, height: 30, color: Colors.white12);
+}
+
+class _LinesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFFD4B96A).withOpacity(0.09)
+      ..strokeWidth = 1.0;
+    const spacing = 22.0;
+    final count = (size.width + size.height) ~/ spacing + 2;
+    for (int i = 0; i < count; i++) {
+      final x = i * spacing - size.height;
+      canvas.drawLine(Offset(x, 0), Offset(x + size.height * math.tan(math.pi / 4), size.height), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_LinesPainter old) => false;
 }
