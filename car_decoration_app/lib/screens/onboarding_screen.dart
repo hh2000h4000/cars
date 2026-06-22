@@ -142,7 +142,7 @@ class OnboardingScreen extends StatelessWidget {
                     children: [
                       Text('لديك حساب بالفعل؟ ', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                       GestureDetector(
-                        onTap: () => Navigator.pushNamed(context, '/customer/home'),
+                        onTap: () => Navigator.pushNamed(context, '/auth/login'),
                         child: Text('تسجيل الدخول', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.goldText)),
                       ),
                     ],

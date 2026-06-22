@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'theme.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/auth/login_screen.dart';
 import 'screens/auth/customer_register_screen.dart';
 import 'screens/auth/shop_register_screen.dart';
 import 'screens/auth/shop_pending_screen.dart';
@@ -60,6 +61,9 @@ class CarDecorationApp extends StatelessWidget {
     switch (settings.name) {
       case '/onboarding':
         page = const OnboardingScreen();
+        break;
+      case '/auth/login':
+        page = const LoginScreen();
         break;
       case '/auth/customer-register':
         page = const CustomerRegisterScreen();
