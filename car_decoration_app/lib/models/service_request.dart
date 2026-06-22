@@ -47,6 +47,38 @@ class ServiceRequest {
   final String? notes;
   final String? selectedShopName;
 
+  factory ServiceRequest.fromJson(Map<String, dynamic> json) {
+    final v = json['vehicle'] as Map<String, dynamic>?;
+    final statusStr = (json['status'] as String?)?.toLowerCase() ?? 'pending';
+    final RequestStatus status;
+    switch (statusStr) {
+      case 'active': status = RequestStatus.inProgress; break;
+      case 'completed': status = RequestStatus.completed; break;
+      case 'cancelled': status = RequestStatus.cancelled; break;
+      default: status = RequestStatus.pending;
+    }
+    final createdAt = json['createdAt'] as String?;
+    String dateLabel = '';
+    if (createdAt != null) {
+      try {
+        final dt = DateTime.parse(createdAt).toLocal();
+        dateLabel = '${dt.day}/${dt.month}/${dt.year}';
+      } catch (_) {}
+    }
+    return ServiceRequest(
+      id: json['id'] as String,
+      serviceType: json['description'] as String? ?? '',
+      vehicleBrand: v?['brand'] as String? ?? '',
+      vehicleModel: v?['model'] as String? ?? '',
+      vehicleYear: v?['year'] as int? ?? 0,
+      vehicleColor: v?['color'] as String? ?? '',
+      status: status,
+      dateLabel: dateLabel,
+      quotationCount: json['quotationCount'] as int? ?? 0,
+      notes: json['notes'] as String?,
+    );
+  }
+
   const ServiceRequest({
     required this.id,
     required this.serviceType,

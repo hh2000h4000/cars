@@ -26,6 +26,29 @@ class Shop {
   final List<ShopReview> reviews;
   final String? profileImageUrl;
 
+  factory Shop.fromJson(Map<String, dynamic> json) {
+    final name = json['name'] as String? ?? '';
+    return Shop(
+      id: json['id'] as String,
+      name: name,
+      mono: name.isNotEmpty ? name[0] : '؟',
+      area: json['area'] as String? ?? '',
+      city: json['city'] as String? ?? '',
+      address: json['area'] as String? ?? '',
+      description: json['description'] as String? ?? '',
+      rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
+      reviewCount: 0,
+      completedJobs: json['completedJobs'] as int? ?? 0,
+      distance: '',
+      tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? [],
+      services: [],
+      gallery: (json['images'] as List<dynamic>?)?.cast<String>() ?? [],
+      verified: json['isApproved'] as bool? ?? false,
+      reviews: [],
+      profileImageUrl: json['logoUrl'] as String?,
+    );
+  }
+
   const Shop({
     required this.id,
     required this.name,
