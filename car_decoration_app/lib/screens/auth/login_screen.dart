@@ -114,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(22, 18, 22, 28),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -359,7 +359,6 @@ class _LoginScreenState extends State<LoginScreen> {
           controller: _emailController,
           hint: 'أدخل بريدك أو اسم المستخدم',
           keyboardType: TextInputType.emailAddress,
-          textDirection: TextDirection.ltr,
           suffixIcon: const Icon(Icons.alternate_email_rounded, size: 19, color: AppColors.textMuted),
         ),
         const SizedBox(height: 16),
