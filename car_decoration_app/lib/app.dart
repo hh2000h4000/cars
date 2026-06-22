@@ -49,7 +49,7 @@ class CarDecorationApp extends StatelessWidget {
         textDirection: TextDirection.rtl,
         child: child!,
       ),
-      initialRoute: '/onboarding',
+      initialRoute: '/auth/login',
       onGenerateRoute: _generateRoute,
     );
   }

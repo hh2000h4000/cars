@@ -12,7 +12,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  int _tabIndex = 0; // 0 = phone, 1 = email
+  int _tabIndex = 0;
   bool _obscure = true;
   bool _loading = false;
 
@@ -29,8 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _loginWithPhone() async {
-    final phone = _phoneController.text.trim();
-    if (phone.isEmpty) {
+    if (_phoneController.text.trim().isEmpty) {
       _showError('يرجى إدخال رقم الجوال');
       return;
     }
@@ -60,22 +59,20 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         Navigator.pushNamedAndRemoveUntil(context, '/customer/home', (_) => false);
       }
-    } catch (e) {
-      setState(() => _loading = false);
+    } catch (_) {
       if (!mounted) return;
+      setState(() => _loading = false);
       _showError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
     }
   }
 
   void _showError(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg, style: const TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
-        backgroundColor: AppColors.red,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(msg, style: const TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
+      backgroundColor: AppColors.red,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    ));
   }
 
   @override
@@ -84,93 +81,88 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: AppColors.surface,
       body: Stack(
         children: [
-          Column(
-            children: [
-              // ── Hero section ──
-              Container(
-                height: 290,
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFF1B1A14), Color(0xFF2A2618), Color(0xFF15140F)],
+          // ── Dark hero ──
+          Container(
+            height: 300,
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF1B1A14), Color(0xFF2A2618), Color(0xFF15140F)],
+              ),
+            ),
+            child: Stack(
+              children: [
+                Positioned.fill(child: CustomPaint(painter: _GridPainter())),
+                Positioned(
+                  top: -60,
+                  right: -40,
+                  child: Container(
+                    width: 240,
+                    height: 240,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [AppColors.goldLight.withOpacity(.28), Colors.transparent],
+                      ),
+                    ),
                   ),
                 ),
-                child: Stack(
-                  children: [
-                    Positioned.fill(child: CustomPaint(painter: _GridPainter())),
-                    Positioned(
-                      top: -60,
-                      right: -40,
-                      child: Container(
-                        width: 240,
-                        height: 240,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(
-                            colors: [AppColors.goldLight.withOpacity(.28), Colors.transparent],
-                          ),
-                        ),
-                      ),
-                    ),
-                    SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(26, 20, 26, 28),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(22, 18, 22, 28),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        // Top bar: back button LEFT, logo RIGHT
+                        Row(
                           children: [
-                            Row(
-                              children: [
-                                const AppLogoMark(size: 46),
-                                const SizedBox(width: 10),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('تزيين', style: TextStyle(fontFamily: 'Tajawal', fontSize: 17, fontWeight: FontWeight.w900, color: const Color(0xFFF7F1E2))),
-                                    Text('CAR DECORATION', style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.goldMuted, letterSpacing: 1)),
-                                  ],
+                            GestureDetector(
+                              onTap: () => Navigator.pop(context),
+                              child: Container(
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(.10),
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
-                                const Spacer(),
-                                GestureDetector(
-                                  onTap: () => Navigator.pop(context),
-                                  child: Container(
-                                    width: 36,
-                                    height: 36,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(.08),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: const Icon(Icons.chevron_right, color: Colors.white, size: 20),
-                                  ),
-                                ),
-                              ],
+                                child: const Icon(Icons.chevron_left, color: Colors.white, size: 20),
+                              ),
                             ),
                             const Spacer(),
-                            Text(
-                              'مرحباً بعودتك',
-                              textAlign: TextAlign.right,
-                              style: TextStyle(fontFamily: 'Tajawal', fontSize: 28, fontWeight: FontWeight.w900, color: const Color(0xFFFBF7EC), height: 1.2),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text('تزيين', style: TextStyle(fontFamily: 'Tajawal', fontSize: 17, fontWeight: FontWeight.w900, color: const Color(0xFFF7F1E2))),
+                                Text('CAR DECORATION', style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.goldMuted, letterSpacing: 1)),
+                              ],
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'سجّل دخولك لمتابعة طلباتك والعناية بسيارتك.',
-                              textAlign: TextAlign.right,
-                              style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w600, color: AppColors.goldMuted, height: 1.5),
-                            ),
+                            const SizedBox(width: 10),
+                            const AppLogoMark(size: 46),
                           ],
                         ),
-                      ),
+                        const Spacer(),
+                        Text(
+                          'مرحباً بعودتك',
+                          style: TextStyle(fontFamily: 'Tajawal', fontSize: 32, fontWeight: FontWeight.w900, color: const Color(0xFFFBF7EC), height: 1.2),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'سجّل دخولك لمتابعة طلباتك والعناية بسيارتك.',
+                          style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w600, color: AppColors.goldMuted, height: 1.5),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
 
-          // ── Card overlapping hero ──
+          // ── White card overlapping hero ──
           Positioned(
-            top: 264,
+            top: 272,
             left: 0,
             right: 0,
             bottom: 0,
@@ -193,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     // ── Tab content ──
                     AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 220),
+                      duration: const Duration(milliseconds: 200),
                       child: _tabIndex == 0
                           ? _PhoneTab(controller: _phoneController, key: const ValueKey(0))
                           : _EmailTab(
@@ -214,24 +206,45 @@ class _LoginScreenState extends State<LoginScreen> {
                             alignment: Alignment.center,
                             child: const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5)),
                           )
-                        : DarkButton(
-                            label: 'تسجيل الدخول',
-                            onTap: _tabIndex == 0 ? _loginWithPhone : _loginWithEmail,
-                          ),
+                        : DarkButton(label: 'تسجيل الدخول', onTap: _tabIndex == 0 ? _loginWithPhone : _loginWithEmail),
 
                     const SizedBox(height: 22),
 
-                    // ── Divider ──
-                    _OrDivider(),
-
-                    const SizedBox(height: 18),
+                    // ── Or divider ──
+                    Row(
+                      children: [
+                        Expanded(child: Divider(color: AppColors.border, thickness: 1.2)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text('أو المتابعة عبر', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+                        ),
+                        Expanded(child: Divider(color: AppColors.border, thickness: 1.2)),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
 
                     // ── Social buttons ──
                     Row(
                       children: [
-                        Expanded(child: _SocialButton(label: 'Google', isGoogle: true)),
+                        Expanded(
+                          child: _SocialButton(
+                            label: 'Apple',
+                            child: const Icon(Icons.apple, size: 23, color: AppColors.dark),
+                          ),
+                        ),
                         const SizedBox(width: 12),
-                        Expanded(child: _SocialButton(label: 'Apple')),
+                        Expanded(
+                          child: _SocialButton(
+                            label: 'Google',
+                            child: Container(
+                              width: 22,
+                              height: 22,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(color: const Color(0xFF4285F4), borderRadius: BorderRadius.circular(5)),
+                              child: const Text('G', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w900, color: Colors.white)),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
 
@@ -243,7 +256,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         Text('ليس لديك حساب؟ ', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                         GestureDetector(
-                          onTap: () => Navigator.pushReplacementNamed(context, '/onboarding'),
+                          onTap: () => Navigator.pushNamed(context, '/onboarding'),
                           child: Text('إنشاء حساب جديد', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.goldText)),
                         ),
                       ],
@@ -271,15 +284,12 @@ class _TabSwitcher extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 48,
-      decoration: BoxDecoration(
-        color: AppColors.goldBg,
-        borderRadius: BorderRadius.circular(14),
-      ),
+      decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(14)),
       padding: const EdgeInsets.all(4),
       child: Row(
         children: [
-          _TabItem(label: 'رقم الجوال', active: selected == 0, onTap: () => onChanged(0)),
           _TabItem(label: 'اسم المستخدم / البريد', active: selected == 1, onTap: () => onChanged(1)),
+          _TabItem(label: 'رقم الجوال', active: selected == 0, onTap: () => onChanged(0)),
         ],
       ),
     );
@@ -308,7 +318,7 @@ class _TabItem extends StatelessWidget {
             label,
             style: TextStyle(
               fontFamily: 'Tajawal',
-              fontSize: 13,
+              fontSize: 12.5,
               fontWeight: FontWeight.w700,
               color: active ? Colors.white : AppColors.textSecondary,
             ),
@@ -329,12 +339,9 @@ class _PhoneTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 7),
-          child: Text('رقم الجوال', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-        ),
+        const _FieldLabel('رقم الجوال'),
         Container(
           height: 54,
           decoration: BoxDecoration(
@@ -344,54 +351,57 @@ class _PhoneTab extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                decoration: BoxDecoration(
-                  border: Border(left: BorderSide(color: AppColors.border)),
-                ),
-                child: Row(
-                  children: [
-                    Text('🇸🇦', style: TextStyle(fontSize: 18)),
-                    const SizedBox(width: 5),
-                    Text('+966', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                  ],
-                ),
-              ),
+              // Phone input fills the right side (first child in RTL)
               Expanded(
                 child: TextField(
                   controller: controller,
                   keyboardType: TextInputType.phone,
                   textDirection: TextDirection.ltr,
+                  textAlign: TextAlign.left,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(9)],
                   style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                   decoration: InputDecoration(
                     border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14),
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
                     hintText: '5X XXX XXXX',
                     hintStyle: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textMuted),
                   ),
                 ),
               ),
+              // Country code on the LEFT (second child in RTL row = left side)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                decoration: const BoxDecoration(
+                  border: Border(right: BorderSide(color: AppColors.border)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('🇸🇦', style: TextStyle(fontSize: 18)),
+                    const SizedBox(width: 5),
+                    Text('+966', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: AppColors.goldBg,
-            borderRadius: BorderRadius.circular(12),
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+          decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(12)),
           child: Row(
             children: [
-              Icon(Icons.info_outline_rounded, size: 16, color: AppColors.goldText),
-              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   'سنرسل لك رمز تحقق (OTP) عبر رسالة نصية لتأكيد رقمك.',
                   style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.goldText, height: 1.5),
                 ),
               ),
+              const SizedBox(width: 8),
+              Icon(Icons.info_outline_rounded, size: 16, color: AppColors.goldText),
             ],
           ),
         ),
@@ -416,97 +426,87 @@ class _EmailTab extends StatelessWidget {
     super.key,
   });
 
+  static OutlineInputBorder _border(Color color, {double width = 1.0}) =>
+      OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide(color: color, width: width));
+
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        // Email field
-        Padding(
-          padding: const EdgeInsets.only(bottom: 7),
-          child: Text('البريد الإلكتروني / اسم المستخدم', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-        ),
-        Container(
-          height: 54,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: AppColors.border),
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                child: Icon(Icons.alternate_email_rounded, size: 19, color: AppColors.textMuted),
-              ),
-              Expanded(
-                child: TextField(
-                  controller: emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  textDirection: TextDirection.ltr,
-                  textAlign: TextAlign.left,
-                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'example@email.com',
-                    hintStyle: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w500, color: AppColors.textMuted),
-                  ),
-                ),
-              ),
-            ],
+        // ── Email field ──
+        const _FieldLabel('اسم المستخدم أو البريد الإلكتروني'),
+        TextField(
+          controller: emailController,
+          keyboardType: TextInputType.emailAddress,
+          textDirection: TextDirection.ltr,
+          textAlign: TextAlign.left,
+          style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+            border: _border(AppColors.border),
+            enabledBorder: _border(AppColors.border),
+            focusedBorder: _border(AppColors.dark, width: 1.5),
+            // suffixIcon = LEFT side in RTL
+            suffixIcon: Padding(
+              padding: const EdgeInsets.only(left: 14),
+              child: Icon(Icons.alternate_email_rounded, size: 19, color: AppColors.textMuted),
+            ),
+            suffixIconConstraints: const BoxConstraints(minWidth: 46),
+            hintText: 'أدخل بريدك أو اسم المستخدم',
+            hintStyle: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w500, color: AppColors.textMuted),
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 16),
 
-        // Password field
+        // ── Password label row ──
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('كلمة المرور', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
             GestureDetector(
               onTap: () {},
               child: Text('نسيت كلمة المرور؟', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.goldText)),
             ),
+            const _FieldLabel('كلمة المرور'),
           ],
         ),
         const SizedBox(height: 7),
-        Container(
-          height: 54,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: AppColors.border),
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                child: Icon(Icons.lock_outline_rounded, size: 19, color: AppColors.textMuted),
-              ),
-              Expanded(
-                child: TextField(
-                  controller: passwordController,
-                  obscureText: obscure,
-                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: '••••••••',
-                    hintStyle: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textMuted, letterSpacing: 3),
-                  ),
+
+        // ── Password field ──
+        TextField(
+          controller: passwordController,
+          obscureText: obscure,
+          style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+            border: _border(AppColors.border),
+            enabledBorder: _border(AppColors.border),
+            focusedBorder: _border(AppColors.dark, width: 1.5),
+            // prefixIcon = RIGHT side in RTL (lock icon)
+            prefixIcon: const Padding(
+              padding: EdgeInsets.only(right: 14),
+              child: Icon(Icons.lock_outline_rounded, size: 19, color: AppColors.textMuted),
+            ),
+            prefixIconConstraints: const BoxConstraints(minWidth: 46),
+            // suffixIcon = LEFT side in RTL (eye icon)
+            suffixIcon: GestureDetector(
+              onTap: onToggleObscure,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 14),
+                child: Icon(
+                  obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                  color: AppColors.textMuted,
+                  size: 20,
                 ),
               ),
-              GestureDetector(
-                onTap: onToggleObscure,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  child: Icon(
-                    obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                    color: AppColors.textMuted,
-                    size: 20,
-                  ),
-                ),
-              ),
-            ],
+            ),
+            suffixIconConstraints: const BoxConstraints(minWidth: 46),
+            hintText: '••••••••',
+            hintStyle: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textMuted, letterSpacing: 3),
           ),
         ),
       ],
@@ -515,22 +515,17 @@ class _EmailTab extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────
-// "Or continue via" divider
+// Shared field label
 // ─────────────────────────────────────────────
-class _OrDivider extends StatelessWidget {
+class _FieldLabel extends StatelessWidget {
+  final String text;
+  const _FieldLabel(this.text);
+
   @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(child: Divider(color: AppColors.border, thickness: 1.2)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Text('أو المتابعة عبر', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
-        ),
-        Expanded(child: Divider(color: AppColors.border, thickness: 1.2)),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 7),
+    child: Text(text, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+  );
 }
 
 // ─────────────────────────────────────────────
@@ -538,8 +533,8 @@ class _OrDivider extends StatelessWidget {
 // ─────────────────────────────────────────────
 class _SocialButton extends StatelessWidget {
   final String label;
-  final bool isGoogle;
-  const _SocialButton({required this.label, this.isGoogle = false});
+  final Widget child;
+  const _SocialButton({required this.label, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -555,19 +550,7 @@ class _SocialButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (isGoogle)
-              Container(
-                width: 22,
-                height: 22,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF4285F4),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Text('G', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w900, color: Colors.white)),
-              )
-            else
-              const Icon(Icons.apple, size: 23, color: AppColors.dark),
+            child,
             const SizedBox(width: 8),
             Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
           ],
@@ -578,7 +561,7 @@ class _SocialButton extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────
-// Grid painter (same as onboarding)
+// Grid painter
 // ─────────────────────────────────────────────
 class _GridPainter extends CustomPainter {
   @override
