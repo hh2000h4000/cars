@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../theme.dart';
+import '../../providers/app_provider.dart';
 import 'home_screen.dart';
 import 'requests_screen.dart';
 import 'vehicles_screen.dart';
@@ -16,6 +18,14 @@ class CustomerShell extends StatefulWidget {
 
 class _CustomerShellState extends State<CustomerShell> {
   int _index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AppProvider>().initFromApi();
+    });
+  }
 
   static const _screens = [
     HomeScreen(),

@@ -25,7 +25,8 @@ import 'screens/admin/admin_pending_screen.dart';
 import 'screens/admin/admin_disputes_screen.dart';
 
 class CarDecorationApp extends StatelessWidget {
-  const CarDecorationApp({super.key});
+  final String initialRoute;
+  const CarDecorationApp({super.key, this.initialRoute = '/auth/login'});
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +50,7 @@ class CarDecorationApp extends StatelessWidget {
         textDirection: TextDirection.rtl,
         child: child!,
       ),
-      initialRoute: '/auth/login',
+      initialRoute: initialRoute,
       onGenerateRoute: _generateRoute,
     );
   }

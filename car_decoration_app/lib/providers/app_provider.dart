@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../data/mock_data.dart';
+import '../services/vehicle_service.dart';
+import '../services/request_service.dart';
 
 enum UserType { customer, shop, admin }
 
@@ -162,5 +164,18 @@ class AppProvider extends ChangeNotifier {
   void addVehicle(Vehicle v) {
     vehicles = [...vehicles, v];
     notifyListeners();
+  }
+
+  // ─── API bootstrap ────────────────────────────────────────────
+  Future<void> initFromApi() async {
+    try {
+      final fetchedVehicles = VehicleService.getMyVehicles();
+      final fetchedRequests = RequestService.getMyRequests();
+      vehicles = await fetchedVehicles;
+      requests = await fetchedRequests;
+      notifyListeners();
+    } catch (_) {
+      // Keep mock data on failure
+    }
   }
 }

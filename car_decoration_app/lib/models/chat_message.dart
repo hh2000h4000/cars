@@ -12,4 +12,21 @@ class ChatMessage {
     required this.time,
     this.hasImage = false,
   });
+
+  factory ChatMessage.fromJson(Map<String, dynamic> json, String currentUserId) {
+    final sentAt = json['sentAt'] as String?;
+    String time = '';
+    if (sentAt != null) {
+      try {
+        final dt = DateTime.parse(sentAt).toLocal();
+        time = '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+      } catch (_) {}
+    }
+    return ChatMessage(
+      id: json['id'] as String,
+      isMe: json['senderId'] == currentUserId,
+      text: json['content'] as String? ?? '',
+      time: time,
+    );
+  }
 }

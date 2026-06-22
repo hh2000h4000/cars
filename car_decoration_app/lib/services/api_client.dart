@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -56,4 +57,20 @@ class ApiClient {
   static Future<String?> getRole() => _storage.read(key: 'role');
   static Future<String?> getFullName() => _storage.read(key: 'fullName');
   static Future<String?> getEmail() => _storage.read(key: 'email');
+
+  static Future<String?> getUserId() async {
+    final token = await _storage.read(key: 'token');
+    if (token == null) return null;
+    try {
+      final parts = token.split('.');
+      if (parts.length != 3) return null;
+      final payload = parts[1];
+      final normalized = base64Url.normalize(payload);
+      final decoded = utf8.decode(base64Url.decode(normalized));
+      final map = json.decode(decoded) as Map<String, dynamic>;
+      return map['sub'] as String? ?? map['nameid'] as String?;
+    } catch (_) {
+      return null;
+    }
+  }
 }
