@@ -28,35 +28,34 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  Future<void> _loginWithPhone() async {
-    if (_phoneController.text.trim().isEmpty) {
-      _showError('يرجى إدخال رقم الجوال');
-      return;
-    }
-    setState(() => _loading = true);
-    await Future.delayed(const Duration(milliseconds: 800));
-    setState(() => _loading = false);
-    if (!mounted) return;
-    Navigator.pushNamedAndRemoveUntil(context, '/customer/home', (_) => false);
-  }
-
-  Future<void> _loginWithEmail() async {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text;
-    if (email.isEmpty || password.isEmpty) {
-      _showError('يرجى إدخال البريد الإلكتروني وكلمة المرور');
-      return;
+  Future<void> _login() async {
+    if (_tabIndex == 0) {
+      if (_phoneController.text.trim().isEmpty) {
+        _showError('يرجى إدخال رقم الجوال');
+        return;
+      }
+    } else {
+      if (_emailController.text.trim().isEmpty || _passwordController.text.isEmpty) {
+        _showError('يرجى إدخال البريد الإلكتروني وكلمة المرور');
+        return;
+      }
     }
     setState(() => _loading = true);
     try {
-      final data = await AuthService.login(email, password);
-      if (!mounted) return;
-      final role = data['role'] as String? ?? 'Customer';
-      if (role == 'Admin') {
-        Navigator.pushNamedAndRemoveUntil(context, '/admin/dashboard', (_) => false);
-      } else if (role == 'Shop') {
-        Navigator.pushNamedAndRemoveUntil(context, '/shop/dashboard', (_) => false);
+      if (_tabIndex == 1) {
+        final data = await AuthService.login(_emailController.text.trim(), _passwordController.text);
+        if (!mounted) return;
+        final role = data['role'] as String? ?? 'Customer';
+        if (role == 'Admin') {
+          Navigator.pushNamedAndRemoveUntil(context, '/admin/dashboard', (_) => false);
+        } else if (role == 'Shop') {
+          Navigator.pushNamedAndRemoveUntil(context, '/shop/dashboard', (_) => false);
+        } else {
+          Navigator.pushNamedAndRemoveUntil(context, '/customer/home', (_) => false);
+        }
       } else {
+        await Future.delayed(const Duration(milliseconds: 800));
+        if (!mounted) return;
         Navigator.pushNamedAndRemoveUntil(context, '/customer/home', (_) => false);
       }
     } catch (_) {
@@ -81,88 +80,92 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: AppColors.surface,
       body: Stack(
         children: [
-          // ── Dark hero ──
-          Container(
-            height: 300,
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF1B1A14), Color(0xFF2A2618), Color(0xFF15140F)],
-              ),
-            ),
-            child: Stack(
-              children: [
-                Positioned.fill(child: CustomPaint(painter: _GridPainter())),
-                Positioned(
-                  top: -60,
-                  right: -40,
-                  child: Container(
-                    width: 240,
-                    height: 240,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [AppColors.goldLight.withOpacity(.28), Colors.transparent],
+          // ── Background column (gives Stack intrinsic height) ──
+          Column(
+            children: [
+              Container(
+                height: 310,
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFF1B1A14), Color(0xFF2A2618), Color(0xFF15140F)],
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned.fill(child: CustomPaint(painter: _GridPainter())),
+                    Positioned(
+                      top: -60,
+                      right: -40,
+                      child: Container(
+                        width: 240,
+                        height: 240,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [AppColors.goldLight.withOpacity(.28), Colors.transparent],
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(22, 18, 22, 28),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        // Top bar: back button LEFT, logo RIGHT
-                        Row(
+                    SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(22, 18, 22, 28),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            GestureDetector(
-                              onTap: () => Navigator.pop(context),
-                              child: Container(
-                                width: 36,
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(.10),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: const Icon(Icons.chevron_left, color: Colors.white, size: 20),
-                              ),
-                            ),
-                            const Spacer(),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                            Row(
                               children: [
-                                Text('تزيين', style: TextStyle(fontFamily: 'Tajawal', fontSize: 17, fontWeight: FontWeight.w900, color: const Color(0xFFF7F1E2))),
-                                Text('CAR DECORATION', style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.goldMuted, letterSpacing: 1)),
+                                GestureDetector(
+                                  onTap: () => Navigator.pop(context),
+                                  child: Container(
+                                    width: 36,
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(.10),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Icon(Icons.chevron_left, color: Colors.white, size: 20),
+                                  ),
+                                ),
+                                const Spacer(),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text('تزيين', style: TextStyle(fontFamily: 'Tajawal', fontSize: 17, fontWeight: FontWeight.w900, color: const Color(0xFFF7F1E2))),
+                                    Text('CAR DECORATION', style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.goldMuted, letterSpacing: 1)),
+                                  ],
+                                ),
+                                const SizedBox(width: 10),
+                                const AppLogoMark(size: 46),
                               ],
                             ),
-                            const SizedBox(width: 10),
-                            const AppLogoMark(size: 46),
+                            const Spacer(),
+                            Text(
+                              'مرحباً بعودتك',
+                              style: TextStyle(fontFamily: 'Tajawal', fontSize: 30, fontWeight: FontWeight.w900, color: const Color(0xFFFBF7EC), height: 1.2),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'سجّل دخولك لمتابعة طلباتك والعناية بسيارتك.',
+                              style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w600, color: AppColors.goldMuted, height: 1.5),
+                            ),
                           ],
                         ),
-                        const Spacer(),
-                        Text(
-                          'مرحباً بعودتك',
-                          style: TextStyle(fontFamily: 'Tajawal', fontSize: 32, fontWeight: FontWeight.w900, color: const Color(0xFFFBF7EC), height: 1.2),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'سجّل دخولك لمتابعة طلباتك والعناية بسيارتك.',
-                          style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w600, color: AppColors.goldMuted, height: 1.5),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 28),
+            ],
           ),
 
           // ── White card overlapping hero ──
           Positioned(
-            top: 272,
+            top: 282,
             left: 0,
             right: 0,
             bottom: 0,
@@ -171,31 +174,31 @@ class _LoginScreenState extends State<LoginScreen> {
                 color: AppColors.surface,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
               ),
+              padding: const EdgeInsets.fromLTRB(22, 26, 22, 36),
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(22, 26, 22, 36),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+
                     // ── Tab switcher ──
-                    _TabSwitcher(
-                      selected: _tabIndex,
-                      onChanged: (i) => setState(() => _tabIndex = i),
+                    Container(
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: AppColors.goldBg,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      padding: const EdgeInsets.all(4),
+                      child: Row(
+                        children: [
+                          _buildTab('اسم المستخدم / البريد', 1),
+                          _buildTab('رقم الجوال', 0),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 24),
 
                     // ── Tab content ──
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 200),
-                      child: _tabIndex == 0
-                          ? _PhoneTab(controller: _phoneController, key: const ValueKey(0))
-                          : _EmailTab(
-                              emailController: _emailController,
-                              passwordController: _passwordController,
-                              obscure: _obscure,
-                              onToggleObscure: () => setState(() => _obscure = !_obscure),
-                              key: const ValueKey(1),
-                            ),
-                    ),
+                    if (_tabIndex == 0) _buildPhoneTab() else _buildEmailTab(),
                     const SizedBox(height: 22),
 
                     // ── Login button ──
@@ -206,11 +209,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             alignment: Alignment.center,
                             child: const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5)),
                           )
-                        : DarkButton(label: 'تسجيل الدخول', onTap: _tabIndex == 0 ? _loginWithPhone : _loginWithEmail),
-
+                        : DarkButton(label: 'تسجيل الدخول', onTap: _login),
                     const SizedBox(height: 22),
 
-                    // ── Or divider ──
+                    // ── Divider ──
                     Row(
                       children: [
                         Expanded(child: Divider(color: AppColors.border, thickness: 1.2)),
@@ -226,28 +228,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     // ── Social buttons ──
                     Row(
                       children: [
-                        Expanded(
-                          child: _SocialButton(
-                            label: 'Apple',
-                            child: const Icon(Icons.apple, size: 23, color: AppColors.dark),
-                          ),
-                        ),
+                        Expanded(child: _socialBtn('Apple', const Icon(Icons.apple, size: 23, color: AppColors.dark))),
                         const SizedBox(width: 12),
-                        Expanded(
-                          child: _SocialButton(
-                            label: 'Google',
-                            child: Container(
-                              width: 22,
-                              height: 22,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(color: const Color(0xFF4285F4), borderRadius: BorderRadius.circular(5)),
-                              child: const Text('G', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w900, color: Colors.white)),
-                            ),
-                          ),
-                        ),
+                        Expanded(child: _socialBtn('Google', Container(
+                          width: 22, height: 22,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(color: const Color(0xFF4285F4), borderRadius: BorderRadius.circular(5)),
+                          child: const Text('G', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w900, color: Colors.white)),
+                        ))),
                       ],
                     ),
-
                     const SizedBox(height: 24),
 
                     // ── Register link ──
@@ -270,43 +260,13 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-}
 
-// ─────────────────────────────────────────────
-// Tab Switcher
-// ─────────────────────────────────────────────
-class _TabSwitcher extends StatelessWidget {
-  final int selected;
-  final ValueChanged<int> onChanged;
-  const _TabSwitcher({required this.selected, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 48,
-      decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(14)),
-      padding: const EdgeInsets.all(4),
-      child: Row(
-        children: [
-          _TabItem(label: 'اسم المستخدم / البريد', active: selected == 1, onTap: () => onChanged(1)),
-          _TabItem(label: 'رقم الجوال', active: selected == 0, onTap: () => onChanged(0)),
-        ],
-      ),
-    );
-  }
-}
-
-class _TabItem extends StatelessWidget {
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
-  const _TabItem({required this.label, required this.active, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
+  // ── Tab button ──
+  Widget _buildTab(String label, int index) {
+    final active = _tabIndex == index;
     return Expanded(
       child: GestureDetector(
-        onTap: onTap,
+        onTap: () => setState(() => _tabIndex = index),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
@@ -327,21 +287,13 @@ class _TabItem extends StatelessWidget {
       ),
     );
   }
-}
 
-// ─────────────────────────────────────────────
-// Phone Tab
-// ─────────────────────────────────────────────
-class _PhoneTab extends StatelessWidget {
-  final TextEditingController controller;
-  const _PhoneTab({required this.controller, super.key});
-
-  @override
-  Widget build(BuildContext context) {
+  // ── Phone tab content ──
+  Widget _buildPhoneTab() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const _FieldLabel('رقم الجوال'),
+        _label('رقم الجوال'),
         Container(
           height: 54,
           decoration: BoxDecoration(
@@ -351,10 +303,10 @@ class _PhoneTab extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // Phone input fills the right side (first child in RTL)
+              // Number input on RIGHT (first in RTL)
               Expanded(
                 child: TextField(
-                  controller: controller,
+                  controller: _phoneController,
                   keyboardType: TextInputType.phone,
                   textDirection: TextDirection.ltr,
                   textAlign: TextAlign.left,
@@ -370,7 +322,7 @@ class _PhoneTab extends StatelessWidget {
                   ),
                 ),
               ),
-              // Country code on the LEFT (second child in RTL row = left side)
+              // Country code on LEFT (second child in RTL = left side)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 decoration: const BoxDecoration(
@@ -380,7 +332,7 @@ class _PhoneTab extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Text('🇸🇦', style: TextStyle(fontSize: 18)),
-                    const SizedBox(width: 5),
+                    const SizedBox(width: 6),
                     Text('+966', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                   ],
                 ),
@@ -408,60 +360,21 @@ class _PhoneTab extends StatelessWidget {
       ],
     );
   }
-}
 
-// ─────────────────────────────────────────────
-// Email / Username Tab
-// ─────────────────────────────────────────────
-class _EmailTab extends StatelessWidget {
-  final TextEditingController emailController;
-  final TextEditingController passwordController;
-  final bool obscure;
-  final VoidCallback onToggleObscure;
-  const _EmailTab({
-    required this.emailController,
-    required this.passwordController,
-    required this.obscure,
-    required this.onToggleObscure,
-    super.key,
-  });
-
-  static OutlineInputBorder _border(Color color, {double width = 1.0}) =>
-      OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide(color: color, width: width));
-
-  @override
-  Widget build(BuildContext context) {
+  // ── Email tab content ──
+  Widget _buildEmailTab() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // ── Email field ──
-        const _FieldLabel('اسم المستخدم أو البريد الإلكتروني'),
-        TextField(
-          controller: emailController,
+        _label('اسم المستخدم أو البريد الإلكتروني'),
+        _field(
+          controller: _emailController,
+          hint: 'أدخل بريدك أو اسم المستخدم',
           keyboardType: TextInputType.emailAddress,
           textDirection: TextDirection.ltr,
-          textAlign: TextAlign.left,
-          style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-            border: _border(AppColors.border),
-            enabledBorder: _border(AppColors.border),
-            focusedBorder: _border(AppColors.dark, width: 1.5),
-            // suffixIcon = LEFT side in RTL
-            suffixIcon: Padding(
-              padding: const EdgeInsets.only(left: 14),
-              child: Icon(Icons.alternate_email_rounded, size: 19, color: AppColors.textMuted),
-            ),
-            suffixIconConstraints: const BoxConstraints(minWidth: 46),
-            hintText: 'أدخل بريدك أو اسم المستخدم',
-            hintStyle: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w500, color: AppColors.textMuted),
-          ),
+          suffixIcon: const Icon(Icons.alternate_email_rounded, size: 19, color: AppColors.textMuted),
         ),
         const SizedBox(height: 16),
-
-        // ── Password label row ──
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -469,75 +382,71 @@ class _EmailTab extends StatelessWidget {
               onTap: () {},
               child: Text('نسيت كلمة المرور؟', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.goldText)),
             ),
-            const _FieldLabel('كلمة المرور'),
+            _label('كلمة المرور', noPad: true),
           ],
         ),
-        const SizedBox(height: 7),
-
-        // ── Password field ──
-        TextField(
-          controller: passwordController,
-          obscureText: obscure,
-          style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-            border: _border(AppColors.border),
-            enabledBorder: _border(AppColors.border),
-            focusedBorder: _border(AppColors.dark, width: 1.5),
-            // prefixIcon = RIGHT side in RTL (lock icon)
-            prefixIcon: const Padding(
-              padding: EdgeInsets.only(right: 14),
-              child: Icon(Icons.lock_outline_rounded, size: 19, color: AppColors.textMuted),
-            ),
-            prefixIconConstraints: const BoxConstraints(minWidth: 46),
-            // suffixIcon = LEFT side in RTL (eye icon)
-            suffixIcon: GestureDetector(
-              onTap: onToggleObscure,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 14),
-                child: Icon(
-                  obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                  color: AppColors.textMuted,
-                  size: 20,
-                ),
-              ),
-            ),
-            suffixIconConstraints: const BoxConstraints(minWidth: 46),
-            hintText: '••••••••',
-            hintStyle: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textMuted, letterSpacing: 3),
+        const SizedBox(height: 8),
+        _field(
+          controller: _passwordController,
+          hint: '••••••••',
+          obscure: _obscure,
+          prefixIcon: const Icon(Icons.lock_outline_rounded, size: 19, color: AppColors.textMuted),
+          suffixIcon: GestureDetector(
+            onTap: () => setState(() => _obscure = !_obscure),
+            child: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined, color: AppColors.textMuted, size: 20),
           ),
         ),
       ],
     );
   }
-}
 
-// ─────────────────────────────────────────────
-// Shared field label
-// ─────────────────────────────────────────────
-class _FieldLabel extends StatelessWidget {
-  final String text;
-  const _FieldLabel(this.text);
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 7),
+  Widget _label(String text, {bool noPad = false}) => Padding(
+    padding: EdgeInsets.only(bottom: noPad ? 0 : 7),
     child: Text(text, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
   );
-}
 
-// ─────────────────────────────────────────────
-// Social button
-// ─────────────────────────────────────────────
-class _SocialButton extends StatelessWidget {
-  final String label;
-  final Widget child;
-  const _SocialButton({required this.label, required this.child});
+  Widget _field({
+    required TextEditingController controller,
+    required String hint,
+    TextInputType? keyboardType,
+    TextDirection? textDirection,
+    bool obscure = false,
+    Widget? prefixIcon,
+    Widget? suffixIcon,
+  }) {
+    OutlineInputBorder border(Color c, {double w = 1.0}) =>
+        OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide(color: c, width: w));
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      textDirection: textDirection,
+      textAlign: textDirection == TextDirection.ltr ? TextAlign.left : TextAlign.right,
+      obscureText: obscure,
+      style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+        border: border(AppColors.border),
+        enabledBorder: border(AppColors.border),
+        focusedBorder: border(AppColors.dark, w: 1.5),
+        hintText: hint,
+        hintStyle: TextStyle(
+          fontFamily: 'Tajawal',
+          fontSize: obscure ? 18 : 13.5,
+          fontWeight: obscure ? FontWeight.w700 : FontWeight.w500,
+          color: AppColors.textMuted,
+          letterSpacing: obscure ? 3 : 0,
+        ),
+        prefixIcon: prefixIcon != null ? Padding(padding: const EdgeInsets.only(right: 12), child: prefixIcon) : null,
+        prefixIconConstraints: prefixIcon != null ? const BoxConstraints(minWidth: 44) : null,
+        suffixIcon: suffixIcon != null ? Padding(padding: const EdgeInsets.only(left: 12), child: suffixIcon) : null,
+        suffixIconConstraints: suffixIcon != null ? const BoxConstraints(minWidth: 44) : null,
+      ),
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _socialBtn(String label, Widget icon) {
     return GestureDetector(
       onTap: () {},
       child: Container(
@@ -550,7 +459,7 @@ class _SocialButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            child,
+            icon,
             const SizedBox(width: 8),
             Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
           ],
@@ -560,9 +469,6 @@ class _SocialButton extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// Grid painter
-// ─────────────────────────────────────────────
 class _GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
