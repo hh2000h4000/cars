@@ -117,29 +117,17 @@ class _LoginScreenState extends State<LoginScreen> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                GestureDetector(
-                                  onTap: () => Navigator.pop(context),
-                                  child: Container(
-                                    width: 36,
-                                    height: 36,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(.10),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: const Icon(Icons.chevron_left, color: Colors.white, size: 20),
-                                  ),
-                                ),
-                                const Spacer(),
+                                const AppLogoMark(size: 46),
+                                const SizedBox(width: 11),
                                 Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text('تزيين', style: TextStyle(fontFamily: 'Tajawal', fontSize: 17, fontWeight: FontWeight.w900, color: const Color(0xFFF7F1E2))),
                                     Text('CAR DECORATION', style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.goldMuted, letterSpacing: 1)),
                                   ],
                                 ),
-                                const SizedBox(width: 10),
-                                const AppLogoMark(size: 46),
                               ],
                             ),
                             const Spacer(),
