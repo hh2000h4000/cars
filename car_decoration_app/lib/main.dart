@@ -27,7 +27,11 @@ Future<void> main() async {
 
   runApp(
     ChangeNotifierProvider(
-      create: (_) => AppProvider(),
+      create: (_) {
+        final provider = AppProvider();
+        if (isLoggedIn) provider.initFromApi();
+        return provider;
+      },
       child: CarDecorationApp(initialRoute: initialRoute),
     ),
   );
