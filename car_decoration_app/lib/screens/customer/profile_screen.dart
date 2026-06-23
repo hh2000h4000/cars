@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../../data/mock_data.dart';
+import '../../services/auth_service.dart';
 import 'dart:math' as math;
 
 class ProfileScreen extends StatelessWidget {
@@ -152,7 +153,12 @@ class ProfileScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(22, 0, 22, 40),
               child: GestureDetector(
-                onTap: () => Navigator.pushNamedAndRemoveUntil(context, '/onboarding', (_) => false),
+                onTap: () async {
+                  await AuthService.logout();
+                  if (context.mounted) {
+                    Navigator.pushNamedAndRemoveUntil(context, '/auth/login', (_) => false);
+                  }
+                },
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 15),

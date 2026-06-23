@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:dio/dio.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../../services/auth_service.dart';
@@ -12,7 +13,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  int _tabIndex = 0;
+  int _tabIndex = 1;
   bool _obscure = true;
   bool _loading = false;
 
@@ -58,10 +59,17 @@ class _LoginScreenState extends State<LoginScreen> {
         if (!mounted) return;
         Navigator.pushNamedAndRemoveUntil(context, '/customer/home', (_) => false);
       }
+    } on DioException catch (e) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      final msg = e.response?.data is Map
+          ? e.response?.data['message'] as String?
+          : null;
+      _showError(msg ?? 'تعذر الاتصال بالخادم، تأكد من تشغيل الـ API');
     } catch (_) {
       if (!mounted) return;
       setState(() => _loading = false);
-      _showError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
+      _showError('حدث خطأ غير متوقع');
     }
   }
 
