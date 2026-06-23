@@ -48,8 +48,8 @@ class _ShopSelectScreenState extends State<ShopSelectScreen> {
       }
     } on DioException catch (e) {
       final data = e.response?.data;
-      final msg = data != null ? data.toString() : 'حدث خطأ، يرجى المحاولة مجدداً';
-      setState(() { _error = msg; });
+      final msg = data is Map ? (data['message'] ?? data['title'] ?? data.toString()) : 'حدث خطأ، يرجى المحاولة مجدداً';
+      setState(() { _error = msg.toString(); });
     } catch (_) {
       setState(() { _error = 'حدث خطأ، يرجى المحاولة مجدداً'; });
     } finally {
