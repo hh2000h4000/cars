@@ -1,0 +1,173 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\hamza\\cars\\api\\CarDecoration.API\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{F5384947-53F2-4686-A99A-DD37C5583299}|CarDecoration.API\\CarDecoration.API.csproj|c:\\users\\hamza\\cars\\api\\cardecoration.api\\cardecoration.api\\dtos\\vehicledtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F5384947-53F2-4686-A99A-DD37C5583299}|CarDecoration.API\\CarDecoration.API.csproj|solutionrelative:cardecoration.api\\dtos\\vehicledtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F5384947-53F2-4686-A99A-DD37C5583299}|CarDecoration.API\\CarDecoration.API.csproj|c:\\users\\hamza\\cars\\api\\cardecoration.api\\cardecoration.api\\services\\vehicleservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F5384947-53F2-4686-A99A-DD37C5583299}|CarDecoration.API\\CarDecoration.API.csproj|solutionrelative:cardecoration.api\\services\\vehicleservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F5384947-53F2-4686-A99A-DD37C5583299}|CarDecoration.API\\CarDecoration.API.csproj|c:\\users\\hamza\\cars\\api\\cardecoration.api\\cardecoration.api\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F5384947-53F2-4686-A99A-DD37C5583299}|CarDecoration.API\\CarDecoration.API.csproj|solutionrelative:cardecoration.api\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F5384947-53F2-4686-A99A-DD37C5583299}|CarDecoration.API\\CarDecoration.API.csproj|c:\\users\\hamza\\cars\\api\\cardecoration.api\\cardecoration.api\\models\\request.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F5384947-53F2-4686-A99A-DD37C5583299}|CarDecoration.API\\CarDecoration.API.csproj|solutionrelative:cardecoration.api\\models\\request.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F5384947-53F2-4686-A99A-DD37C5583299}|CarDecoration.API\\CarDecoration.API.csproj|c:\\users\\hamza\\cars\\api\\cardecoration.api\\cardecoration.api\\models\\vehicle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F5384947-53F2-4686-A99A-DD37C5583299}|CarDecoration.API\\CarDecoration.API.csproj|solutionrelative:cardecoration.api\\models\\vehicle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F5384947-53F2-4686-A99A-DD37C5583299}|CarDecoration.API\\CarDecoration.API.csproj|c:\\users\\hamza\\cars\\api\\cardecoration.api\\cardecoration.api\\models\\vehicleimage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F5384947-53F2-4686-A99A-DD37C5583299}|CarDecoration.API\\CarDecoration.API.csproj|solutionrelative:cardecoration.api\\models\\vehicleimage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F5384947-53F2-4686-A99A-DD37C5583299}|CarDecoration.API\\CarDecoration.API.csproj|c:\\users\\hamza\\cars\\api\\cardecoration.api\\cardecoration.api\\models\\requestimage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F5384947-53F2-4686-A99A-DD37C5583299}|CarDecoration.API\\CarDecoration.API.csproj|solutionrelative:cardecoration.api\\models\\requestimage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F5384947-53F2-4686-A99A-DD37C5583299}|CarDecoration.API\\CarDecoration.API.csproj|c:\\users\\hamza\\cars\\api\\cardecoration.api\\cardecoration.api\\services\\requestservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F5384947-53F2-4686-A99A-DD37C5583299}|CarDecoration.API\\CarDecoration.API.csproj|solutionrelative:cardecoration.api\\services\\requestservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F5384947-53F2-4686-A99A-DD37C5583299}|CarDecoration.API\\CarDecoration.API.csproj|c:\\users\\hamza\\cars\\api\\cardecoration.api\\cardecoration.api\\dtos\\requestdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F5384947-53F2-4686-A99A-DD37C5583299}|CarDecoration.API\\CarDecoration.API.csproj|solutionrelative:cardecoration.api\\dtos\\requestdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "VehicleDtos.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\cars\\api\\CarDecoration.API\\CarDecoration.API\\DTOs\\VehicleDtos.cs",
+              "RelativeDocumentMoniker": "CarDecoration.API\\DTOs\\VehicleDtos.cs",
+              "ToolTip": "C:\\Users\\hamza\\cars\\api\\CarDecoration.API\\CarDecoration.API\\DTOs\\VehicleDtos.cs",
+              "RelativeToolTip": "CarDecoration.API\\DTOs\\VehicleDtos.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-23T13:05:13.337Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "VehicleService.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\cars\\api\\CarDecoration.API\\CarDecoration.API\\Services\\VehicleService.cs",
+              "RelativeDocumentMoniker": "CarDecoration.API\\Services\\VehicleService.cs",
+              "ToolTip": "C:\\Users\\hamza\\cars\\api\\CarDecoration.API\\CarDecoration.API\\Services\\VehicleService.cs",
+              "RelativeToolTip": "CarDecoration.API\\Services\\VehicleService.cs",
+              "ViewState": "AgIAABYAAAAAAAAAAAAAACAAAABQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-23T13:04:20.694Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "AppDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\cars\\api\\CarDecoration.API\\CarDecoration.API\\Data\\AppDbContext.cs",
+              "RelativeDocumentMoniker": "CarDecoration.API\\Data\\AppDbContext.cs",
+              "ToolTip": "C:\\Users\\hamza\\cars\\api\\CarDecoration.API\\CarDecoration.API\\Data\\AppDbContext.cs",
+              "RelativeToolTip": "CarDecoration.API\\Data\\AppDbContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAABPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-23T13:00:29.463Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Request.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\cars\\api\\CarDecoration.API\\CarDecoration.API\\Models\\Request.cs",
+              "RelativeDocumentMoniker": "CarDecoration.API\\Models\\Request.cs",
+              "ToolTip": "C:\\Users\\hamza\\cars\\api\\CarDecoration.API\\CarDecoration.API\\Models\\Request.cs",
+              "RelativeToolTip": "CarDecoration.API\\Models\\Request.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAAABYAAAA/AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-23T12:59:22.608Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Vehicle.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\cars\\api\\CarDecoration.API\\CarDecoration.API\\Models\\Vehicle.cs",
+              "RelativeDocumentMoniker": "CarDecoration.API\\Models\\Vehicle.cs",
+              "ToolTip": "C:\\Users\\hamza\\cars\\api\\CarDecoration.API\\CarDecoration.API\\Models\\Vehicle.cs",
+              "RelativeToolTip": "CarDecoration.API\\Models\\Vehicle.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-23T12:58:17.014Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "VehicleImage.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\cars\\api\\CarDecoration.API\\CarDecoration.API\\Models\\VehicleImage.cs",
+              "RelativeDocumentMoniker": "CarDecoration.API\\Models\\VehicleImage.cs",
+              "ToolTip": "C:\\Users\\hamza\\cars\\api\\CarDecoration.API\\CarDecoration.API\\Models\\VehicleImage.cs*",
+              "RelativeToolTip": "CarDecoration.API\\Models\\VehicleImage.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-23T12:56:40.587Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "RequestImage.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\cars\\api\\CarDecoration.API\\CarDecoration.API\\Models\\RequestImage.cs",
+              "RelativeDocumentMoniker": "CarDecoration.API\\Models\\RequestImage.cs",
+              "ToolTip": "C:\\Users\\hamza\\cars\\api\\CarDecoration.API\\CarDecoration.API\\Models\\RequestImage.cs",
+              "RelativeToolTip": "CarDecoration.API\\Models\\RequestImage.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-23T12:55:41.453Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "RequestService.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\cars\\api\\CarDecoration.API\\CarDecoration.API\\Services\\RequestService.cs",
+              "RelativeDocumentMoniker": "CarDecoration.API\\Services\\RequestService.cs",
+              "ToolTip": "C:\\Users\\hamza\\cars\\api\\CarDecoration.API\\CarDecoration.API\\Services\\RequestService.cs",
+              "RelativeToolTip": "CarDecoration.API\\Services\\RequestService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-23T10:40:58.42Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "RequestDtos.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\cars\\api\\CarDecoration.API\\CarDecoration.API\\DTOs\\RequestDtos.cs",
+              "RelativeDocumentMoniker": "CarDecoration.API\\DTOs\\RequestDtos.cs",
+              "ToolTip": "C:\\Users\\hamza\\cars\\api\\CarDecoration.API\\CarDecoration.API\\DTOs\\RequestDtos.cs",
+              "RelativeToolTip": "CarDecoration.API\\DTOs\\RequestDtos.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAQwCcAAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-23T10:38:51.491Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
