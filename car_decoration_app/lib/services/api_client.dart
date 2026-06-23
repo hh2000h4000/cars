@@ -5,9 +5,9 @@ import 'package:dio/io.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiClient {
-  static const String baseUrl = 'https://10.0.2.2:7209'; // Android emulator
+  // static const String baseUrl = 'https://10.0.2.2:7209'; // Android emulator
   // static const String baseUrl = 'https://localhost:7209'; // iOS simulator
-  // static const String baseUrl = 'https://192.168.1.x:7209'; // جهاز حقيقي
+  static const String baseUrl = 'https://192.168.8.11:7209'; // جهاز حقيقي
 
   static final _storage = const FlutterSecureStorage();
 
