@@ -41,10 +41,12 @@ class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
       );
       if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/customer/home', (_) => false);
     } on DioException catch (e) {
-      final msg = e.response?.data?['message'] as String?;
-      setState(() { _error = msg ?? 'حدث خطأ، يرجى المحاولة مجدداً'; });
-    } catch (_) {
-      setState(() { _error = 'حدث خطأ، يرجى المحاولة مجدداً'; });
+      final data = e.response?.data;
+      final msg = data is Map ? (data['message'] ?? data['title'] ?? data.toString()) : data?.toString();
+      final status = e.response?.statusCode;
+      setState(() { _error = msg != null ? '$msg' : 'خطأ ${status ?? ''}: ${e.message}'; });
+    } catch (e) {
+      setState(() { _error = e.toString(); });
     } finally {
       if (mounted) setState(() { _loading = false; });
     }
