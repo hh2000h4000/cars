@@ -1,4 +1,4 @@
-﻿using CarDecoration.API.Data;
+using CarDecoration.API.Data;
 using CarDecoration.API.DTOs;
 using CarDecoration.API.Helpers;
 using CarDecoration.API.Models;
@@ -26,7 +26,9 @@ public class VehicleService
             .Where(v => v.OwnerId == userId)
             .OrderByDescending(v => v.CreatedAt)
             .Select(v => new VehicleResponse(
-                v.Id, v.Brand, v.Model, v.Year, v.PlateNumber, v.Images, v.CreatedAt))
+                v.Id, v.Brand, v.Model, v.Year, v.PlateNumber,
+                v.VehicleImages.OrderBy(i => i.Order).Select(i => i.Url).ToList(),
+                v.CreatedAt))
             .ToListAsync();
     }
 
@@ -37,10 +39,10 @@ public class VehicleService
 
         var vehicle = new Vehicle
         {
-            OwnerId = userId,
-            Brand = req.Brand,
-            Model = req.Model,
-            Year = req.Year,
+            OwnerId     = userId,
+            Brand       = req.Brand,
+            Model       = req.Model,
+            Year        = req.Year,
             PlateNumber = req.PlateNumber
         };
 
@@ -49,7 +51,7 @@ public class VehicleService
 
         return new VehicleResponse(
             vehicle.Id, vehicle.Brand, vehicle.Model,
-            vehicle.Year, vehicle.PlateNumber, vehicle.Images, vehicle.CreatedAt);
+            vehicle.Year, vehicle.PlateNumber, [], vehicle.CreatedAt);
     }
 
     public async Task DeleteVehicleAsync(Guid id)

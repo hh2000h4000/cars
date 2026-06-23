@@ -73,7 +73,9 @@ public class RequestService
             request.Description, request.Location,
             request.AppointmentDate, request.Notes,
             request.Status.ToString(),
-            shops.Select(s => s.Name).ToList(), request.CreatedAt);
+            shops.Select(s => s.Name).ToList(),
+            [],
+            request.CreatedAt);
     }
     // العميل يعرض طلباته
     public async Task<List<RequestResponse>> GetMyRequestsAsync()
@@ -84,6 +86,7 @@ public class RequestService
         return await _db.Requests
             .Include(r => r.Vehicle)
             .Include(r => r.RequestShops).ThenInclude(rs => rs.Shop)
+            .Include(r => r.RequestImages)
             .Where(r => r.CustomerId == userId && !r.IsDeleted)
             .OrderByDescending(r => r.CreatedAt)
             .Select(r => new RequestResponse(
@@ -93,6 +96,7 @@ public class RequestService
                 r.AppointmentDate, r.Notes,
                 r.Status.ToString(),
                 r.RequestShops.Select(rs => rs.Shop.Name).ToList(),
+                r.RequestImages.OrderBy(i => i.Order).Select(i => i.Url).ToList(),
                 r.CreatedAt))
             .ToListAsync();
     }

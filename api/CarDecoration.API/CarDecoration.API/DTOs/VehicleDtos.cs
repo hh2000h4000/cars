@@ -13,6 +13,6 @@ public record VehicleResponse(
     string Model,
     int Year,
     string? PlateNumber,
-    List<string> Images,
+    List<string> ImageUrls,
     DateTime CreatedAt
 );

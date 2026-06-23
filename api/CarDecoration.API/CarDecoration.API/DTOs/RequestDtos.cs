@@ -22,6 +22,7 @@ public record RequestResponse(
     string? Notes,
     string Status,
     List<string> ShopNames,
+    List<string> ImageUrls,
     DateTime CreatedAt
 );
 
