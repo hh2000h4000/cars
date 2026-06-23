@@ -12,9 +12,9 @@ class AppProvider extends ChangeNotifier {
   UserType userType = UserType.customer;
 
   // Customer state
-  List<Vehicle> vehicles = List.from(MockData.vehicles);
-  List<Shop> shops = List.from(MockData.shops);
-  List<ServiceRequest> requests = List.from(MockData.requests);
+  List<Vehicle> vehicles = [];
+  List<Shop> shops = [];
+  List<ServiceRequest> requests = [];
   List<Quotation> quotations = MockData.quotations;
   String? acceptedQuoteId;
   List<String> selectedShops = [];
