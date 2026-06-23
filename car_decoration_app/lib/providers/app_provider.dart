@@ -60,10 +60,11 @@ class AppProvider extends ChangeNotifier {
       }
     }
     // Update request status
-    requests = requests.map((r) {
+    requests = requests.map<ServiceRequest>((r) {
       if (r.id == '1042') {
         return ServiceRequest(
           id: r.id,
+          requestNumber: r.requestNumber,
           serviceType: r.serviceType,
           vehicleBrand: r.vehicleBrand,
           vehicleModel: r.vehicleModel,
