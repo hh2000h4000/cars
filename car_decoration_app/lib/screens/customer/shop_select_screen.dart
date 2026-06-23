@@ -40,6 +40,8 @@ class _ShopSelectScreenState extends State<ShopSelectScreen> {
         location: args['location'] as String,
         shopIds: shopIds,
         notes: args['notes'] as String?,
+        preferredDate: args['preferredDate'] as DateTime?,
+        preferredTime: args['preferredTime'] as TimeOfDay?,
       );
       if (mounted) {
         Navigator.pushNamedAndRemoveUntil(context, '/customer/home', (r) => false);

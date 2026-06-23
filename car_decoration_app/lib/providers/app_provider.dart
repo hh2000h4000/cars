@@ -17,7 +17,7 @@ class AppProvider extends ChangeNotifier {
   List<ServiceRequest> requests = List.from(MockData.requests);
   List<Quotation> quotations = MockData.quotations;
   String? acceptedQuoteId;
-  List<String> selectedShops = ['sh1', 'sh5'];
+  List<String> selectedShops = [];
   ReviewData reviewData = ReviewData();
   String selectedComplaintReason = '';
 
@@ -190,6 +190,8 @@ class AppProvider extends ChangeNotifier {
     required String location,
     required List<String> shopIds,
     String? notes,
+    DateTime? preferredDate,
+    TimeOfDay? preferredTime,
   }) async {
     final r = await RequestService.createRequest(
       vehicleId: vehicleId,
@@ -197,6 +199,8 @@ class AppProvider extends ChangeNotifier {
       location: location,
       shopIds: shopIds,
       notes: notes,
+      preferredDate: preferredDate,
+      preferredTime: preferredTime,
     );
     requests = [...requests, r];
     notifyListeners();

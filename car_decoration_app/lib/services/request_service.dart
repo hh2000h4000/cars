@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import '../models/service_request.dart';
 import 'api_client.dart';
 
@@ -19,13 +20,23 @@ class RequestService {
     required String location,
     required List<String> shopIds,
     String? notes,
+    DateTime? preferredDate,
+    TimeOfDay? preferredTime,
   }) async {
+    String? preferredDateTime;
+    if (preferredDate != null) {
+      final h = preferredTime?.hour ?? 12;
+      final m = preferredTime?.minute ?? 0;
+      final dt = DateTime(preferredDate.year, preferredDate.month, preferredDate.day, h, m);
+      preferredDateTime = dt.toIso8601String();
+    }
     final res = await ApiClient.dio.post('/api/requests', data: {
       'vehicleId': vehicleId,
       'description': description,
       'location': location,
       'shopIds': shopIds,
       if (notes != null) 'notes': notes,
+      if (preferredDateTime != null) 'preferredDate': preferredDateTime,
     });
     return ServiceRequest.fromJson(res.data as Map<String, dynamic>);
   }

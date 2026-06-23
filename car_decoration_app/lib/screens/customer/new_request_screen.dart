@@ -22,6 +22,8 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
   final _notesCtrl = TextEditingController();
   final List<XFile> _images = [];
   final _picker = ImagePicker();
+  DateTime? _preferredDate;
+  TimeOfDay? _preferredTime;
 
   @override
   void dispose() {
@@ -34,6 +36,50 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
   Future<void> _pickImage() async {
     final picked = await _picker.pickMultiImage(imageQuality: 80);
     if (picked.isNotEmpty) setState(() => _images.addAll(picked));
+  }
+
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _preferredDate ?? now,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 60)),
+      locale: const Locale('ar'),
+      builder: (ctx, child) => Theme(
+        data: Theme.of(ctx).copyWith(colorScheme: ColorScheme.light(primary: AppColors.dark, onPrimary: AppColors.goldLight)),
+        child: child!,
+      ),
+    );
+    if (picked != null) setState(() => _preferredDate = picked);
+  }
+
+  Future<void> _pickTime() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: _preferredTime ?? const TimeOfDay(hour: 10, minute: 0),
+      builder: (ctx, child) => Theme(
+        data: Theme.of(ctx).copyWith(colorScheme: ColorScheme.light(primary: AppColors.dark, onPrimary: AppColors.goldLight)),
+        child: child!,
+      ),
+    );
+    if (picked != null) setState(() => _preferredTime = picked);
+  }
+
+  String get _dateLabel {
+    if (_preferredDate == null) return 'اختر التاريخ';
+    final d = _preferredDate!;
+    const months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    return '${d.day} ${months[d.month - 1]}';
+  }
+
+  String get _timeLabel {
+    if (_preferredTime == null) return 'اختر الوقت';
+    final h = _preferredTime!.hour;
+    final m = _preferredTime!.minute.toString().padLeft(2, '0');
+    final period = h >= 12 ? 'م' : 'ص';
+    final h12 = h > 12 ? h - 12 : (h == 0 ? 12 : h);
+    return '$h12:$m $period';
   }
 
   Future<void> _openLocationPicker() async {
@@ -64,6 +110,8 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
       'description': _descCtrl.text.trim(),
       'location': _locationCtrl.text.trim(),
       'notes': _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
+      'preferredDate': _preferredDate,
+      'preferredTime': _preferredTime,
     });
   }
 
@@ -254,15 +302,23 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
                               children: [
                                 Text('التاريخ المفضّل', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                                 const SizedBox(height: 8),
-                                Container(
-                                  height: 50,
-                                  decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(14)),
-                                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                                  child: Row(children: [
-                                    Text('٢٢ يونيو', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                                    const Spacer(),
-                                    const Icon(Icons.calendar_today_outlined, color: AppColors.goldText, size: 18),
-                                  ]),
+                                GestureDetector(
+                                  onTap: _pickDate,
+                                  child: Container(
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      border: Border.all(color: _preferredDate != null ? AppColors.goldLight : AppColors.border),
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    child: Row(children: [
+                                      Text(_dateLabel, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700,
+                                        color: _preferredDate != null ? AppColors.textPrimary : AppColors.textMuted)),
+                                      const Spacer(),
+                                      const Icon(Icons.calendar_today_outlined, color: AppColors.goldText, size: 18),
+                                    ]),
+                                  ),
                                 ),
                               ],
                             ),
@@ -274,15 +330,23 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
                               children: [
                                 Text('الوقت المفضّل', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                                 const SizedBox(height: 8),
-                                Container(
-                                  height: 50,
-                                  decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(14)),
-                                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                                  child: Row(children: [
-                                    Text('٤:٠٠ م', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                                    const Spacer(),
-                                    const Icon(Icons.access_time_outlined, color: AppColors.goldText, size: 18),
-                                  ]),
+                                GestureDetector(
+                                  onTap: _pickTime,
+                                  child: Container(
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      border: Border.all(color: _preferredTime != null ? AppColors.goldLight : AppColors.border),
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    child: Row(children: [
+                                      Text(_timeLabel, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700,
+                                        color: _preferredTime != null ? AppColors.textPrimary : AppColors.textMuted)),
+                                      const Spacer(),
+                                      const Icon(Icons.access_time_outlined, color: AppColors.goldText, size: 18),
+                                    ]),
+                                  ),
                                 ),
                               ],
                             ),
