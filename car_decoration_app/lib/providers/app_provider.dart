@@ -187,10 +187,16 @@ class AppProvider extends ChangeNotifier {
   Future<ServiceRequest> addRequestFromApi({
     required String vehicleId,
     required String description,
+    required String location,
+    required List<String> shopIds,
     String? notes,
   }) async {
     final r = await RequestService.createRequest(
-      vehicleId: vehicleId, description: description, notes: notes,
+      vehicleId: vehicleId,
+      description: description,
+      location: location,
+      shopIds: shopIds,
+      notes: notes,
     );
     requests = [...requests, r];
     notifyListeners();

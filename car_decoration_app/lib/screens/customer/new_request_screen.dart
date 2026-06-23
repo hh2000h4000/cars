@@ -18,6 +18,8 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
   String? _selectedVehicleId;
   final _descCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
+  final _locationCtrl = TextEditingController();
+  final Set<String> _selectedShopIds = {};
   bool _loading = false;
   String? _error;
 
@@ -25,6 +27,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
   void dispose() {
     _descCtrl.dispose();
     _notesCtrl.dispose();
+    _locationCtrl.dispose();
     super.dispose();
   }
 
@@ -37,11 +40,21 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
       setState(() { _error = 'يرجى كتابة وصف الخدمة المطلوبة'; });
       return;
     }
+    if (_locationCtrl.text.trim().isEmpty) {
+      setState(() { _error = 'يرجى كتابة موقع تنفيذ الخدمة'; });
+      return;
+    }
+    if (_selectedShopIds.isEmpty) {
+      setState(() { _error = 'يرجى اختيار متجر واحد على الأقل'; });
+      return;
+    }
     setState(() { _loading = true; _error = null; });
     try {
       await context.read<AppProvider>().addRequestFromApi(
         vehicleId: _selectedVehicleId!,
         description: _descCtrl.text.trim(),
+        location: _locationCtrl.text.trim(),
+        shopIds: _selectedShopIds.toList(),
         notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
       );
       if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/customer/home', (_) => false);
@@ -68,7 +81,9 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final vehicles = context.watch<AppProvider>().vehicles;
+    final provider = context.watch<AppProvider>();
+    final vehicles = provider.vehicles;
+    final shops = provider.shops;
 
     if (_selectedVehicleId == null && vehicles.isNotEmpty) {
       final main = vehicles.where((v) => v.isMain).toList();
@@ -191,6 +206,79 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
                       ),
                     ),
                     const SizedBox(height: 22),
+
+                    // ── الموقع ──
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(22, 0, 22, 8),
+                      child: Text('موقع تنفيذ الخدمة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(22, 0, 22, 22),
+                      child: TextField(
+                        controller: _locationCtrl,
+                        textAlign: TextAlign.right,
+                        style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600),
+                        decoration: InputDecoration(
+                          hintText: 'مثال: حي الياسمين، الرياض',
+                          hintStyle: TextStyle(fontFamily: 'Tajawal', fontSize: 13, color: AppColors.textMuted),
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.all(14),
+                          prefixIcon: const Icon(Icons.location_on_outlined, color: AppColors.goldText, size: 20),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: AppColors.border)),
+                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: AppColors.border)),
+                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.goldText, width: 1.5)),
+                        ),
+                      ),
+                    ),
+
+                    // ── اختيار المتاجر ──
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(22, 0, 22, 10),
+                      child: Text('اختر المتاجر', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    ),
+                    if (shops.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(22, 0, 22, 22),
+                        child: Text('لا توجد متاجر متاحة حالياً', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, color: AppColors.textMuted)),
+                      )
+                    else
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(22, 0, 22, 22),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: shops.map((shop) {
+                            final selected = _selectedShopIds.contains(shop.id);
+                            return GestureDetector(
+                              onTap: () => setState(() {
+                                if (selected) _selectedShopIds.remove(shop.id);
+                                else _selectedShopIds.add(shop.id);
+                              }),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: selected ? AppColors.dark : Colors.white,
+                                  border: Border.all(color: selected ? AppColors.dark : AppColors.border),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (selected) ...[
+                                      const Icon(Icons.check, color: AppColors.goldLight, size: 14),
+                                      const SizedBox(width: 5),
+                                    ],
+                                    Text(shop.name,
+                                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700,
+                                        color: selected ? AppColors.goldLight : AppColors.textPrimary)),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
 
                     // ── ملاحظات إضافية ──
                     Padding(

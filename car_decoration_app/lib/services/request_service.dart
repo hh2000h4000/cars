@@ -16,11 +16,15 @@ class RequestService {
   static Future<ServiceRequest> createRequest({
     required String vehicleId,
     required String description,
+    required String location,
+    required List<String> shopIds,
     String? notes,
   }) async {
     final res = await ApiClient.dio.post('/api/requests', data: {
       'vehicleId': vehicleId,
       'description': description,
+      'location': location,
+      'shopIds': shopIds,
       if (notes != null) 'notes': notes,
     });
     return ServiceRequest.fromJson(res.data as Map<String, dynamic>);
