@@ -1,8 +1,10 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+// dart:io و dio/io غير متوفران على الويب
+import 'api_client_mobile.dart' if (dart.library.html) 'api_client_web.dart' as platform;
 
 class ApiClient {
   // static const String baseUrl = 'https://10.0.2.2:7209'; // Android emulator
@@ -19,14 +21,9 @@ class ApiClient {
       headers: {'Content-Type': 'application/json'},
     ));
 
-    // تجاوز شهادة HTTPS أثناء التطوير
-    (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
-      final client = HttpClient();
-      client.badCertificateCallback = (cert, host, port) => true;
-      return client;
-    };
+    // تجاوز شهادة HTTPS على موبايل/ديسكتوب فقط
+    if (!kIsWeb) platform.setHttpClientAdapter(dio);
 
-    // إضافة التوكن تلقائياً لكل الطلبات
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         final token = await _storage.read(key: 'token');
