@@ -1,10 +1,10 @@
-class ShopService {
+class ShopServiceItem {
   final String name;
   final int price;
   final String duration;
   final String? description;
 
-  const ShopService({required this.name, required this.price, required this.duration, this.description});
+  const ShopServiceItem({required this.name, required this.price, required this.duration, this.description});
 }
 
 class Shop {
@@ -20,7 +20,7 @@ class Shop {
   final int completedJobs;
   final String distance;
   final List<String> tags;
-  final List<ShopService> services;
+  final List<ShopServiceItem> services;
   final List<String> gallery;
   final bool verified;
   final List<ShopReview> reviews;
@@ -62,7 +62,7 @@ class Shop {
     required this.completedJobs,
     required this.distance,
     required this.tags,
-    required this.services,
+    required this.services, // List<ShopServiceItem>
     required this.gallery,
     required this.verified,
     required this.reviews,
