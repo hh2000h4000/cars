@@ -29,7 +29,7 @@ class RequestDetailScreen extends StatelessWidget {
                 children: [
                   StatusBadge(label: request.status.label, type: request.status.colorType),
                   const Spacer(),
-                  Text('طلب #${request.id}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                  Text('طلب #${request.requestNumber}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
                   const SizedBox(width: 14),
                   const AppBackButton(),
                 ],

@@ -139,7 +139,7 @@ class MockData {
 
   static final List<ServiceRequest> requests = [
     const ServiceRequest(
-      id: '1042',
+      id: '1042', requestNumber: 4,
       serviceType: 'تظليل كامل + فيلم حماية أمامي',
       vehicleBrand: 'تويوتا', vehicleModel: 'لاند كروزر', vehicleYear: 2023, vehicleColor: 'أبيض لؤلؤي',
       status: RequestStatus.offers,
@@ -148,7 +148,7 @@ class MockData {
       notes: 'أريد تظليل النوافذ الجانبية والخلفية بنسبة ٥٠٪ وتظليل خفيف للزجاج الأمامي. مع فيلم حماية شفاف للواجهة الأمامية.',
     ),
     const ServiceRequest(
-      id: '1038',
+      id: '1038', requestNumber: 3,
       serviceType: 'تلميع نانو سيراميك',
       vehicleBrand: 'لكزس', vehicleModel: 'LX 600', vehicleYear: 2024, vehicleColor: 'أسود',
       status: RequestStatus.inProgress,
@@ -156,14 +156,14 @@ class MockData {
       selectedShopName: 'لمسات الفخامة',
     ),
     const ServiceRequest(
-      id: '1051',
+      id: '1051', requestNumber: 2,
       serviceType: 'نظام إضاءة داخلي LED',
       vehicleBrand: 'مرسيدس', vehicleModel: 'G-Class', vehicleYear: 2022, vehicleColor: 'رمادي معدني',
       status: RequestStatus.pending,
       dateLabel: '٢٤ يونيو',
     ),
     const ServiceRequest(
-      id: '0998',
+      id: '0998', requestNumber: 1,
       serviceType: 'تلميع خارجي شامل',
       vehicleBrand: 'تويوتا', vehicleModel: 'لاند كروزر', vehicleYear: 2023, vehicleColor: 'أبيض لؤلؤي',
       status: RequestStatus.disputed,

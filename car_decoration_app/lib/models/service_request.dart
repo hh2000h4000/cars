@@ -36,6 +36,7 @@ extension RequestStatusLabel on RequestStatus {
 
 class ServiceRequest {
   final String id;
+  final int requestNumber;
   final String serviceType;
   final String vehicleBrand;
   final String vehicleModel;
@@ -46,6 +47,7 @@ class ServiceRequest {
   final int quotationCount;
   final String? notes;
   final String? selectedShopName;
+  final DateTime? appointmentDate;
 
   factory ServiceRequest.fromJson(Map<String, dynamic> json) {
     final v = json['vehicle'] as Map<String, dynamic>?;
@@ -65,8 +67,14 @@ class ServiceRequest {
         dateLabel = '${dt.day}/${dt.month}/${dt.year}';
       } catch (_) {}
     }
+    DateTime? appointmentDate;
+    final apptStr = json['appointmentDate'] as String?;
+    if (apptStr != null) {
+      try { appointmentDate = DateTime.parse(apptStr).toLocal(); } catch (_) {}
+    }
     return ServiceRequest(
       id: json['id'] as String,
+      requestNumber: json['requestNumber'] as int? ?? 0,
       serviceType: json['description'] as String? ?? '',
       vehicleBrand: v?['brand'] as String? ?? '',
       vehicleModel: v?['model'] as String? ?? '',
@@ -76,11 +84,13 @@ class ServiceRequest {
       dateLabel: dateLabel,
       quotationCount: json['quotationCount'] as int? ?? 0,
       notes: json['notes'] as String?,
+      appointmentDate: appointmentDate,
     );
   }
 
   const ServiceRequest({
     required this.id,
+    required this.requestNumber,
     required this.serviceType,
     required this.vehicleBrand,
     required this.vehicleModel,
@@ -91,5 +101,6 @@ class ServiceRequest {
     this.quotationCount = 0,
     this.notes,
     this.selectedShopName,
+    this.appointmentDate,
   });
 }

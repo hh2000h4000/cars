@@ -104,7 +104,7 @@ class _RequestCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Text('طلب #${request.id}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                      Text('طلب #${request.requestNumber}', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                       const Spacer(),
                       StatusBadge(label: request.status.label, type: request.status.colorType),
                     ],
