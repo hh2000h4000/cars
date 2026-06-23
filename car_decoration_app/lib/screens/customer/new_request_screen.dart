@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
@@ -20,7 +20,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
   final _descCtrl = TextEditingController();
   final _locationCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
-  final List<XFile> _images = [];
+  final List<Uint8List> _imageBytes = [];
   final _picker = ImagePicker();
   DateTime? _preferredDate;
   TimeOfDay? _preferredTime;
@@ -35,7 +35,10 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
 
   Future<void> _pickImage() async {
     final picked = await _picker.pickMultiImage(imageQuality: 80);
-    if (picked.isNotEmpty) setState(() => _images.addAll(picked));
+    for (final xfile in picked) {
+      final bytes = await xfile.readAsBytes();
+      setState(() => _imageBytes.add(bytes));
+    }
   }
 
   Future<void> _pickDate() async {
@@ -258,21 +261,21 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
                                 child: const Icon(Icons.add_photo_alternate_outlined, color: AppColors.goldText, size: 28),
                               ),
                             ),
-                            ..._images.asMap().entries.map((entry) => Padding(
+                            ..._imageBytes.asMap().entries.map((entry) => Padding(
                               padding: const EdgeInsets.only(right: 10),
                               child: Stack(
                                 children: [
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(14),
-                                    child: Image.file(File(entry.value.path), width: 90, height: 90, fit: BoxFit.cover),
+                                    child: Image.memory(entry.value, width: 90, height: 90, fit: BoxFit.cover),
                                   ),
                                   Positioned(
                                     top: 4, left: 4,
                                     child: GestureDetector(
-                                      onTap: () => setState(() => _images.removeAt(entry.key)),
+                                      onTap: () => setState(() => _imageBytes.removeAt(entry.key)),
                                       child: Container(
                                         width: 22, height: 22,
-                                        decoration: BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+                                        decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
                                         child: const Icon(Icons.close, color: Colors.white, size: 14),
                                       ),
                                     ),
@@ -280,7 +283,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
                                 ],
                               ),
                             )),
-                            if (_images.isEmpty) ...[
+                            if (_imageBytes.isEmpty) ...[
                               const SizedBox(width: 10),
                               _PhotoPlaceholder(),
                               const SizedBox(width: 10),
