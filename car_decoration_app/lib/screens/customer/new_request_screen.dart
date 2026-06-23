@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
@@ -18,6 +20,8 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
   final _descCtrl = TextEditingController();
   final _locationCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
+  final List<XFile> _images = [];
+  final _picker = ImagePicker();
 
   @override
   void dispose() {
@@ -25,6 +29,18 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
     _locationCtrl.dispose();
     _notesCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    final picked = await _picker.pickMultiImage(imageQuality: 80);
+    if (picked.isNotEmpty) setState(() => _images.addAll(picked));
+  }
+
+  Future<void> _openLocationPicker() async {
+    final result = await Navigator.pushNamed(context, '/customer/location-picker');
+    if (result is String && result.isNotEmpty) {
+      setState(() => _locationCtrl.text = result);
+    }
   }
 
   void _goToShopSelect() {
@@ -178,22 +194,52 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(22, 0, 22, 22),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 90, height: 90,
-                            decoration: BoxDecoration(
-                              color: AppColors.goldBg,
-                              border: Border.all(color: AppColors.goldLight, width: 1.5),
-                              borderRadius: BorderRadius.circular(14),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            GestureDetector(
+                              onTap: _pickImage,
+                              child: Container(
+                                width: 90, height: 90,
+                                decoration: BoxDecoration(
+                                  color: AppColors.goldBg,
+                                  border: Border.all(color: AppColors.goldLight, width: 1.5),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: const Icon(Icons.add_photo_alternate_outlined, color: AppColors.goldText, size: 28),
+                              ),
                             ),
-                            child: const Icon(Icons.add, color: AppColors.goldText, size: 28),
-                          ),
-                          const SizedBox(width: 10),
-                          _PhotoPlaceholder(),
-                          const SizedBox(width: 10),
-                          _PhotoPlaceholder(),
-                        ],
+                            ..._images.asMap().entries.map((entry) => Padding(
+                              padding: const EdgeInsets.only(right: 10),
+                              child: Stack(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(14),
+                                    child: Image.file(File(entry.value.path), width: 90, height: 90, fit: BoxFit.cover),
+                                  ),
+                                  Positioned(
+                                    top: 4, left: 4,
+                                    child: GestureDetector(
+                                      onTap: () => setState(() => _images.removeAt(entry.key)),
+                                      child: Container(
+                                        width: 22, height: 22,
+                                        decoration: BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+                                        child: const Icon(Icons.close, color: Colors.white, size: 14),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )),
+                            if (_images.isEmpty) ...[
+                              const SizedBox(width: 10),
+                              _PhotoPlaceholder(),
+                              const SizedBox(width: 10),
+                              _PhotoPlaceholder(),
+                            ],
+                          ],
+                        ),
                       ),
                     ),
 
@@ -252,36 +298,55 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(22, 0, 22, 22),
-                      child: Container(
-                        decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(16)),
-                        clipBehavior: Clip.hardEdge,
-                        child: Column(
-                          children: [
-                            Container(
-                              height: 140,
-                              color: const Color(0xFFF5F0E8),
-                              child: Stack(children: [
-                                CustomPaint(painter: _MapGridPainter(), size: Size.infinite),
-                                const Center(child: Icon(Icons.location_on, color: AppColors.goldText, size: 38)),
-                              ]),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(14),
-                              child: TextField(
-                                controller: _locationCtrl,
-                                textAlign: TextAlign.right,
-                                style: const TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700),
-                                decoration: InputDecoration(
-                                  hintText: 'حي الياسمين، الرياض',
-                                  hintStyle: TextStyle(fontFamily: 'Tajawal', fontSize: 14, color: AppColors.textMuted),
-                                  suffixIcon: const Icon(Icons.home_outlined, color: AppColors.goldText, size: 22),
-                                  border: InputBorder.none,
-                                  isDense: true,
-                                  contentPadding: EdgeInsets.zero,
-                                ),
+                      child: GestureDetector(
+                        onTap: _openLocationPicker,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(color: _locationCtrl.text.isNotEmpty ? AppColors.goldLight : AppColors.border, width: _locationCtrl.text.isNotEmpty ? 1.5 : 1),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          clipBehavior: Clip.hardEdge,
+                          child: Column(
+                            children: [
+                              Container(
+                                height: 140,
+                                color: const Color(0xFFF5F0E8),
+                                child: Stack(children: [
+                                  CustomPaint(painter: _MapGridPainter(), size: Size.infinite),
+                                  Center(child: Icon(Icons.location_on,
+                                    color: _locationCtrl.text.isNotEmpty ? AppColors.dark : AppColors.goldText, size: 38)),
+                                  Positioned(
+                                    top: 10, right: 10,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      decoration: BoxDecoration(color: AppColors.dark, borderRadius: BorderRadius.circular(10)),
+                                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                                        const Icon(Icons.edit_location_alt_outlined, color: AppColors.goldLight, size: 14),
+                                        const SizedBox(width: 5),
+                                        Text('اختر الموقع', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.goldLight)),
+                                      ]),
+                                    ),
+                                  ),
+                                ]),
                               ),
-                            ),
-                          ],
+                              Padding(
+                                padding: const EdgeInsets.all(14),
+                                child: Row(children: [
+                                  const Icon(Icons.location_on_outlined, color: AppColors.goldText, size: 20),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      _locationCtrl.text.isEmpty ? 'انقر لاختيار موقعك على الخريطة' : _locationCtrl.text,
+                                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700,
+                                        color: _locationCtrl.text.isEmpty ? AppColors.textMuted : AppColors.textPrimary),
+                                    ),
+                                  ),
+                                  const Icon(Icons.chevron_left, color: AppColors.textMuted, size: 18),
+                                ]),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
