@@ -46,10 +46,11 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
       );
       if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/customer/home', (_) => false);
     } on DioException catch (e) {
-      final msg = e.response?.data is Map ? e.response?.data['message'] : null;
-      setState(() { _error = msg as String? ?? 'حدث خطأ، يرجى المحاولة مجدداً'; });
-    } catch (_) {
-      setState(() { _error = 'حدث خطأ، يرجى المحاولة مجدداً'; });
+      final data = e.response?.data;
+      final msg = data is Map ? (data['message'] ?? data['title'] ?? data.toString()) : data?.toString();
+      setState(() { _error = msg != null ? '$msg' : 'خطأ ${e.response?.statusCode ?? ''}: ${e.message}'; });
+    } catch (e) {
+      setState(() { _error = e.toString(); });
     } finally {
       if (mounted) setState(() { _loading = false; });
     }
