@@ -47,8 +47,18 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
       if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/customer/home', (_) => false);
     } on DioException catch (e) {
       final data = e.response?.data;
-      final msg = data is Map ? (data['message'] ?? data['title'] ?? data.toString()) : data?.toString();
-      setState(() { _error = msg != null ? '$msg' : 'خطأ ${e.response?.statusCode ?? ''}: ${e.message}'; });
+      String msg;
+      if (data is Map) {
+        final errors = data['errors'];
+        if (errors is Map) {
+          msg = errors.entries.map((e) => '${e.key}: ${e.value}').join('\n');
+        } else {
+          msg = data['message']?.toString() ?? data['title']?.toString() ?? data.toString();
+        }
+      } else {
+        msg = 'خطأ ${e.response?.statusCode ?? ''}: ${e.message}';
+      }
+      setState(() { _error = msg; });
     } catch (e) {
       setState(() { _error = e.toString(); });
     } finally {
