@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
+import 'package:dio/dio.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../../providers/app_provider.dart';
-import '../../models/vehicle.dart';
 
 class AddVehicleScreen extends StatefulWidget {
   const AddVehicleScreen({super.key});
@@ -32,6 +32,36 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
   String _model = 'لاند كروزر';
   String _year = '2023';
   int _colorIndex = 0;
+  bool _loading = false;
+  String? _error;
+  final _plateCtrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _plateCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    setState(() { _loading = true; _error = null; });
+    try {
+      await context.read<AppProvider>().addVehicleFromApi(
+        brand: _brand,
+        model: _model,
+        year: int.parse(_year),
+        color: _colors[_colorIndex].$1,
+        plateNumber: _plateCtrl.text.trim().isEmpty ? null : _plateCtrl.text.trim(),
+      );
+      if (mounted) Navigator.pop(context);
+    } on DioException catch (e) {
+      final msg = e.response?.data is Map ? e.response?.data['message'] : null;
+      setState(() { _error = msg as String? ?? 'حدث خطأ، يرجى المحاولة مجدداً'; });
+    } catch (_) {
+      setState(() { _error = 'حدث خطأ، يرجى المحاولة مجدداً'; });
+    } finally {
+      if (mounted) setState(() { _loading = false; });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -151,17 +181,19 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
 
                     // ── رقم اللوحة ──
                     _Label('رقم اللوحة (اختياري)'),
-                    Container(
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: AppColors.border),
-                        borderRadius: BorderRadius.circular(14),
+                    TextField(
+                      controller: _plateCtrl,
+                      style: const TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w600),
+                      decoration: InputDecoration(
+                        hintText: 'ر ب ح ٤٨٢١',
+                        hintStyle: TextStyle(fontFamily: 'Tajawal', fontSize: 14, color: AppColors.textMuted),
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.border)),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.border)),
+                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppColors.goldText, width: 1.5)),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      alignment: Alignment.centerRight,
-                      child: Text('ر ب ح ٤٨٢١',
-                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
                     ),
                     const SizedBox(height: 22),
 
@@ -185,20 +217,18 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                     ),
                     const SizedBox(height: 28),
 
+                    if (_error != null) ...[
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        decoration: BoxDecoration(color: const Color(0xFFFFF0F0), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFFFFCDD2))),
+                        child: Text(_error!, style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, color: Color(0xFFD32F2F), fontWeight: FontWeight.w600)),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
                     DarkButton(
-                      label: 'حفظ المركبة',
-                      onTap: () {
-                        context.read<AppProvider>().addVehicle(Vehicle(
-                          id: 'v${DateTime.now().millisecondsSinceEpoch}',
-                          brand: _brand,
-                          model: _model,
-                          year: int.parse(_year),
-                          color: _colors[_colorIndex].$1,
-                          mono: _brand[0],
-                          isMain: false,
-                        ));
-                        Navigator.pop(context);
-                      },
+                      label: _loading ? 'جارٍ الحفظ...' : 'حفظ المركبة',
+                      onTap: _loading ? null : _save,
                     ),
                   ],
                 ),

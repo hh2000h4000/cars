@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
-import '../../data/mock_data.dart';
+import '../../providers/app_provider.dart';
 import 'dart:math' as math;
 
 class HomeScreen extends StatelessWidget {
@@ -21,6 +22,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final shops = context.watch<AppProvider>().shops;
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: CustomScrollView(
@@ -203,7 +205,7 @@ class HomeScreen extends StatelessWidget {
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, i) {
-                final shop = MockData.shops[i];
+                final shop = shops[i];
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(22, 0, 22, 14),
                   child: GestureDetector(
@@ -330,7 +332,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                 );
               },
-              childCount: MockData.shops.length,
+              childCount: shops.length,
             ),
           ),
 

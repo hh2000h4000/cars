@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../data/mock_data.dart';
 import '../services/vehicle_service.dart';
+import '../services/shop_service.dart';
 import '../services/request_service.dart';
 
 enum UserType { customer, shop, admin }
@@ -12,6 +13,7 @@ class AppProvider extends ChangeNotifier {
 
   // Customer state
   List<Vehicle> vehicles = List.from(MockData.vehicles);
+  List<Shop> shops = List.from(MockData.shops);
   List<ServiceRequest> requests = List.from(MockData.requests);
   List<Quotation> quotations = MockData.quotations;
   String? acceptedQuoteId;
@@ -166,12 +168,43 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<Vehicle> addVehicleFromApi({
+    required String brand,
+    required String model,
+    required int year,
+    required String color,
+    String? plateNumber,
+  }) async {
+    final v = await VehicleService.addVehicle(
+      brand: brand, model: model, year: year, color: color, plateNumber: plateNumber,
+    );
+    vehicles = [...vehicles, v];
+    notifyListeners();
+    return v;
+  }
+
+  // ─── Request ──────────────────────────────────────────────────
+  Future<ServiceRequest> addRequestFromApi({
+    required String vehicleId,
+    required String description,
+    String? notes,
+  }) async {
+    final r = await RequestService.createRequest(
+      vehicleId: vehicleId, description: description, notes: notes,
+    );
+    requests = [...requests, r];
+    notifyListeners();
+    return r;
+  }
+
   // ─── API bootstrap ────────────────────────────────────────────
   Future<void> initFromApi() async {
     try {
       final fetchedVehicles = VehicleService.getMyVehicles();
+      final fetchedShops = ShopService.getShops();
       final fetchedRequests = RequestService.getMyRequests();
       vehicles = await fetchedVehicles;
+      shops = await fetchedShops;
       requests = await fetchedRequests;
       notifyListeners();
     } catch (_) {
