@@ -6,7 +6,8 @@ public record CreateRequestRequest(
     string Location,
     DateTime? PreferredDate,
     string? Notes,
-    List<Guid> ShopIds
+    List<Guid> ShopIds,
+    List<string>? ImageUrls
 );
 
 public record RequestResponse(

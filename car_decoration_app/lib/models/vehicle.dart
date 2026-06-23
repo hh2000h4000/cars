@@ -7,6 +7,7 @@ class Vehicle {
   final String? plateNumber;
   final String mono;
   final bool isMain;
+  final List<String> imageUrls;
 
   const Vehicle({
     required this.id,
@@ -17,10 +18,12 @@ class Vehicle {
     this.plateNumber,
     required this.mono,
     this.isMain = false,
+    this.imageUrls = const [],
   });
 
   factory Vehicle.fromJson(Map<String, dynamic> json) {
     final brand = json['brand'] as String? ?? '';
+    final rawUrls = json['imageUrls'] as List<dynamic>?;
     return Vehicle(
       id: json['id'] as String,
       brand: brand,
@@ -30,6 +33,7 @@ class Vehicle {
       plateNumber: json['plateNumber'] as String?,
       mono: brand.isNotEmpty ? brand[0] : '?',
       isMain: false,
+      imageUrls: rawUrls?.cast<String>() ?? [],
     );
   }
 

@@ -22,6 +22,7 @@ class RequestService {
     String? notes,
     DateTime? preferredDate,
     TimeOfDay? preferredTime,
+    List<String>? imageUrls,
   }) async {
     String? preferredDateTime;
     if (preferredDate != null) {
@@ -37,6 +38,7 @@ class RequestService {
       'shopIds': shopIds,
       if (notes != null) 'notes': notes,
       if (preferredDateTime != null) 'preferredDate': preferredDateTime,
+      if (imageUrls != null && imageUrls.isNotEmpty) 'imageUrls': imageUrls,
     });
     return ServiceRequest.fromJson(res.data as Map<String, dynamic>);
   }

@@ -115,6 +115,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
       'notes': _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
       'preferredDate': _preferredDate,
       'preferredTime': _preferredTime,
+      'imageBytes': List<Uint8List>.from(_imageBytes),
     });
   }
 

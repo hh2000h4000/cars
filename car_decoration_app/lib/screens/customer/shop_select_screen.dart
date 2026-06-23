@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dio/dio.dart';
@@ -42,6 +43,7 @@ class _ShopSelectScreenState extends State<ShopSelectScreen> {
         notes: args['notes'] as String?,
         preferredDate: args['preferredDate'] as DateTime?,
         preferredTime: args['preferredTime'] as TimeOfDay?,
+        imageBytes: args['imageBytes'] as List<Uint8List>?,
       );
       if (mounted) {
         Navigator.pushNamedAndRemoveUntil(context, '/customer/home', (r) => false);

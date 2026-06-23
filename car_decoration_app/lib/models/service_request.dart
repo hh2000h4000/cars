@@ -48,6 +48,7 @@ class ServiceRequest {
   final String? notes;
   final String? selectedShopName;
   final DateTime? appointmentDate;
+  final List<String> imageUrls;
 
   factory ServiceRequest.fromJson(Map<String, dynamic> json) {
     final v = json['vehicle'] as Map<String, dynamic>?;
@@ -72,6 +73,7 @@ class ServiceRequest {
     if (apptStr != null) {
       try { appointmentDate = DateTime.parse(apptStr).toLocal(); } catch (_) {}
     }
+    final rawUrls = json['imageUrls'] as List<dynamic>?;
     return ServiceRequest(
       id: json['id'] as String,
       requestNumber: json['requestNumber'] as int? ?? 0,
@@ -85,6 +87,7 @@ class ServiceRequest {
       quotationCount: json['quotationCount'] as int? ?? 0,
       notes: json['notes'] as String?,
       appointmentDate: appointmentDate,
+      imageUrls: rawUrls?.cast<String>() ?? [],
     );
   }
 
@@ -102,5 +105,6 @@ class ServiceRequest {
     this.notes,
     this.selectedShopName,
     this.appointmentDate,
+    this.imageUrls = const [],
   });
 }

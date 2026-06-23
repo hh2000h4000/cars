@@ -49,9 +49,18 @@ public class VehicleService
         _db.Vehicles.Add(vehicle);
         await _db.SaveChangesAsync();
 
+        if (req.ImageUrls != null && req.ImageUrls.Count > 0)
+        {
+            for (int i = 0; i < req.ImageUrls.Count; i++)
+                _db.VehicleImages.Add(new VehicleImage { VehicleId = vehicle.Id, Url = req.ImageUrls[i], Order = i });
+            await _db.SaveChangesAsync();
+        }
+
         return new VehicleResponse(
             vehicle.Id, vehicle.Brand, vehicle.Model,
-            vehicle.Year, vehicle.PlateNumber, [], vehicle.CreatedAt);
+            vehicle.Year, vehicle.PlateNumber,
+            req.ImageUrls ?? [],
+            vehicle.CreatedAt);
     }
 
     public async Task DeleteVehicleAsync(Guid id)

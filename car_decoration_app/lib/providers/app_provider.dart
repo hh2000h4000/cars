@@ -1,9 +1,11 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../data/mock_data.dart';
 import '../services/vehicle_service.dart';
 import '../services/shop_service.dart';
 import '../services/request_service.dart';
+import '../services/upload_service.dart';
 
 enum UserType { customer, shop, admin }
 
@@ -175,9 +177,14 @@ class AppProvider extends ChangeNotifier {
     required int year,
     required String color,
     String? plateNumber,
+    List<Uint8List>? imageBytes,
   }) async {
+    final imageUrls = imageBytes != null && imageBytes.isNotEmpty
+        ? await UploadService.uploadImages(imageBytes)
+        : null;
     final v = await VehicleService.addVehicle(
-      brand: brand, model: model, year: year, color: color, plateNumber: plateNumber,
+      brand: brand, model: model, year: year, color: color,
+      plateNumber: plateNumber, imageUrls: imageUrls,
     );
     vehicles = [...vehicles, v];
     notifyListeners();
@@ -193,7 +200,11 @@ class AppProvider extends ChangeNotifier {
     String? notes,
     DateTime? preferredDate,
     TimeOfDay? preferredTime,
+    List<Uint8List>? imageBytes,
   }) async {
+    final imageUrls = imageBytes != null && imageBytes.isNotEmpty
+        ? await UploadService.uploadImages(imageBytes)
+        : null;
     final r = await RequestService.createRequest(
       vehicleId: vehicleId,
       description: description,
@@ -202,6 +213,7 @@ class AppProvider extends ChangeNotifier {
       notes: notes,
       preferredDate: preferredDate,
       preferredTime: preferredTime,
+      imageUrls: imageUrls,
     );
     requests = [...requests, r];
     notifyListeners();

@@ -4,7 +4,8 @@ public record CreateVehicleRequest(
     string Brand,
     string Model,
     int Year,
-    string? PlateNumber
+    string? PlateNumber,
+    List<string>? ImageUrls
 );
 
 public record VehicleResponse(

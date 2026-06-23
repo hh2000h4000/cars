@@ -14,6 +14,7 @@ class VehicleService {
     required int year,
     required String color,
     String? plateNumber,
+    List<String>? imageUrls,
   }) async {
     final res = await ApiClient.dio.post('/api/vehicles', data: {
       'brand': brand,
@@ -21,6 +22,7 @@ class VehicleService {
       'year': year,
       'color': color,
       if (plateNumber != null) 'plateNumber': plateNumber,
+      if (imageUrls != null && imageUrls.isNotEmpty) 'imageUrls': imageUrls,
     });
     return Vehicle.fromJson(res.data as Map<String, dynamic>);
   }

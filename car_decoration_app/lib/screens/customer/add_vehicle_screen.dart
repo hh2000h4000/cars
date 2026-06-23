@@ -1,7 +1,8 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-
 import 'package:provider/provider.dart';
 import 'package:dio/dio.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../../providers/app_provider.dart';
@@ -35,11 +36,21 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
   bool _loading = false;
   String? _error;
   final _plateCtrl = TextEditingController();
+  final List<Uint8List> _imageBytes = [];
+  final _picker = ImagePicker();
 
   @override
   void dispose() {
     _plateCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImages() async {
+    final picked = await _picker.pickMultiImage(imageQuality: 80);
+    for (final xfile in picked) {
+      final bytes = await xfile.readAsBytes();
+      if (_imageBytes.length < 5) setState(() => _imageBytes.add(bytes));
+    }
   }
 
   Future<void> _save() async {
@@ -51,6 +62,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
         year: int.parse(_year),
         color: _colors[_colorIndex].$1,
         plateNumber: _plateCtrl.text.trim().isEmpty ? null : _plateCtrl.text.trim(),
+        imageBytes: _imageBytes.isNotEmpty ? _imageBytes : null,
       );
       if (mounted) Navigator.pop(context);
     } on DioException catch (e) {
@@ -198,22 +210,55 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                     const SizedBox(height: 22),
 
                     // ── صور المركبة ──
-                    _Label('صور المركبة'),
+                    _Label('صور المركبة (اختياري)'),
                     const SizedBox(height: 4),
-                    GridView.count(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      crossAxisCount: 3,
-                      mainAxisSpacing: 10,
-                      crossAxisSpacing: 10,
-                      childAspectRatio: 1,
-                      children: [
-                        _PhotoSlot(label: 'أمامية', isAdd: false),
-                        _PhotoSlot(label: 'خلفية', isAdd: false),
-                        _PhotoSlot(label: 'جانبية', isAdd: false),
-                        _PhotoSlot(label: 'داخلية', isAdd: false),
-                        _PhotoSlot(label: 'إضافية', isAdd: true),
-                      ],
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          GestureDetector(
+                            onTap: _pickImages,
+                            child: Container(
+                              width: 90, height: 90,
+                              decoration: BoxDecoration(
+                                color: AppColors.goldBg,
+                                border: Border.all(color: AppColors.goldLight, width: 1.5),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: const Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.add_photo_alternate_outlined, color: AppColors.goldText, size: 28),
+                                  SizedBox(height: 4),
+                                  Text('إضافة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.goldText)),
+                                ],
+                              ),
+                            ),
+                          ),
+                          ..._imageBytes.asMap().entries.map((entry) => Padding(
+                            padding: const EdgeInsets.only(right: 10),
+                            child: Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: Image.memory(entry.value, width: 90, height: 90, fit: BoxFit.cover),
+                                ),
+                                Positioned(
+                                  top: 4, left: 4,
+                                  child: GestureDetector(
+                                    onTap: () => setState(() => _imageBytes.removeAt(entry.key)),
+                                    child: Container(
+                                      width: 22, height: 22,
+                                      decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+                                      child: const Icon(Icons.close, color: Colors.white, size: 14),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 28),
 
@@ -323,35 +368,3 @@ class _DropdownField extends StatelessWidget {
   );
 }
 
-class _PhotoSlot extends StatelessWidget {
-  final String label;
-  final bool isAdd;
-  const _PhotoSlot({required this.label, required this.isAdd});
-
-  @override
-  Widget build(BuildContext context) => Container(
-    decoration: BoxDecoration(
-      color: isAdd ? AppColors.goldBg : const Color(0xFFEDE8DE),
-      border: Border.all(
-        color: isAdd ? AppColors.goldLight : Colors.transparent,
-        width: isAdd ? 1.5 : 0,
-        style: isAdd ? BorderStyle.solid : BorderStyle.none,
-      ),
-      borderRadius: BorderRadius.circular(14),
-    ),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        isAdd
-            ? const Icon(Icons.add, color: AppColors.goldText, size: 28)
-            : Icon(Icons.photo_camera_outlined, color: Colors.brown.withOpacity(.35), size: 24),
-        const SizedBox(height: 6),
-        Text(label,
-          style: TextStyle(
-            fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700,
-            color: isAdd ? AppColors.goldText : Colors.brown.withOpacity(.45),
-          )),
-      ],
-    ),
-  );
-}

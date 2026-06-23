@@ -67,6 +67,13 @@ public class RequestService
 
         await _db.SaveChangesAsync();
 
+        if (req.ImageUrls != null && req.ImageUrls.Count > 0)
+        {
+            for (int i = 0; i < req.ImageUrls.Count; i++)
+                _db.RequestImages.Add(new RequestImage { RequestId = request.Id, Url = req.ImageUrls[i], Order = i });
+            await _db.SaveChangesAsync();
+        }
+
         return new RequestResponse(
             request.Id, request.RequestNumber, vehicle.Id,
             vehicle.Brand, vehicle.Model, vehicle.Year,
@@ -74,7 +81,7 @@ public class RequestService
             request.AppointmentDate, request.Notes,
             request.Status.ToString(),
             shops.Select(s => s.Name).ToList(),
-            [],
+            req.ImageUrls ?? [],
             request.CreatedAt);
     }
     // العميل يعرض طلباته
