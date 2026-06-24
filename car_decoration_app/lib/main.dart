@@ -13,7 +13,7 @@ import 'services/app_logger.dart';
 // ثم ضعه هنا أو مرره عبر: flutter run --dart-define=SENTRY_DSN=https://...
 const _sentryDsn = String.fromEnvironment(
   'SENTRY_DSN',
-  defaultValue: '', // ← ضع DSN هنا للـ production
+  defaultValue: 'https://e2ed34c1fa48770a44c874aea24e60f3@o4511620516675584.ingest.us.sentry.io/4511620525457409',
 );
 
 Future<void> main() async {
