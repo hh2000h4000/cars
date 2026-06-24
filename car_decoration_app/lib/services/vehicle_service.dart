@@ -27,6 +27,26 @@ class VehicleService {
     return Vehicle.fromJson(res.data as Map<String, dynamic>);
   }
 
+  static Future<Vehicle> updateVehicle({
+    required String id,
+    required String brand,
+    required String model,
+    required int year,
+    required String color,
+    String? plateNumber,
+    List<String>? imageUrls,
+  }) async {
+    final res = await ApiClient.dio.put('/api/vehicles/$id', data: {
+      'brand': brand,
+      'model': model,
+      'year': year,
+      'color': color,
+      if (plateNumber != null) 'plateNumber': plateNumber,
+      if (imageUrls != null) 'imageUrls': imageUrls,
+    });
+    return Vehicle.fromJson(res.data as Map<String, dynamic>);
+  }
+
   static Future<void> deleteVehicle(String id) async {
     await ApiClient.dio.delete('/api/vehicles/$id');
   }

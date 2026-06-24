@@ -6,6 +6,9 @@ import 'package:image_picker/image_picker.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../../providers/app_provider.dart';
+import '../../models/vehicle.dart';
+import '../../services/vehicle_service.dart';
+import '../../services/upload_service.dart';
 
 class AddVehicleScreen extends StatefulWidget {
   const AddVehicleScreen({super.key});
@@ -16,8 +19,8 @@ class AddVehicleScreen extends StatefulWidget {
 
 class _AddVehicleScreenState extends State<AddVehicleScreen> {
   static const _brands = ['تويوتا', 'لكزس', 'مرسيدس', 'BMW', 'نيسان', 'هوندا', 'كيا', 'هيونداي'];
-  static const _models = ['لاند كروزر', 'كامري', 'كورولا', 'برادو', 'يارس', 'هايلكس'];
-  static const _years = ['2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017'];
+  static const _models = ['لاند كروزر', 'كامري', 'كورولا', 'برادو', 'يارس', 'هايلكس', 'LX 600'];
+  static const _years = ['2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017'];
   static const _colors = [
     ('أبيض لؤلؤي', Color(0xFFF5F0E8)),
     ('أسود', Color(0xFF1A1A1A)),
@@ -29,6 +32,10 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
     ('بيج', Color(0xFFD7C9A7)),
   ];
 
+  Vehicle? _editVehicle;
+  bool _isEdit = false;
+  bool _initialized = false;
+
   String _brand = 'تويوتا';
   String _model = 'لاند كروزر';
   String _year = '2023';
@@ -36,8 +43,29 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
   bool _loading = false;
   String? _error;
   final _plateCtrl = TextEditingController();
-  final List<Uint8List> _imageBytes = [];
   final _picker = ImagePicker();
+
+  List<String> _existingUrls = [];
+  final List<Uint8List> _newImageBytes = [];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_initialized) return;
+    _initialized = true;
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Vehicle) {
+      _isEdit = true;
+      _editVehicle = args;
+      _brand = _brands.contains(args.brand) ? args.brand : _brands.first;
+      _model = _models.contains(args.model) ? args.model : _models.first;
+      _year = _years.contains(args.year.toString()) ? args.year.toString() : _years.first;
+      _plateCtrl.text = args.plateNumber ?? '';
+      _existingUrls = List.from(args.imageUrls);
+      final idx = _colors.indexWhere((c) => c.$1 == args.color);
+      _colorIndex = idx >= 0 ? idx : 0;
+    }
+  }
 
   @override
   void dispose() {
@@ -46,24 +74,46 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
   }
 
   Future<void> _pickImages() async {
+    final total = _existingUrls.length + _newImageBytes.length;
+    if (total >= 5) return;
     final picked = await _picker.pickMultiImage(imageQuality: 80);
     for (final xfile in picked) {
+      if (_existingUrls.length + _newImageBytes.length >= 5) break;
       final bytes = await xfile.readAsBytes();
-      if (_imageBytes.length < 5) setState(() => _imageBytes.add(bytes));
+      setState(() => _newImageBytes.add(bytes));
     }
   }
 
   Future<void> _save() async {
     setState(() { _loading = true; _error = null; });
     try {
-      await context.read<AppProvider>().addVehicleFromApi(
-        brand: _brand,
-        model: _model,
-        year: int.parse(_year),
-        color: _colors[_colorIndex].$1,
-        plateNumber: _plateCtrl.text.trim().isEmpty ? null : _plateCtrl.text.trim(),
-        imageBytes: _imageBytes.isNotEmpty ? _imageBytes : null,
-      );
+      List<String> newUrls = [];
+      if (_newImageBytes.isNotEmpty) {
+        newUrls = await UploadService.uploadImages(_newImageBytes);
+      }
+      final allUrls = [..._existingUrls, ...newUrls];
+
+      if (_isEdit && _editVehicle != null) {
+        final updated = await VehicleService.updateVehicle(
+          id: _editVehicle!.id,
+          brand: _brand,
+          model: _model,
+          year: int.parse(_year),
+          color: _colors[_colorIndex].$1,
+          plateNumber: _plateCtrl.text.trim().isEmpty ? null : _plateCtrl.text.trim(),
+          imageUrls: allUrls.isNotEmpty ? allUrls : null,
+        );
+        if (mounted) context.read<AppProvider>().updateVehicle(updated);
+      } else {
+        await context.read<AppProvider>().addVehicleFromApi(
+          brand: _brand,
+          model: _model,
+          year: int.parse(_year),
+          color: _colors[_colorIndex].$1,
+          plateNumber: _plateCtrl.text.trim().isEmpty ? null : _plateCtrl.text.trim(),
+          imageBytes: _newImageBytes.isNotEmpty ? _newImageBytes : null,
+        );
+      }
       if (mounted) Navigator.pop(context);
     } on DioException catch (e) {
       final msg = e.response?.data is Map ? e.response?.data['message'] : null;
@@ -82,12 +132,12 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header
             Padding(
               padding: const EdgeInsets.fromLTRB(22, 12, 22, 18),
               child: Row(
                 children: [
-                  Text('إضافة مركبة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                  Text(_isEdit ? 'تعديل السيارة' : 'إضافة سيارة',
+                    style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                   const Spacer(),
                   const AppBackButton(),
                 ],
@@ -101,7 +151,6 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
 
-                    // ── الماركة + الموديل ──
                     Row(
                       children: [
                         Expanded(
@@ -109,11 +158,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _Label('الماركة'),
-                              _DropdownField(
-                                value: _brand,
-                                items: _brands,
-                                onChanged: (v) => setState(() => _brand = v!),
-                              ),
+                              _DropdownField(value: _brand, items: _brands, onChanged: (v) => setState(() => _brand = v!)),
                             ],
                           ),
                         ),
@@ -123,11 +168,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _Label('الموديل'),
-                              _DropdownField(
-                                value: _model,
-                                items: _models,
-                                onChanged: (v) => setState(() => _model = v!),
-                              ),
+                              _DropdownField(value: _model, items: _models, onChanged: (v) => setState(() => _model = v!)),
                             ],
                           ),
                         ),
@@ -135,7 +176,6 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                     ),
                     const SizedBox(height: 14),
 
-                    // ── سنة الصنع + اللون ──
                     Row(
                       children: [
                         Expanded(
@@ -143,11 +183,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _Label('سنة الصنع'),
-                              _DropdownField(
-                                value: _year,
-                                items: _years,
-                                onChanged: (v) => setState(() => _year = v!),
-                              ),
+                              _DropdownField(value: _year, items: _years, onChanged: (v) => setState(() => _year = v!)),
                             ],
                           ),
                         ),
@@ -161,24 +197,15 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                                 onTap: () => _showColorPicker(context),
                                 child: Container(
                                   height: 50,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    border: Border.all(color: AppColors.border),
-                                    borderRadius: BorderRadius.circular(14),
-                                  ),
+                                  decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(14)),
                                   padding: const EdgeInsets.symmetric(horizontal: 12),
                                   child: Row(
                                     children: [
-                                      Text(_colors[_colorIndex].$1,
-                                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                                      Text(_colors[_colorIndex].$1, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
                                       const Spacer(),
                                       Container(
                                         width: 20, height: 20,
-                                        decoration: BoxDecoration(
-                                          color: _colors[_colorIndex].$2,
-                                          shape: BoxShape.circle,
-                                          border: Border.all(color: AppColors.border),
-                                        ),
+                                        decoration: BoxDecoration(color: _colors[_colorIndex].$2, shape: BoxShape.circle, border: Border.all(color: AppColors.border)),
                                       ),
                                     ],
                                   ),
@@ -191,7 +218,6 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                     ),
                     const SizedBox(height: 14),
 
-                    // ── رقم اللوحة ──
                     _Label('رقم اللوحة (اختياري)'),
                     TextField(
                       controller: _plateCtrl,
@@ -199,8 +225,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                       decoration: InputDecoration(
                         hintText: 'ر ب ح ٤٨٢١',
                         hintStyle: TextStyle(fontFamily: 'Tajawal', fontSize: 14, color: AppColors.textMuted),
-                        filled: true,
-                        fillColor: Colors.white,
+                        filled: true, fillColor: Colors.white,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.border)),
                         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.border)),
@@ -209,9 +234,8 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                     ),
                     const SizedBox(height: 22),
 
-                    // ── صور المركبة ──
                     _Label('صور المركبة (اختياري)'),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Row(
@@ -235,7 +259,35 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                               ),
                             ),
                           ),
-                          ..._imageBytes.asMap().entries.map((entry) => Padding(
+                          ..._existingUrls.asMap().entries.map((entry) => Padding(
+                            padding: const EdgeInsets.only(right: 10),
+                            child: Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: Image.network(entry.value, width: 90, height: 90, fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Container(
+                                      width: 90, height: 90,
+                                      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14)),
+                                      child: const Icon(Icons.broken_image_outlined, color: AppColors.textMuted),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 4, left: 4,
+                                  child: GestureDetector(
+                                    onTap: () => setState(() => _existingUrls.removeAt(entry.key)),
+                                    child: Container(
+                                      width: 22, height: 22,
+                                      decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+                                      child: const Icon(Icons.close, color: Colors.white, size: 14),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )),
+                          ..._newImageBytes.asMap().entries.map((entry) => Padding(
                             padding: const EdgeInsets.only(right: 10),
                             child: Stack(
                               children: [
@@ -246,7 +298,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                                 Positioned(
                                   top: 4, left: 4,
                                   child: GestureDetector(
-                                    onTap: () => setState(() => _imageBytes.removeAt(entry.key)),
+                                    onTap: () => setState(() => _newImageBytes.removeAt(entry.key)),
                                     child: Container(
                                       width: 22, height: 22,
                                       decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
@@ -263,7 +315,6 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                     const SizedBox(height: 28),
 
                     if (_error != null) ...[
-                      const SizedBox(height: 4),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                         decoration: BoxDecoration(color: const Color(0xFFFFF0F0), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFFFFCDD2))),
@@ -271,8 +322,9 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                       ),
                       const SizedBox(height: 8),
                     ],
+
                     DarkButton(
-                      label: _loading ? 'جارٍ الحفظ...' : 'حفظ المركبة',
+                      label: _loading ? 'جارٍ الحفظ...' : (_isEdit ? 'حفظ التعديلات' : 'حفظ السيارة'),
                       onTap: _loading ? null : _save,
                     ),
                   ],
@@ -303,10 +355,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
               children: List.generate(_colors.length, (i) {
                 final (name, color) = _colors[i];
                 return GestureDetector(
-                  onTap: () {
-                    setState(() => _colorIndex = i);
-                    Navigator.pop(context);
-                  },
+                  onTap: () { setState(() => _colorIndex = i); Navigator.pop(context); },
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
@@ -357,7 +406,7 @@ class _DropdownField extends StatelessWidget {
     padding: const EdgeInsets.symmetric(horizontal: 12),
     child: DropdownButtonHideUnderline(
       child: DropdownButton<String>(
-        value: value,
+        value: items.contains(value) ? value : items.first,
         isExpanded: true,
         icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.textMuted, size: 20),
         style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF1A1916)),
@@ -367,4 +416,3 @@ class _DropdownField extends StatelessWidget {
     ),
   );
 }
-

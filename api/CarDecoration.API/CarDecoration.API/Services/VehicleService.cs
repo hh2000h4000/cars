@@ -26,7 +26,7 @@ public class VehicleService
             .Where(v => v.OwnerId == userId)
             .OrderByDescending(v => v.CreatedAt)
             .Select(v => new VehicleResponse(
-                v.Id, v.Brand, v.Model, v.Year, v.PlateNumber,
+                v.Id, v.Brand, v.Model, v.Year, v.Color, v.PlateNumber,
                 v.VehicleImages.OrderBy(i => i.Order).Select(i => i.Url).ToList(),
                 v.CreatedAt))
             .ToListAsync();
@@ -43,6 +43,7 @@ public class VehicleService
             Brand       = req.Brand,
             Model       = req.Model,
             Year        = req.Year,
+            Color       = req.Color,
             PlateNumber = req.PlateNumber
         };
 
@@ -58,7 +59,40 @@ public class VehicleService
 
         return new VehicleResponse(
             vehicle.Id, vehicle.Brand, vehicle.Model,
-            vehicle.Year, vehicle.PlateNumber,
+            vehicle.Year, vehicle.Color, vehicle.PlateNumber,
+            req.ImageUrls ?? [],
+            vehicle.CreatedAt);
+    }
+
+    public async Task<VehicleResponse> UpdateVehicleAsync(Guid id, UpdateVehicleRequest req)
+    {
+        var userId = _currentUser.UserId
+            ?? throw new Exception("غير مصرح");
+
+        var vehicle = await _db.Vehicles
+            .Include(v => v.VehicleImages)
+            .FirstOrDefaultAsync(v => v.Id == id && v.OwnerId == userId)
+            ?? throw new Exception("المركبة غير موجودة");
+
+        vehicle.Brand       = req.Brand;
+        vehicle.Model       = req.Model;
+        vehicle.Year        = req.Year;
+        vehicle.Color       = req.Color;
+        vehicle.PlateNumber = req.PlateNumber;
+
+        _db.VehicleImages.RemoveRange(vehicle.VehicleImages);
+        await _db.SaveChangesAsync();
+
+        if (req.ImageUrls != null && req.ImageUrls.Count > 0)
+        {
+            for (int i = 0; i < req.ImageUrls.Count; i++)
+                _db.VehicleImages.Add(new VehicleImage { VehicleId = vehicle.Id, Url = req.ImageUrls[i], Order = i });
+            await _db.SaveChangesAsync();
+        }
+
+        return new VehicleResponse(
+            vehicle.Id, vehicle.Brand, vehicle.Model,
+            vehicle.Year, vehicle.Color, vehicle.PlateNumber,
             req.ImageUrls ?? [],
             vehicle.CreatedAt);
     }

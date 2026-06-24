@@ -171,6 +171,16 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void removeVehicle(String id) {
+    vehicles = vehicles.where((v) => v.id != id).toList();
+    notifyListeners();
+  }
+
+  void updateVehicle(Vehicle updated) {
+    vehicles = vehicles.map((v) => v.id == updated.id ? updated : v).toList();
+    notifyListeners();
+  }
+
   Future<Vehicle> addVehicleFromApi({
     required String brand,
     required String model,

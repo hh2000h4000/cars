@@ -32,7 +32,6 @@ public class VehiclesController : ControllerBase
     }
 
     [HttpPost]
-    [HttpPost]
     public async Task<IActionResult> AddVehicle(CreateVehicleRequest req)
     {
         try
@@ -48,6 +47,20 @@ public class VehiclesController : ControllerBase
                 inner = ex.InnerException?.Message,
                 inner2 = ex.InnerException?.InnerException?.Message
             });
+        }
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateVehicle(Guid id, UpdateVehicleRequest req)
+    {
+        try
+        {
+            var result = await _service.UpdateVehicleAsync(id, req);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
     }
 
