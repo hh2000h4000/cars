@@ -28,31 +28,37 @@ class ApiClient {
 
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
-        final token = await _storage.read(key: 'token');
-        if (token != null) {
-          options.headers['Authorization'] = 'Bearer $token';
-        }
-        AppLogger.info('→ ${options.method} ${options.path}');
+        try {
+          final token = await _storage.read(key: 'token');
+          if (token != null) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
+          AppLogger.info('→ ${options.method} ${options.path}');
+        } catch (_) {}
         handler.next(options);
       },
       onResponse: (response, handler) {
-        AppLogger.apiCall(
-          response.requestOptions.method,
-          response.requestOptions.path,
-          response.statusCode,
-        );
+        try {
+          AppLogger.apiCall(
+            response.requestOptions.method,
+            response.requestOptions.path,
+            response.statusCode,
+          );
+        } catch (_) {}
         handler.next(response);
       },
       onError: (error, handler) {
-        AppLogger.error(
-          'API Error: ${error.requestOptions.method} ${error.requestOptions.path}',
-          error: '${error.response?.statusCode} — ${error.message}',
-          context: {
-            'url': error.requestOptions.uri.toString(),
-            'status': error.response?.statusCode,
-            'response': error.response?.data?.toString(),
-          },
-        );
+        try {
+          AppLogger.error(
+            'API Error: ${error.requestOptions.method} ${error.requestOptions.path}',
+            error: '${error.response?.statusCode} — ${error.message}',
+            context: {
+              'url': error.requestOptions.uri.toString(),
+              'status': error.response?.statusCode,
+              'response': error.response?.data?.toString(),
+            },
+          );
+        } catch (_) {}
         handler.next(error);
       },
     ));

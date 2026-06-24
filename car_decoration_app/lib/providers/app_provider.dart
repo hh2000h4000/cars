@@ -251,13 +251,13 @@ class AppProvider extends ChangeNotifier {
     await Future.wait([
       VehicleService.getMyVehicles()
           .then((v) => vehicles = v)
-          .catchError((e, st) { AppLogger.error('initFromApi: vehicles', error: e, stackTrace: st as StackTrace?); errors.add('سيارات: $e'); }),
+          .catchError((Object e) { AppLogger.error('initFromApi: vehicles', error: e); errors.add('سيارات: $e'); }),
       ShopService.getShops()
           .then((s) => shops = s)
-          .catchError((e, st) { AppLogger.error('initFromApi: shops', error: e, stackTrace: st as StackTrace?); }),
+          .catchError((Object e) { AppLogger.error('initFromApi: shops', error: e); }),
       RequestService.getMyRequests()
           .then((r) => requests = r)
-          .catchError((e, st) { AppLogger.error('initFromApi: requests', error: e, stackTrace: st as StackTrace?); errors.add('طلبات: $e'); }),
+          .catchError((Object e) { AppLogger.error('initFromApi: requests', error: e); errors.add('طلبات: $e'); }),
     ]);
 
     initLoading = false;
