@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
-import '../../data/mock_data.dart';
 import '../../services/auth_service.dart';
 import 'dart:math' as math;
 

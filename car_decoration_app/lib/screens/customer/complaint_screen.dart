@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../../providers/app_provider.dart';
-import '../../data/mock_data.dart';
 
 class ComplaintScreen extends StatelessWidget {
   final String requestId;
@@ -76,7 +75,7 @@ class ComplaintScreen extends StatelessWidget {
               Text('سبب الشكوى', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
               const SizedBox(height: 10),
               Column(
-                children: MockData.complaintReasons.map((reason) {
+                children: const ['تغيّر السعر', 'تأخر الوصول', 'عدم الحضور', 'جودة رديئة', 'خدمة مختلفة', 'سبب آخر'].map((reason) {
                   final isSelected = selected == reason;
                   return GestureDetector(
                     onTap: () => provider.selectComplaintReason(reason),

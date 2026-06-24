@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
-import '../../data/mock_data.dart';
+import '../../providers/app_provider.dart';
 import 'dart:math' as math;
 
 class ShopProfileScreen extends StatelessWidget {
@@ -11,7 +12,15 @@ class ShopProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shop = MockData.shops.firstWhere((s) => s.id == shopId, orElse: () => MockData.shops.first);
+    final shops = context.watch<AppProvider>().shops;
+    final matches = shops.where((s) => s.id == shopId).toList();
+    if (matches.isEmpty) {
+      return Scaffold(
+        backgroundColor: AppColors.surface,
+        body: Center(child: Text('المتجر غير متاح', style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, color: AppColors.textSecondary))),
+      );
+    }
+    final shop = matches.first;
 
     return Scaffold(
       backgroundColor: AppColors.surface,

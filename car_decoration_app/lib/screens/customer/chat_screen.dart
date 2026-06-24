@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
-import '../../data/mock_data.dart';
 import '../../models/chat_message.dart';
 import '../../providers/app_provider.dart';
 
@@ -28,10 +27,9 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<AppProvider>();
     final messages = provider.messages;
-    final shop = MockData.shops.firstWhere(
-      (s) => s.id == widget.shopId,
-      orElse: () => MockData.shops.first,
-    );
+    final shopMatches = provider.shops.where((s) => s.id == widget.shopId).toList();
+    final shopName = shopMatches.isNotEmpty ? shopMatches.first.name : 'المتجر';
+    final shopMono = shopMatches.isNotEmpty ? shopMatches.first.mono : '؟';
     final isRequestId = int.tryParse(widget.shopId) != null;
     final chipLabel = isRequestId
         ? 'المحادثة بخصوص الطلب #${widget.shopId}'
@@ -55,13 +53,13 @@ class _ChatScreenState extends State<ChatScreen> {
                   const AppBackButton(),
                   const SizedBox(width: 10),
                   // Shop avatar (before name)
-                  ShopAvatar(mono: shop.mono, size: 40, fontSize: 15),
+                  ShopAvatar(mono: shopMono, size: 40, fontSize: 15),
                   const SizedBox(width: 10),
                   // Name + status
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(shop.name,
+                      Text(shopName,
                         style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                       const SizedBox(height: 2),
                       Row(

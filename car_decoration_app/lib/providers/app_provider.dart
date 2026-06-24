@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../services/app_logger.dart';
 import '../models/models.dart';
-import '../data/mock_data.dart';
 import '../services/vehicle_service.dart';
 import '../services/shop_service.dart';
 import '../services/request_service.dart';
@@ -19,22 +18,22 @@ class AppProvider extends ChangeNotifier {
   List<Vehicle> vehicles = [];
   List<Shop> shops = [];
   List<ServiceRequest> requests = [];
-  List<Quotation> quotations = MockData.quotations;
+  List<Quotation> quotations = [];
   String? acceptedQuoteId;
   List<String> selectedShops = [];
   ReviewData reviewData = ReviewData();
   String selectedComplaintReason = '';
 
   // Chat state
-  List<ChatMessage> messages = List.from(MockData.initialMessages);
+  List<ChatMessage> messages = [];
 
   // Shop state
   bool sentQuote = false;
-  List<ShopInboxItem> shopInbox = List.from(MockData.shopInbox);
+  List<ShopInboxItem> shopInbox = [];
 
   // Admin state
-  List<PendingShop> pendingShops = MockData.pendingShops;
-  List<Dispute> disputes = List.from(MockData.disputes);
+  List<PendingShop> pendingShops = [];
+  List<Dispute> disputes = [];
 
   // ─── Shop selection ───────────────────────────────────────────
   bool isShopSelected(String shopId) => selectedShops.contains(shopId);
@@ -49,7 +48,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   void selectAllShops() {
-    selectedShops = MockData.shops.map((s) => s.id).toList();
+    selectedShops = shops.map((s) => s.id).toList();
     notifyListeners();
   }
 
