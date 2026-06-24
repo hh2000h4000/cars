@@ -569,8 +569,7 @@ namespace CarDecoration.API.Migrations
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Images")
-                        .IsRequired()
+                    b.Property<string>("Color")
                         .HasColumnType("text");
 
                     b.Property<bool>("IsDeleted")
@@ -600,6 +599,52 @@ namespace CarDecoration.API.Migrations
                     b.HasIndex("OwnerId");
 
                     b.ToTable("Vehicles");
+                });
+
+            modelBuilder.Entity("CarDecoration.API.Models.VehicleImage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("VehicleId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VehicleId");
+
+                    b.ToTable("VehicleImages");
+                });
+
+            modelBuilder.Entity("CarDecoration.API.Models.RequestImage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("RequestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RequestId");
+
+                    b.ToTable("RequestImages");
                 });
 
             modelBuilder.Entity("CarDecoration.API.Models.ChatRoom", b =>
@@ -764,6 +809,28 @@ namespace CarDecoration.API.Migrations
                     b.Navigation("Owner");
                 });
 
+            modelBuilder.Entity("CarDecoration.API.Models.VehicleImage", b =>
+                {
+                    b.HasOne("CarDecoration.API.Models.Vehicle", "Vehicle")
+                        .WithMany("VehicleImages")
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Vehicle");
+                });
+
+            modelBuilder.Entity("CarDecoration.API.Models.RequestImage", b =>
+                {
+                    b.HasOne("CarDecoration.API.Models.Request", "Request")
+                        .WithMany("RequestImages")
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Request");
+                });
+
             modelBuilder.Entity("CarDecoration.API.Models.ChatRoom", b =>
                 {
                     b.Navigation("Messages");
@@ -777,9 +844,16 @@ namespace CarDecoration.API.Migrations
 
                     b.Navigation("Quotations");
 
+                    b.Navigation("RequestImages");
+
                     b.Navigation("RequestShops");
 
                     b.Navigation("Review");
+                });
+
+            modelBuilder.Entity("CarDecoration.API.Models.Vehicle", b =>
+                {
+                    b.Navigation("VehicleImages");
                 });
 
             modelBuilder.Entity("CarDecoration.API.Models.Shop", b =>
