@@ -201,6 +201,11 @@ class AppProvider extends ChangeNotifier {
     return v;
   }
 
+  void updateRequest(ServiceRequest updated) {
+    requests = requests.map((r) => r.id == updated.id ? updated : r).toList();
+    notifyListeners();
+  }
+
   // ─── Request ──────────────────────────────────────────────────
   Future<ServiceRequest> addRequestFromApi({
     required String vehicleId,

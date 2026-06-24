@@ -128,6 +128,15 @@ class RequestDetailScreen extends StatelessWidget {
 
                     const SizedBox(height: 16),
 
+                    // Edit button for pending requests
+                    if (request.status == RequestStatus.pending)
+                      OutlinedDarkButton(
+                        label: 'تعديل الطلب',
+                        onTap: () => Navigator.pushNamed(context, '/customer/requests/edit', arguments: request),
+                        textColor: AppColors.textPrimary,
+                        borderColor: AppColors.border,
+                      ),
+
                     // Complaint button for active requests
                     if (request.status == RequestStatus.inProgress || request.status == RequestStatus.disputed)
                       OutlinedDarkButton(

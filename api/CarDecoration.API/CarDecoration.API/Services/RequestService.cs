@@ -76,7 +76,7 @@ public class RequestService
 
         return new RequestResponse(
             request.Id, request.RequestNumber, vehicle.Id,
-            vehicle.Brand, vehicle.Model, vehicle.Year,
+            vehicle.Brand, vehicle.Model, vehicle.Year, vehicle.Color,
             request.Description, request.Location,
             request.AppointmentDate, request.Notes,
             request.Status.ToString(),
@@ -98,7 +98,7 @@ public class RequestService
             .OrderByDescending(r => r.CreatedAt)
             .Select(r => new RequestResponse(
                 r.Id, r.RequestNumber, r.Vehicle.Id,
-                r.Vehicle.Brand, r.Vehicle.Model, r.Vehicle.Year,
+                r.Vehicle.Brand, r.Vehicle.Model, r.Vehicle.Year, r.Vehicle.Color,
                 r.Description, r.Location,
                 r.AppointmentDate, r.Notes,
                 r.Status.ToString(),
@@ -168,6 +168,50 @@ public class RequestService
         await _db.SaveChangesAsync();
 
         return chatRoom.Id;
+    }
+
+    // تعديل طلب من قِبل العميل (يُسمح فقط عند الحالة Pending)
+    public async Task<RequestResponse> UpdateRequestAsync(Guid id, UpdateRequestRequest req)
+    {
+        var userId = _currentUser.UserId
+            ?? throw new Exception("غير مصرح");
+
+        var request = await _db.Requests
+            .Include(r => r.Vehicle)
+            .Include(r => r.RequestShops).ThenInclude(rs => rs.Shop)
+            .Include(r => r.RequestImages)
+            .FirstOrDefaultAsync(r => r.Id == id && r.CustomerId == userId && !r.IsDeleted)
+            ?? throw new Exception("الطلب غير موجود");
+
+        if (request.Status != RequestStatus.Pending)
+            throw new Exception("لا يمكن تعديل الطلب في هذه المرحلة");
+
+        request.Description = req.Description;
+        request.Location = req.Location;
+        request.AppointmentDate = req.PreferredDate;
+        request.Notes = req.Notes;
+
+        _db.RequestImages.RemoveRange(request.RequestImages);
+        await _db.SaveChangesAsync();
+
+        if (req.ImageUrls != null && req.ImageUrls.Count > 0)
+        {
+            for (int i = 0; i < req.ImageUrls.Count; i++)
+                _db.RequestImages.Add(new RequestImage { RequestId = request.Id, Url = req.ImageUrls[i], Order = i });
+            await _db.SaveChangesAsync();
+        }
+
+        var shopNames = request.RequestShops.Select(rs => rs.Shop.Name).ToList();
+
+        return new RequestResponse(
+            request.Id, request.RequestNumber, request.VehicleId,
+            request.Vehicle.Brand, request.Vehicle.Model, request.Vehicle.Year, request.Vehicle.Color,
+            request.Description, request.Location,
+            request.AppointmentDate, request.Notes,
+            request.Status.ToString(),
+            shopNames,
+            req.ImageUrls ?? [],
+            request.CreatedAt);
     }
 
     // إلغاء طلب من قِبل العميل

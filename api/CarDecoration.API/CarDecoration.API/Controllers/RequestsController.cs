@@ -73,6 +73,20 @@ public class RequestsController : ControllerBase
         }
     }
 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, UpdateRequestRequest req)
+    {
+        try
+        {
+            var result = await _service.UpdateRequestAsync(id, req);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> Cancel(Guid id)
     {

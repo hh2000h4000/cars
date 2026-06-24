@@ -17,6 +17,7 @@ import 'screens/customer/chat_screen.dart';
 import 'screens/customer/review_screen.dart';
 import 'screens/customer/complaint_screen.dart';
 import 'screens/customer/add_vehicle_screen.dart';
+import 'screens/customer/edit_request_screen.dart';
 import 'screens/customer/location_picker_screen.dart';
 import 'screens/shop/shop_shell.dart';
 import 'screens/shop/shop_request_detail_screen.dart';
@@ -111,6 +112,9 @@ class CarDecorationApp extends StatelessWidget {
         break;
       case '/customer/vehicles/add':
         page = const AddVehicleScreen();
+        break;
+      case '/customer/requests/edit':
+        page = const EditRequestScreen();
         break;
       case '/customer/location-picker':
         page = const LocationPickerScreen();

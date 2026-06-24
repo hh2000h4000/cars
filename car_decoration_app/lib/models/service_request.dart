@@ -37,11 +37,13 @@ extension RequestStatusLabel on RequestStatus {
 class ServiceRequest {
   final String id;
   final int requestNumber;
+  final String vehicleId;
   final String serviceType;
   final String vehicleBrand;
   final String vehicleModel;
   final int vehicleYear;
   final String vehicleColor;
+  final String location;
   final RequestStatus status;
   final String dateLabel;
   final int quotationCount;
@@ -51,7 +53,6 @@ class ServiceRequest {
   final List<String> imageUrls;
 
   factory ServiceRequest.fromJson(Map<String, dynamic> json) {
-    final v = json['vehicle'] as Map<String, dynamic>?;
     final statusStr = (json['status'] as String?)?.toLowerCase() ?? 'pending';
     final RequestStatus status;
     switch (statusStr) {
@@ -77,11 +78,13 @@ class ServiceRequest {
     return ServiceRequest(
       id: json['id'] as String,
       requestNumber: json['requestNumber'] as int? ?? 0,
+      vehicleId: (json['vehicleId'] as String?) ?? '',
       serviceType: json['description'] as String? ?? '',
-      vehicleBrand: v?['brand'] as String? ?? '',
-      vehicleModel: v?['model'] as String? ?? '',
-      vehicleYear: v?['year'] as int? ?? 0,
-      vehicleColor: v?['color'] as String? ?? '',
+      vehicleBrand: json['vehicleBrand'] as String? ?? '',
+      vehicleModel: json['vehicleModel'] as String? ?? '',
+      vehicleYear: json['vehicleYear'] as int? ?? 0,
+      vehicleColor: json['vehicleColor'] as String? ?? '',
+      location: json['location'] as String? ?? '',
       status: status,
       dateLabel: dateLabel,
       quotationCount: json['quotationCount'] as int? ?? 0,
@@ -94,11 +97,13 @@ class ServiceRequest {
   const ServiceRequest({
     required this.id,
     required this.requestNumber,
+    this.vehicleId = '',
     required this.serviceType,
     required this.vehicleBrand,
     required this.vehicleModel,
     required this.vehicleYear,
     required this.vehicleColor,
+    this.location = '',
     required this.status,
     required this.dateLabel,
     this.quotationCount = 0,

@@ -4,7 +4,7 @@ import 'api_client.dart';
 
 class RequestService {
   static Future<List<ServiceRequest>> getMyRequests() async {
-    final res = await ApiClient.dio.get('/api/requests');
+    final res = await ApiClient.dio.get('/api/requests/my');
     final list = res.data as List<dynamic>;
     return list.map((e) => ServiceRequest.fromJson(e as Map<String, dynamic>)).toList();
   }
@@ -39,6 +39,32 @@ class RequestService {
       if (notes != null) 'notes': notes,
       if (preferredDateTime != null) 'preferredDate': preferredDateTime,
       if (imageUrls != null && imageUrls.isNotEmpty) 'imageUrls': imageUrls,
+    });
+    return ServiceRequest.fromJson(res.data as Map<String, dynamic>);
+  }
+
+  static Future<ServiceRequest> updateRequest({
+    required String id,
+    required String description,
+    required String location,
+    String? notes,
+    DateTime? preferredDate,
+    TimeOfDay? preferredTime,
+    List<String>? imageUrls,
+  }) async {
+    String? preferredDateTime;
+    if (preferredDate != null) {
+      final h = preferredTime?.hour ?? 12;
+      final m = preferredTime?.minute ?? 0;
+      final dt = DateTime(preferredDate.year, preferredDate.month, preferredDate.day, h, m);
+      preferredDateTime = dt.toIso8601String();
+    }
+    final res = await ApiClient.dio.put('/api/requests/$id', data: {
+      'description': description,
+      'location': location,
+      if (notes != null && notes.isNotEmpty) 'notes': notes,
+      if (preferredDateTime != null) 'preferredDate': preferredDateTime,
+      if (imageUrls != null) 'imageUrls': imageUrls,
     });
     return ServiceRequest.fromJson(res.data as Map<String, dynamic>);
   }

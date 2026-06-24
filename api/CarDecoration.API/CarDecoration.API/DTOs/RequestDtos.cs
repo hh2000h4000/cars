@@ -10,6 +10,14 @@ public record CreateRequestRequest(
     List<string>? ImageUrls
 );
 
+public record UpdateRequestRequest(
+    string Description,
+    string Location,
+    DateTime? PreferredDate,
+    string? Notes,
+    List<string>? ImageUrls
+);
+
 public record RequestResponse(
     Guid Id,
     int RequestNumber,
@@ -17,6 +25,7 @@ public record RequestResponse(
     string VehicleBrand,
     string VehicleModel,
     int VehicleYear,
+    string? VehicleColor,
     string Description,
     string Location,
     DateTime? AppointmentDate,
