@@ -1,38 +1,78 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'app.dart';
 import 'providers/app_provider.dart';
 import 'services/auth_service.dart';
 import 'services/api_client.dart';
+import 'services/app_logger.dart';
+
+// ─── إعداد Sentry ──────────────────────────────────────────────
+// احصل على DSN من: https://sentry.io → New Project → Flutter
+// ثم ضعه هنا أو مرره عبر: flutter run --dart-define=SENTRY_DSN=https://...
+const _sentryDsn = String.fromEnvironment(
+  'SENTRY_DSN',
+  defaultValue: '', // ← ضع DSN هنا للـ production
+);
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  await SentryFlutter.init(
+    (options) {
+      options.dsn = _sentryDsn;
+      options.tracesSampleRate = kDebugMode ? 0.0 : 1.0;
+      options.environment = kDebugMode ? 'development' : 'production';
+      options.attachScreenshot = true;
+      options.attachViewHierarchy = true;
+      // في debug mode: يطبع في console بدون إرسال لـ Sentry
+      options.debug = kDebugMode;
+    },
+    appRunner: () async {
+      WidgetsFlutterBinding.ensureInitialized();
 
-  final isLoggedIn = await AuthService.isLoggedIn();
-  String initialRoute = '/auth/login';
+      // التقاط كل Flutter framework errors
+      FlutterError.onError = (details) {
+        AppLogger.error(
+          'Flutter Framework Error',
+          error: details.exception,
+          stackTrace: details.stack,
+          context: {'widget': details.context?.toDescription()},
+        );
+      };
 
-  if (isLoggedIn) {
-    final role = await ApiClient.getRole();
-    switch (role?.toLowerCase()) {
-      case 'shop':
-        initialRoute = '/shop/dashboard';
-        break;
-      case 'admin':
-        initialRoute = '/admin/dashboard';
-        break;
-      default:
-        initialRoute = '/customer/home';
-    }
-  }
+      // التقاط كل Dart async errors غير المعالجة
+      PlatformDispatcher.instance.onError = (error, stack) {
+        AppLogger.error('Unhandled Dart Error', error: error, stackTrace: stack);
+        return true;
+      };
 
-  runApp(
-    ChangeNotifierProvider(
-      create: (_) {
-        final provider = AppProvider();
-        if (isLoggedIn) provider.initFromApi();
-        return provider;
-      },
-      child: CarDecorationApp(initialRoute: initialRoute),
-    ),
+      final isLoggedIn = await AuthService.isLoggedIn();
+      String initialRoute = '/auth/login';
+
+      if (isLoggedIn) {
+        final role = await ApiClient.getRole();
+        switch (role?.toLowerCase()) {
+          case 'shop':
+            initialRoute = '/shop/dashboard';
+            break;
+          case 'admin':
+            initialRoute = '/admin/dashboard';
+            break;
+          default:
+            initialRoute = '/customer/home';
+        }
+      }
+
+      runApp(
+        ChangeNotifierProvider(
+          create: (_) {
+            final provider = AppProvider();
+            if (isLoggedIn) provider.initFromApi();
+            return provider;
+          },
+          child: CarDecorationApp(initialRoute: initialRoute),
+        ),
+      );
+    },
   );
 }

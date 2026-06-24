@@ -11,10 +11,12 @@ namespace CarDecoration.API.Controllers;
 public class VehiclesController : ControllerBase
 {
     private readonly VehicleService _service;
+    private readonly ILogger<VehiclesController> _logger;
 
-    public VehiclesController(VehicleService service)
+    public VehiclesController(VehicleService service, ILogger<VehiclesController> logger)
     {
         _service = service;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -27,6 +29,7 @@ public class VehiclesController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "GetMyVehicles failed");
             return BadRequest(new { message = ex.Message });
         }
     }
@@ -41,12 +44,8 @@ public class VehiclesController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(new
-            {
-                message = ex.Message,
-                inner = ex.InnerException?.Message,
-                inner2 = ex.InnerException?.InnerException?.Message
-            });
+            _logger.LogError(ex, "AddVehicle failed");
+            return BadRequest(new { message = ex.Message });
         }
     }
 
@@ -60,6 +59,7 @@ public class VehiclesController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "UpdateVehicle failed for {VehicleId}", id);
             return BadRequest(new { message = ex.Message });
         }
     }
@@ -74,6 +74,7 @@ public class VehiclesController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "DeleteVehicle failed for {VehicleId}", id);
             return BadRequest(new { message = ex.Message });
         }
     }

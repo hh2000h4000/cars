@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'app_logger.dart';
 
 // dart:io و dio/io غير متوفران على الويب
 import 'api_client_mobile.dart' if (dart.library.html) 'api_client_web.dart' as platform;
@@ -31,9 +32,27 @@ class ApiClient {
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
         }
+        AppLogger.info('→ ${options.method} ${options.path}');
         handler.next(options);
       },
+      onResponse: (response, handler) {
+        AppLogger.apiCall(
+          response.requestOptions.method,
+          response.requestOptions.path,
+          response.statusCode,
+        );
+        handler.next(response);
+      },
       onError: (error, handler) {
+        AppLogger.error(
+          'API Error: ${error.requestOptions.method} ${error.requestOptions.path}',
+          error: '${error.response?.statusCode} — ${error.message}',
+          context: {
+            'url': error.requestOptions.uri.toString(),
+            'status': error.response?.statusCode,
+            'response': error.response?.data?.toString(),
+          },
+        );
         handler.next(error);
       },
     ));

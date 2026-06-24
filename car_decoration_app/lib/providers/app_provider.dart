@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../services/app_logger.dart';
 import '../models/models.dart';
 import '../data/mock_data.dart';
 import '../services/vehicle_service.dart';
@@ -250,13 +251,13 @@ class AppProvider extends ChangeNotifier {
     await Future.wait([
       VehicleService.getMyVehicles()
           .then((v) => vehicles = v)
-          .catchError((e) { debugPrint('vehicles error: $e'); errors.add('سيارات: $e'); }),
+          .catchError((e, st) { AppLogger.error('initFromApi: vehicles', error: e, stackTrace: st as StackTrace?); errors.add('سيارات: $e'); }),
       ShopService.getShops()
           .then((s) => shops = s)
-          .catchError((e) { debugPrint('shops error: $e'); }),
+          .catchError((e, st) { AppLogger.error('initFromApi: shops', error: e, stackTrace: st as StackTrace?); }),
       RequestService.getMyRequests()
           .then((r) => requests = r)
-          .catchError((e) { debugPrint('requests error: $e'); errors.add('طلبات: $e'); }),
+          .catchError((e, st) { AppLogger.error('initFromApi: requests', error: e, stackTrace: st as StackTrace?); errors.add('طلبات: $e'); }),
     ]);
 
     initLoading = false;

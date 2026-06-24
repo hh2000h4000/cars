@@ -11,10 +11,12 @@ namespace CarDecoration.API.Controllers;
 public class RequestsController : ControllerBase
 {
     private readonly RequestService _service;
+    private readonly ILogger<RequestsController> _logger;
 
-    public RequestsController(RequestService service)
+    public RequestsController(RequestService service, ILogger<RequestsController> logger)
     {
         _service = service;
+        _logger = logger;
     }
 
     [HttpPost]
@@ -27,6 +29,7 @@ public class RequestsController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Create request failed");
             return BadRequest(new { message = ex.Message });
         }
     }
@@ -41,6 +44,7 @@ public class RequestsController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "GetMyRequests failed");
             return BadRequest(new { message = ex.Message });
         }
     }
@@ -55,6 +59,7 @@ public class RequestsController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "GetShopRequests failed");
             return BadRequest(new { message = ex.Message });
         }
     }
@@ -69,6 +74,7 @@ public class RequestsController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "AcceptRequest failed for {RequestId}", id);
             return BadRequest(new { message = ex.Message });
         }
     }
@@ -83,6 +89,7 @@ public class RequestsController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Update request failed for {RequestId}", id);
             return BadRequest(new { message = ex.Message });
         }
     }
@@ -97,6 +104,7 @@ public class RequestsController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Cancel request failed for {RequestId}", id);
             return BadRequest(new { message = ex.Message });
         }
     }
