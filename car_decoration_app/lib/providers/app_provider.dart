@@ -244,19 +244,23 @@ class AppProvider extends ChangeNotifier {
     initLoading = true;
     initError = null;
     notifyListeners();
-    try {
-      final fetchedVehicles = VehicleService.getMyVehicles();
-      final fetchedShops = ShopService.getShops();
-      final fetchedRequests = RequestService.getMyRequests();
-      vehicles = await fetchedVehicles;
-      shops = await fetchedShops;
-      requests = await fetchedRequests;
-    } catch (e) {
-      debugPrint('initFromApi error: $e');
-      initError = e.toString();
-    } finally {
-      initLoading = false;
-      notifyListeners();
-    }
+
+    final errors = <String>[];
+
+    await Future.wait([
+      VehicleService.getMyVehicles()
+          .then((v) => vehicles = v)
+          .catchError((e) { debugPrint('vehicles error: $e'); errors.add('سيارات: $e'); }),
+      ShopService.getShops()
+          .then((s) => shops = s)
+          .catchError((e) { debugPrint('shops error: $e'); }),
+      RequestService.getMyRequests()
+          .then((r) => requests = r)
+          .catchError((e) { debugPrint('requests error: $e'); errors.add('طلبات: $e'); }),
+    ]);
+
+    initLoading = false;
+    if (errors.isNotEmpty) initError = errors.first;
+    notifyListeners();
   }
 }
