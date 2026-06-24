@@ -11,7 +11,9 @@ class VehiclesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vehicles = context.watch<AppProvider>().vehicles;
+    final provider = context.watch<AppProvider>();
+    final vehicles = provider.vehicles;
+    final loading = provider.initLoading;
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -45,8 +47,10 @@ class VehiclesScreen extends StatelessWidget {
                 ],
               ),
             ),
+            if (loading)
+              const LinearProgressIndicator(color: AppColors.goldText, backgroundColor: AppColors.goldBg),
             Expanded(
-              child: vehicles.isEmpty
+              child: vehicles.isEmpty && !loading
                   ? _EmptyState(onAdd: () => Navigator.pushNamed(context, '/customer/vehicles/add'))
                   : ListView.separated(
                       padding: const EdgeInsets.fromLTRB(22, 0, 22, 32),

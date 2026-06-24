@@ -11,13 +11,17 @@ class RequestsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final requests = context.watch<AppProvider>().requests;
+    final provider = context.watch<AppProvider>();
+    final requests = provider.requests;
+    final loading = provider.initLoading;
 
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Column(
           children: [
+            if (loading)
+              const LinearProgressIndicator(color: AppColors.goldText, backgroundColor: AppColors.goldBg),
             Padding(
               padding: const EdgeInsets.fromLTRB(22, 14, 22, 16),
               child: Row(
@@ -47,7 +51,7 @@ class RequestsScreen extends StatelessWidget {
             ),
 
             Expanded(
-              child: requests.isEmpty
+              child: requests.isEmpty && !loading
                   ? Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,

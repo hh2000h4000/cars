@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../data/mock_data.dart';
@@ -236,7 +237,13 @@ class AppProvider extends ChangeNotifier {
   }
 
   // ─── API bootstrap ────────────────────────────────────────────
+  bool initLoading = false;
+  String? initError;
+
   Future<void> initFromApi() async {
+    initLoading = true;
+    initError = null;
+    notifyListeners();
     try {
       final fetchedVehicles = VehicleService.getMyVehicles();
       final fetchedShops = ShopService.getShops();
@@ -244,9 +251,12 @@ class AppProvider extends ChangeNotifier {
       vehicles = await fetchedVehicles;
       shops = await fetchedShops;
       requests = await fetchedRequests;
+    } catch (e) {
+      debugPrint('initFromApi error: $e');
+      initError = e.toString();
+    } finally {
+      initLoading = false;
       notifyListeners();
-    } catch (_) {
-      // Keep mock data on failure
     }
   }
 }

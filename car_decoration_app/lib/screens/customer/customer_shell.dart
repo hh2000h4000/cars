@@ -22,8 +22,19 @@ class _CustomerShellState extends State<CustomerShell> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AppProvider>().initFromApi();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await context.read<AppProvider>().initFromApi();
+      if (mounted) {
+        final err = context.read<AppProvider>().initError;
+        if (err != null) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('خطأ في تحميل البيانات: $err',
+              style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13)),
+            backgroundColor: const Color(0xFFD32F2F),
+            duration: const Duration(seconds: 6),
+          ));
+        }
+      }
     });
   }
 
