@@ -112,7 +112,7 @@ class HomeScreen extends StatelessWidget {
               child: GestureDetector(
                 onTap: () => Navigator.pushNamed(context, '/customer/requests/new'),
                 child: Container(
-                  padding: const EdgeInsets.all(22),
+                  clipBehavior: Clip.hardEdge,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(colors: [Color(0xFF1B1A14), Color(0xFF2E2917)]),
                     borderRadius: BorderRadius.circular(22),
@@ -120,12 +120,9 @@ class HomeScreen extends StatelessWidget {
                   ),
                   child: Stack(
                     children: [
-                      // Golden diagonal lines — same painter as shop cards
+                      // Lines fill the full Container (no padding here so Positioned.fill works correctly)
                       Positioned.fill(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(22),
-                          child: CustomPaint(painter: _GoldenLinesPainter()),
-                        ),
+                        child: CustomPaint(painter: _GoldenLinesPainter()),
                       ),
                       Positioned(
                         top: -40, right: -20,
@@ -137,30 +134,34 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(color: AppColors.goldLight, borderRadius: BorderRadius.circular(999)),
-                            child: Text('خدمة منزلية متنقلة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w800, color: AppColors.dark)),
-                          ),
-                          const SizedBox(height: 11),
-                          Text('احجز خدمة احترافية\nتصلك أينما كنت', style: TextStyle(fontFamily: 'Tajawal', fontSize: 21, fontWeight: FontWeight.w900, color: const Color(0xFFFBF7EC), height: 1.35)),
-                          const SizedBox(height: 15),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
-                            decoration: BoxDecoration(color: const Color(0xFFFBF7EC), borderRadius: BorderRadius.circular(12)),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text('اطلب الآن', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.dark)),
-                                const SizedBox(width: 4),
-                                const Icon(Icons.chevron_left, color: AppColors.dark, size: 18),
-                              ],
+                      // Content gets the padding
+                      Padding(
+                        padding: const EdgeInsets.all(22),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(color: AppColors.goldLight, borderRadius: BorderRadius.circular(999)),
+                              child: Text('خدمة منزلية متنقلة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w800, color: AppColors.dark)),
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 11),
+                            Text('احجز خدمة احترافية\nتصلك أينما كنت', style: TextStyle(fontFamily: 'Tajawal', fontSize: 21, fontWeight: FontWeight.w900, color: const Color(0xFFFBF7EC), height: 1.35)),
+                            const SizedBox(height: 15),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
+                              decoration: BoxDecoration(color: const Color(0xFFFBF7EC), borderRadius: BorderRadius.circular(12)),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text('اطلب الآن', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.dark)),
+                                  const SizedBox(width: 4),
+                                  const Icon(Icons.chevron_left, color: AppColors.dark, size: 18),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
