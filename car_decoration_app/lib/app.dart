@@ -99,7 +99,7 @@ class CarDecorationApp extends StatelessWidget {
         page = QuotationDetailScreen(quotationId: args as String? ?? 'q1');
         break;
       case '/customer/chat':
-        page = ChatScreen(shopId: args as String? ?? 'sh1');
+        page = ChatScreen(chatRoomId: args as String? ?? '');
         break;
       case '/customer/review':
         page = const ReviewScreen();

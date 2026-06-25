@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-
-import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../../models/chat_message.dart';
-import '../../providers/app_provider.dart';
+import '../../services/chat_service.dart';
 
 class ChatScreen extends StatefulWidget {
-  final String shopId;
-  const ChatScreen({super.key, required this.shopId});
+  final String chatRoomId;
+  const ChatScreen({super.key, required this.chatRoomId});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -16,24 +14,90 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final _controller = TextEditingController();
+  final _scrollController = ScrollController();
+
+  ChatRoom? _room;
+  List<ChatMessage> _messages = [];
+  bool _loading = true;
+  bool _sending = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRoom();
+  }
 
   @override
   void dispose() {
     _controller.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadRoom() async {
+    try {
+      final detail = await ChatService.getRoomDetail(widget.chatRoomId);
+      if (mounted) {
+        setState(() {
+          _room = detail.room;
+          _messages = detail.messages;
+          _loading = false;
+        });
+        _scrollToBottom();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'تعذّر تحميل المحادثة';
+          _loading = false;
+        });
+      }
+    }
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  Future<void> _sendMessage() async {
+    final text = _controller.text.trim();
+    if (text.isEmpty || _sending) return;
+    setState(() => _sending = true);
+    _controller.clear();
+    try {
+      final msg = await ChatService.sendMessage(widget.chatRoomId, text);
+      if (mounted) {
+        setState(() => _messages.add(msg));
+        _scrollToBottom();
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('تعذّر إرسال الرسالة', style: TextStyle(fontFamily: 'Tajawal')),
+            backgroundColor: AppColors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<AppProvider>();
-    final messages = provider.messages;
-    final shopMatches = provider.shops.where((s) => s.id == widget.shopId).toList();
-    final shopName = shopMatches.isNotEmpty ? shopMatches.first.name : 'المتجر';
-    final shopMono = shopMatches.isNotEmpty ? shopMatches.first.mono : '؟';
-    final isRequestId = int.tryParse(widget.shopId) != null;
-    final chipLabel = isRequestId
-        ? 'المحادثة بخصوص الطلب #${widget.shopId}'
-        : 'المحادثة بخصوص الطلب';
+    final shopName = _room?.shopName ?? 'المتجر';
+    final shopMono = _room?.shopMono ?? '؟';
+    final requestId = _room?.requestId ?? '';
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -49,33 +113,28 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               child: Row(
                 children: [
-                  // Back button (visual RIGHT in RTL)
                   const AppBackButton(),
                   const SizedBox(width: 10),
-                  // Shop avatar (before name)
                   ShopAvatar(mono: shopMono, size: 40, fontSize: 15),
                   const SizedBox(width: 10),
-                  // Name + status
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(shopName,
-                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                        style: const TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                       const SizedBox(height: 2),
                       Row(
                         children: [
                           Container(width: 7, height: 7,
                             decoration: const BoxDecoration(color: AppColors.green, shape: BoxShape.circle)),
                           const SizedBox(width: 5),
-                          Text('متصل الآن',
+                          const Text('متصل الآن',
                             style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.green)),
                         ],
                       ),
                     ],
                   ),
-                  // Spacer pushes phone to FAR LEFT
                   const Spacer(),
-                  // Phone button (visual FAR LEFT in RTL)
                   Container(
                     width: 38, height: 38,
                     decoration: BoxDecoration(
@@ -89,31 +148,41 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
 
-            // ── Messages ──
+            // ── Body ──
             Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                itemCount: messages.length + 1,
-                itemBuilder: (_, i) {
-                  if (i == 0) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      child: Center(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: AppColors.dark.withOpacity(0.55),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(chipLabel,
-                            style: const TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: Colors.white)),
+              child: _loading
+                  ? const Center(child: CircularProgressIndicator(color: AppColors.goldText))
+                  : _error != null
+                      ? Center(
+                          child: Text(_error!,
+                            style: const TextStyle(fontFamily: 'Tajawal', fontSize: 14, color: AppColors.textMuted)),
+                        )
+                      : ListView.builder(
+                          controller: _scrollController,
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                          itemCount: _messages.length + 1,
+                          itemBuilder: (_, i) {
+                            if (i == 0) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 20),
+                                child: Center(
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.dark.withOpacity(0.55),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      requestId.isNotEmpty ? 'المحادثة بخصوص الطلب #$requestId' : 'المحادثة',
+                                      style: const TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+                            return _MessageBubble(msg: _messages[i - 1]);
+                          },
                         ),
-                      ),
-                    );
-                  }
-                  return _MessageBubble(msg: messages[i - 1]);
-                },
-              ),
             ),
 
             // ── Input bar ──
@@ -125,7 +194,6 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               child: Row(
                 children: [
-                  // Attachment (visual RIGHT in RTL)
                   Container(
                     width: 38, height: 38,
                     decoration: BoxDecoration(
@@ -135,7 +203,6 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: const Icon(Icons.image_outlined, color: AppColors.textMuted, size: 18),
                   ),
                   const SizedBox(width: 8),
-                  // Text field (single pill shape, no border)
                   Expanded(
                     child: Container(
                       height: 40,
@@ -149,38 +216,41 @@ class _ChatScreenState extends State<ChatScreen> {
                         textAlign: TextAlign.right,
                         textDirection: TextDirection.rtl,
                         style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           hintText: 'اكتب رسالة...',
-                          hintStyle: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textMuted),
+                          hintStyle: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textMuted),
                           border: InputBorder.none,
                           enabledBorder: InputBorder.none,
                           focusedBorder: InputBorder.none,
                           filled: false,
                           isDense: true,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                          contentPadding: EdgeInsets.symmetric(vertical: 10),
                         ),
+                        onSubmitted: (_) => _sendMessage(),
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  // Send button - gold (visual LEFT in RTL)
                   GestureDetector(
-                    onTap: () {
-                      if (_controller.text.trim().isNotEmpty) {
-                        provider.sendMessage(_controller.text.trim());
-                        _controller.clear();
-                      }
-                    },
+                    onTap: _sendMessage,
                     child: Container(
                       width: 40, height: 40,
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(colors: [AppColors.goldLight, AppColors.gold]),
+                        gradient: _sending
+                            ? null
+                            : const LinearGradient(colors: [AppColors.goldLight, AppColors.gold]),
+                        color: _sending ? AppColors.border : null,
                         borderRadius: BorderRadius.circular(13),
                       ),
-                      child: const Directionality(
-                        textDirection: TextDirection.ltr,
-                        child: Icon(Icons.send_rounded, color: AppColors.dark, size: 18),
-                      ),
+                      child: _sending
+                          ? const Padding(
+                              padding: EdgeInsets.all(10),
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.goldText),
+                            )
+                          : const Directionality(
+                              textDirection: TextDirection.ltr,
+                              child: Icon(Icons.send_rounded, color: AppColors.dark, size: 18),
+                            ),
                     ),
                   ),
                 ],

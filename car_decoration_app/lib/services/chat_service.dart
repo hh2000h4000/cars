@@ -8,6 +8,8 @@ class ChatRoom {
   final String customerName;
   final String shopMono;
   final String customerMono;
+  final String lastMessage;
+  final String lastMessageTime;
 
   const ChatRoom({
     required this.id,
@@ -16,11 +18,27 @@ class ChatRoom {
     required this.customerName,
     required this.shopMono,
     required this.customerMono,
+    this.lastMessage = '',
+    this.lastMessageTime = '',
   });
 
   factory ChatRoom.fromJson(Map<String, dynamic> json) {
     final shopName = json['shopName'] as String? ?? '';
     final customerName = json['customerName'] as String? ?? '';
+    final lastMsg = json['lastMessage'] as String? ?? '';
+    final lastMsgAt = json['lastMessageAt'] as String?;
+    String timeLabel = '';
+    if (lastMsgAt != null) {
+      try {
+        final dt = DateTime.parse(lastMsgAt).toLocal();
+        final now = DateTime.now();
+        if (dt.day == now.day && dt.month == now.month && dt.year == now.year) {
+          timeLabel = '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+        } else {
+          timeLabel = '${dt.day}/${dt.month}';
+        }
+      } catch (_) {}
+    }
     return ChatRoom(
       id: json['id'] as String,
       requestId: json['requestId'] as String? ?? '',
@@ -28,8 +46,16 @@ class ChatRoom {
       customerName: customerName,
       shopMono: shopName.isNotEmpty ? shopName[0] : '؟',
       customerMono: customerName.isNotEmpty ? customerName[0] : '؟',
+      lastMessage: lastMsg,
+      lastMessageTime: timeLabel,
     );
   }
+}
+
+class ChatRoomDetail {
+  final ChatRoom room;
+  final List<ChatMessage> messages;
+  const ChatRoomDetail({required this.room, required this.messages});
 }
 
 class ChatService {
@@ -39,14 +65,16 @@ class ChatService {
     return list.map((e) => ChatRoom.fromJson(e as Map<String, dynamic>)).toList();
   }
 
-  static Future<List<ChatMessage>> getMessages(String roomId) async {
+  static Future<ChatRoomDetail> getRoomDetail(String roomId) async {
     final currentUserId = await ApiClient.getUserId() ?? '';
     final res = await ApiClient.dio.get('/api/chats/$roomId');
     final data = res.data as Map<String, dynamic>;
-    final messages = data['messages'] as List<dynamic>? ?? [];
-    return messages
+    final room = ChatRoom.fromJson(data);
+    final rawMessages = data['messages'] as List<dynamic>? ?? [];
+    final messages = rawMessages
         .map((e) => ChatMessage.fromJson(e as Map<String, dynamic>, currentUserId))
         .toList();
+    return ChatRoomDetail(room: room, messages: messages);
   }
 
   static Future<ChatMessage> sendMessage(String roomId, String text) async {
