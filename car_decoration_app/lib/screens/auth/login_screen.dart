@@ -32,8 +32,8 @@ class _LoginScreenState extends State<LoginScreen> {
     final saved = await AuthService.getRememberedCredentials();
     if (saved != null && mounted) {
       setState(() {
-        _emailController.text = saved.email;
-        _passwordController.text = saved.password;
+        _emailController.text = saved['email'] ?? '';
+        _passwordController.text = saved['password'] ?? '';
         _rememberMe = true;
         _tabIndex = 1;
       });
@@ -65,7 +65,6 @@ class _LoginScreenState extends State<LoginScreen> {
       if (_tabIndex == 1) {
         final data = await AuthService.login(_emailController.text.trim(), _passwordController.text);
         if (!mounted) return;
-        TextInput.finishAutofillContext();
         // Save or clear remembered credentials based on checkbox
         if (_rememberMe) {
           await AuthService.saveRememberedCredentials(
@@ -92,7 +91,6 @@ class _LoginScreenState extends State<LoginScreen> {
     } on DioException catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
-      TextInput.finishAutofillContext(shouldSave: false);
       final msg = e.response?.data is Map
           ? e.response?.data['message'] as String?
           : null;
@@ -100,7 +98,6 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (_) {
       if (!mounted) return;
       setState(() => _loading = false);
-      TextInput.finishAutofillContext(shouldSave: false);
       _showError('حدث خطأ غير متوقع');
     }
   }
@@ -391,41 +388,38 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // ── Email tab content ──
   Widget _buildEmailTab() {
-    return AutofillGroup(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _label('اسم المستخدم أو البريد الإلكتروني'),
-          _field(
-            controller: _emailController,
-            hint: 'أدخل بريدك أو اسم المستخدم',
-            keyboardType: TextInputType.emailAddress,
-            autofillHints: const [AutofillHints.email, AutofillHints.username],
-            suffixIcon: const Icon(Icons.alternate_email_rounded, size: 19, color: AppColors.textMuted),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              GestureDetector(
-                onTap: () {},
-                child: Text('نسيت كلمة المرور؟', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.goldText)),
-              ),
-              _label('كلمة المرور', noPad: true),
-            ],
-          ),
-          const SizedBox(height: 8),
-          _field(
-            controller: _passwordController,
-            hint: '••••••••',
-            obscure: _obscure,
-            autofillHints: const [AutofillHints.password],
-            prefixIcon: const Icon(Icons.lock_outline_rounded, size: 19, color: AppColors.textMuted),
-            suffixIcon: GestureDetector(
-              onTap: () => setState(() => _obscure = !_obscure),
-              child: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined, color: AppColors.textMuted, size: 20),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _label('اسم المستخدم أو البريد الإلكتروني'),
+        _field(
+          controller: _emailController,
+          hint: 'أدخل بريدك أو اسم المستخدم',
+          keyboardType: TextInputType.emailAddress,
+          suffixIcon: const Icon(Icons.alternate_email_rounded, size: 19, color: AppColors.textMuted),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            GestureDetector(
+              onTap: () {},
+              child: Text('نسيت كلمة المرور؟', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.goldText)),
             ),
+            _label('كلمة المرور', noPad: true),
+          ],
+        ),
+        const SizedBox(height: 8),
+        _field(
+          controller: _passwordController,
+          hint: '••••••••',
+          obscure: _obscure,
+          prefixIcon: const Icon(Icons.lock_outline_rounded, size: 19, color: AppColors.textMuted),
+          suffixIcon: GestureDetector(
+            onTap: () => setState(() => _obscure = !_obscure),
+            child: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined, color: AppColors.textMuted, size: 20),
           ),
+        ),
           const SizedBox(height: 14),
           // ── Remember me ──────────────────────────────
           GestureDetector(
@@ -460,9 +454,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ],
             ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -477,7 +470,6 @@ class _LoginScreenState extends State<LoginScreen> {
     TextInputType? keyboardType,
     TextDirection? textDirection,
     bool obscure = false,
-    List<String>? autofillHints,
     Widget? prefixIcon,
     Widget? suffixIcon,
   }) {
@@ -489,7 +481,6 @@ class _LoginScreenState extends State<LoginScreen> {
       textDirection: textDirection,
       textAlign: textDirection == TextDirection.ltr ? TextAlign.left : TextAlign.right,
       obscureText: obscure,
-      autofillHints: autofillHints,
       style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
       decoration: InputDecoration(
         filled: true,

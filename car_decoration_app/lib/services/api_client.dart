@@ -48,7 +48,7 @@ class ApiClient {
         } catch (_) {}
         handler.next(response);
       },
-      onError: (error, handler) async {
+      onError: (error, handler) {
         try {
           final body = error.response?.data?.toString() ?? '';
           AppLogger.error(
@@ -60,11 +60,12 @@ class ApiClient {
         if (error.response?.statusCode == 401) {
           final path = error.requestOptions.path;
           if (!path.contains('/api/auth/')) {
-            await _storage.deleteAll();
-            appNavigatorKey.currentState?.pushNamedAndRemoveUntil(
-              '/auth/login',
-              (route) => false,
-            );
+            clearUserData().then((_) {
+              appNavigatorKey.currentState?.pushNamedAndRemoveUntil(
+                '/auth/login',
+                (route) => false,
+              );
+            });
           }
         }
         handler.next(error);

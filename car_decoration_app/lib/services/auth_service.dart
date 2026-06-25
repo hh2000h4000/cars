@@ -95,12 +95,12 @@ class AuthService {
     await _storage.delete(key: 'remember_me');
   }
 
-  static Future<({String email, String password})?> getRememberedCredentials() async {
+  static Future<Map<String, String>?> getRememberedCredentials() async {
     final flag = await _storage.read(key: 'remember_me');
     if (flag != 'true') return null;
     final email = await _storage.read(key: 'saved_email') ?? '';
     final password = await _storage.read(key: 'saved_password') ?? '';
     if (email.isEmpty) return null;
-    return (email: email, password: password);
+    return {'email': email, 'password': password};
   }
 }
