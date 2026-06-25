@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'app_navigator.dart';
 import 'theme.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/auth/login_screen.dart';
@@ -38,6 +39,7 @@ class CarDecorationApp extends StatelessWidget {
     ));
 
     return MaterialApp(
+      navigatorKey: appNavigatorKey,
       title: 'تزيين',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,

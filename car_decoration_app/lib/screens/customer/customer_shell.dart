@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../theme.dart';
 import '../../providers/app_provider.dart';
+import '../../services/api_client.dart';
 import 'home_screen.dart';
 import 'requests_screen.dart';
 import 'vehicles_screen.dart';
@@ -23,6 +24,14 @@ class _CustomerShellState extends State<CustomerShell> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Auth guard: redirect to login if no token (handles direct URL navigation on web)
+      final token = await ApiClient.getToken();
+      if (token == null) {
+        if (mounted) {
+          Navigator.pushNamedAndRemoveUntil(context, '/auth/login', (r) => false);
+        }
+        return;
+      }
       await context.read<AppProvider>().initFromApi();
       if (mounted) {
         final err = context.read<AppProvider>().initError;

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../app_navigator.dart';
 import 'app_logger.dart';
 
 // dart:io و dio/io غير متوفران على الويب
@@ -47,7 +48,7 @@ class ApiClient {
         } catch (_) {}
         handler.next(response);
       },
-      onError: (error, handler) {
+      onError: (error, handler) async {
         try {
           final body = error.response?.data?.toString() ?? '';
           AppLogger.error(
@@ -55,6 +56,17 @@ class ApiClient {
             error: body.isNotEmpty ? body : error.message,
           );
         } catch (_) {}
+        // Redirect to login on 401 (except for auth endpoints)
+        if (error.response?.statusCode == 401) {
+          final path = error.requestOptions.path;
+          if (!path.contains('/api/auth/')) {
+            await _storage.deleteAll();
+            appNavigatorKey.currentState?.pushNamedAndRemoveUntil(
+              '/auth/login',
+              (route) => false,
+            );
+          }
+        }
         handler.next(error);
       },
     ));

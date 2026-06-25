@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme.dart';
+import '../../services/api_client.dart';
 import 'shop_dashboard_screen.dart';
 import 'shop_requests_screen.dart';
 import 'shop_chats_screen.dart';
@@ -15,6 +16,17 @@ class ShopShell extends StatefulWidget {
 
 class _ShopShellState extends State<ShopShell> {
   int _index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final token = await ApiClient.getToken();
+      if (token == null && mounted) {
+        Navigator.pushNamedAndRemoveUntil(context, '/auth/login', (r) => false);
+      }
+    });
+  }
 
   static const _screens = [
     ShopDashboardScreen(),
