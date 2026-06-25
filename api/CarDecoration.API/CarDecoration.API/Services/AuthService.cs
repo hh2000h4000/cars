@@ -59,8 +59,13 @@ public class AuthService
         if (await _db.Users.AnyAsync(u => u.Email == req.Email))
             throw new Exception("البريد الإلكتروني مستخدم مسبقاً");
 
+        if (await _db.Users.AnyAsync(u => u.Phone == req.Phone))
+            throw new Exception("رقم الجوال مستخدم مسبقاً");
+
         if (await _db.Shops.AnyAsync(s => s.CrNumber == req.CrNumber))
-            throw new Exception("السجل التجاري مستخدم مسبقاً");
+            throw new Exception("رقم السجل التجاري مستخدم مسبقاً");
+
+        await using var tx = await _db.Database.BeginTransactionAsync();
 
         var user = new User
         {
@@ -87,6 +92,7 @@ public class AuthService
         _db.Shops.Add(shop);
         await _db.SaveChangesAsync();
 
+        await tx.CommitAsync();
         return new AuthResponse(_jwt.Generate(user), user.FullName, user.Email, user.Role.ToString());
     }
 }

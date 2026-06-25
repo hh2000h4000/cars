@@ -53,7 +53,8 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = ex.Message });
+            // Return inner exception so DB constraint errors are visible
+            return BadRequest(new { message = ex.InnerException?.Message ?? ex.Message });
         }
     }
 }

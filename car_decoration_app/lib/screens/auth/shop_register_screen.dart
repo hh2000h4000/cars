@@ -38,7 +38,25 @@ class _ShopRegisterScreenState extends State<ShopRegisterScreen> {
     super.dispose();
   }
 
+  String? _validate() {
+    if (_shopNameCtrl.text.trim().isEmpty) return 'يرجى إدخال اسم المتجر';
+    if (_crNumberCtrl.text.trim().isEmpty) return 'يرجى إدخال رقم السجل التجاري';
+    if (_ownerNameCtrl.text.trim().isEmpty) return 'يرجى إدخال اسم المالك';
+    if (_phoneCtrl.text.trim().isEmpty) return 'يرجى إدخال رقم الجوال';
+    if (_shopPhoneCtrl.text.trim().isEmpty) return 'يرجى إدخال رقم جوال المتجر';
+    if (_emailCtrl.text.trim().isEmpty) return 'يرجى إدخال البريد الإلكتروني';
+    if (_cityCtrl.text.trim().isEmpty) return 'يرجى إدخال المدينة';
+    if (_passwordCtrl.text.isEmpty) return 'يرجى إدخال كلمة المرور';
+    if (_passwordCtrl.text.length < 6) return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+    return null;
+  }
+
   Future<void> _submit() async {
+    final validationError = _validate();
+    if (validationError != null) {
+      setState(() => _error = validationError);
+      return;
+    }
     setState(() { _loading = true; _error = null; });
     try {
       await AuthService.registerShop(
