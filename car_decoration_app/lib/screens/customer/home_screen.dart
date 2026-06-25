@@ -125,7 +125,7 @@ class HomeScreen extends StatelessWidget {
                         child: CustomPaint(painter: _GoldenLinesPainter()),
                       ),
                       Positioned(
-                        top: -40, right: -20,
+                        top: -40, left: -20,
                         child: Container(
                           width: 160, height: 160,
                           decoration: BoxDecoration(
@@ -364,8 +364,8 @@ class _GoldenLinesPainter extends CustomPainter {
     for (int i = 0; i < count; i++) {
       final x = i * spacing - size.height;
       canvas.drawLine(
-        Offset(x, 0),
-        Offset(x + size.height * math.tan(math.pi / 4), size.height),
+        Offset(x + size.height, 0),
+        Offset(x, size.height),
         paint,
       );
     }
