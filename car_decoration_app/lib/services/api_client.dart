@@ -91,7 +91,11 @@ class ApiClient {
   }
 
   static Future<void> clearUserData() async {
-    await _storage.deleteAll();
+    // Delete session keys only — saved_email/saved_password/remember_me are preserved
+    await _storage.delete(key: 'token');
+    await _storage.delete(key: 'fullName');
+    await _storage.delete(key: 'email');
+    await _storage.delete(key: 'role');
   }
 
   static Future<String?> getToken() => _storage.read(key: 'token');

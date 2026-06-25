@@ -16,10 +16,29 @@ class _LoginScreenState extends State<LoginScreen> {
   int _tabIndex = 1;
   bool _obscure = true;
   bool _loading = false;
+  bool _rememberMe = false;
 
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedCredentials();
+  }
+
+  Future<void> _loadSavedCredentials() async {
+    final saved = await AuthService.getRememberedCredentials();
+    if (saved != null && mounted) {
+      setState(() {
+        _emailController.text = saved.email;
+        _passwordController.text = saved.password;
+        _rememberMe = true;
+        _tabIndex = 1;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -47,6 +66,16 @@ class _LoginScreenState extends State<LoginScreen> {
         final data = await AuthService.login(_emailController.text.trim(), _passwordController.text);
         if (!mounted) return;
         TextInput.finishAutofillContext();
+        // Save or clear remembered credentials based on checkbox
+        if (_rememberMe) {
+          await AuthService.saveRememberedCredentials(
+            _emailController.text.trim(),
+            _passwordController.text,
+          );
+        } else {
+          await AuthService.clearRememberedCredentials();
+        }
+        if (!mounted) return;
         final role = data['role'] as String? ?? 'Customer';
         if (role == 'Admin') {
           Navigator.pushNamedAndRemoveUntil(context, '/admin/dashboard', (_) => false);
@@ -395,6 +424,41 @@ class _LoginScreenState extends State<LoginScreen> {
             suffixIcon: GestureDetector(
               onTap: () => setState(() => _obscure = !_obscure),
               child: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined, color: AppColors.textMuted, size: 20),
+            ),
+          ),
+          const SizedBox(height: 14),
+          // ── Remember me ──────────────────────────────
+          GestureDetector(
+            onTap: () => setState(() => _rememberMe = !_rememberMe),
+            behavior: HitTestBehavior.opaque,
+            child: Row(
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  width: 22, height: 22,
+                  decoration: BoxDecoration(
+                    color: _rememberMe ? AppColors.dark : Colors.white,
+                    border: Border.all(
+                      color: _rememberMe ? AppColors.dark : AppColors.border,
+                      width: 1.5,
+                    ),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: _rememberMe
+                      ? const Icon(Icons.check_rounded, color: Colors.white, size: 14)
+                      : null,
+                ),
+                const SizedBox(width: 9),
+                Text(
+                  'تذكّرني',
+                  style: TextStyle(
+                    fontFamily: 'Tajawal',
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
