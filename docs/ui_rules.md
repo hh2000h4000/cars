@@ -4,7 +4,7 @@
 
 - All user-visible text is **Arabic**
 - Layout is **RTL** (`textDirection: TextDirection.rtl`)
-- Font: **Tajawal** (custom, bundled in assets)
+- Font: **Tajawal** (custom, bundled in `assets/fonts/`)
   - Available weights: 300 (Light), 400 (Regular), 500 (Medium), 700 (Bold), 800 (ExtraBold), 900 (Black)
   - Used via: `TextStyle(fontFamily: 'Tajawal', ...)`
 
@@ -84,7 +84,7 @@
 | لوحة التحكم (Dashboard) | dashboard | ShopDashboardScreen |
 | الطلبات (Requests) | inbox | ShopRequestsScreen |
 | المحادثات (Chats) | chat | ShopChatsScreen |
-| متجري (My Store) | store | ShopMyStoreScreen |
+| متجري (My Store) | store | ShopMyStoreScreen ⚠️ placeholder |
 
 ### Admin Shell (3 tabs)
 | Tab | Icon | Screen |
@@ -107,38 +107,38 @@
 | `/onboarding` | OnboardingScreen | Splash/intro |
 
 ### Customer
-| Route | Screen | Purpose |
-|-------|--------|---------|
-| `/customer/home` | HomeScreen (via Shell) | Browse approved shops |
-| `/customer/requests` | RequestsScreen (via Shell) | My requests list |
-| `/customer/vehicles` | VehiclesScreen (via Shell) | My vehicles list |
-| `/customer/requests/new` | NewRequestScreen | Multi-step request creation |
-| `/customer/requests/shop-select` | ShopSelectScreen | Pick shops for request |
-| `/customer/request-detail` | RequestDetailScreen | Request details + quotations |
-| `/customer/quotation-detail` | QuotationDetailScreen | View single quotation |
-| `/customer/shop` | ShopProfileScreen | Shop details + reviews |
-| `/customer/vehicles/add` | AddVehicleScreen | Add new vehicle |
-| `/customer/requests/edit` | EditRequestScreen | Edit pending request |
-| `/customer/chat` | ChatScreen | Chat with a shop |
-| `/customer/review` | ReviewScreen | Submit post-job review |
-| `/customer/complaint` | ComplaintScreen | Raise dispute |
-| `/customer/location-picker` | LocationPickerScreen | Map-based location selection |
+| Route | Screen | Status |
+|-------|--------|--------|
+| `/customer/home` | HomeScreen | ✅ Loads shops from API |
+| `/customer/requests` | RequestsScreen | ✅ Loads requests from API |
+| `/customer/vehicles` | VehiclesScreen | ✅ Loads vehicles from API |
+| `/customer/requests/new` | NewRequestScreen | ✅ Multi-step creation |
+| `/customer/requests/shop-select` | ShopSelectScreen | ✅ Pick shops for request |
+| `/customer/request-detail` | RequestDetailScreen | ✅ Shows quotations |
+| `/customer/quotation-detail` | QuotationDetailScreen | ✅ Single quotation view |
+| `/customer/shop` | ShopProfileScreen | ✅ Shop details + reviews |
+| `/customer/vehicles/add` | AddVehicleScreen | ✅ Add new vehicle |
+| `/customer/requests/edit` | EditRequestScreen | ✅ Edit pending request |
+| `/customer/chat` | ChatScreen | ✅ Chat with a shop |
+| `/customer/review` | ReviewScreen | ✅ Submit review |
+| `/customer/complaint` | ComplaintScreen | ✅ Raise dispute |
+| `/customer/location-picker` | LocationPickerScreen | ✅ Map-based location |
 
 ### Shop
-| Route | Screen | Purpose |
-|-------|--------|---------|
-| `/shop/dashboard` | ShopDashboardScreen (via Shell) | Stats overview |
-| `/shop/request-detail` | ShopRequestDetailScreen | View request from customer |
-| `/shop/send-quote` | SendQuoteScreen | Send quotation form |
-| Shop Chats tab | ShopChatsScreen | Chat rooms list |
-| My Store tab | ShopMyStoreScreen | Store profile (placeholder) |
+| Route | Screen | Status |
+|-------|--------|--------|
+| `/shop/dashboard` | ShopDashboardScreen | ✅ Stats overview |
+| `/shop/request-detail` | ShopRequestDetailScreen | ✅ View request |
+| `/shop/send-quote` | SendQuoteScreen | ⚠️ Form exists, API call not wired |
+| Chats tab | ShopChatsScreen | ✅ Chat rooms list |
+| My Store tab | ShopMyStoreScreen | ❌ Placeholder "قريباً" |
 
 ### Admin
-| Route | Screen | Purpose |
-|-------|--------|---------|
-| `/admin/dashboard` | AdminDashboardScreen (via Shell) | Overview |
-| `/admin/pending` | AdminPendingScreen | Approve/reject shops |
-| `/admin/disputes` | AdminDisputesScreen | View/resolve disputes |
+| Route | Screen | Status |
+|-------|--------|--------|
+| `/admin/dashboard` | AdminDashboardScreen | ⚠️ Placeholder stats |
+| `/admin/pending` | AdminPendingScreen | ✅ Approve/reject shops |
+| `/admin/disputes` | AdminDisputesScreen | ✅ View/resolve disputes |
 
 ---
 
@@ -146,10 +146,10 @@
 
 | API Status | Flutter Enum | Arabic Label | Color |
 |-----------|-------------|-------------|-------|
-| `pending` | `pending` | معلق | gold |
-| `active` | `inProgress` | جارٍ | green |
-| `completed` | `completed` | مكتمل | green |
-| `cancelled` | `cancelled` | ملغى | red |
+| `Pending` | `pending` | معلق | gold |
+| `Active` | `inProgress` | جارٍ | green |
+| `Completed` | `completed` | مكتمل | green |
+| `Cancelled` | `cancelled` | ملغى | red |
 
 ---
 

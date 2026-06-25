@@ -47,7 +47,7 @@ Technical decisions made during development, with rationale.
 **Why:** Business rule — a customer can only work with one shop per request. Automating this prevents inconsistent states.
 
 ### Local file storage for uploads
-**Decision:** Uploaded files stored at `wwwroot/uploads/` on the server's disk, served as static files.
+**Decision:** Uploaded files stored at `uploads/` on the server's disk (not `wwwroot/`), served via `PhysicalFileProvider`.
 **Why:** Fastest to implement. No external service dependency for development.
 **Trade-off:** Files lost if server is redeployed or disk is wiped. Must migrate to S3/cloud before production.
 
@@ -59,6 +59,16 @@ Technical decisions made during development, with rationale.
 ### `UseRouting()` explicit before `UseCors()`
 **Decision:** `app.UseRouting()` is explicitly called before `app.UseCors("AllowAll")`.
 **Why:** Without explicit `UseRouting()`, ASP.NET Core routes OPTIONS preflight requests to a 405 handler before CORS middleware can respond. This was causing 405 errors on all Flutter web API calls.
+
+### `UseHttpsRedirection()` disabled in Development
+**Decision:** `if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection()`
+**Why:** In development, the API runs on HTTP port 5053. When HTTPS redirect was always active, a 307 redirect from HTTP → HTTPS caused browsers to strip the `Authorization` header, resulting in 401 on every authenticated endpoint. Disabling it in dev keeps the flow on HTTP throughout.
+**Production:** Re-enabled (the condition ensures it's on in staging/production).
+
+### `MapInboundClaims = false` in JWT config
+**Decision:** `options.MapInboundClaims = false` is set in `AddJwtBearer`.
+**Why:** .NET 8 default behavior remaps the `sub` JWT claim to the long URI `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier`. With `MapInboundClaims = false`, claim names stay as issued (`sub`, `role`, etc.), which is the standard JWT behavior.
+**Impact:** `CurrentUserService` must try multiple claim names as a fallback: `ClaimTypes.NameIdentifier` → `"sub"` → `"nameid"`.
 
 ---
 
@@ -82,6 +92,10 @@ Technical decisions made during development, with rationale.
 **Why:** Data volume is small during development. Pagination adds complexity.
 **Trade-off:** Will need pagination before production for requests/messages/reviews.
 
+### ApiClient uses HTTP not HTTPS in dev
+**Decision:** `baseUrl = 'http://localhost:5053'` (not HTTPS).
+**Why:** Avoids the self-signed certificate issue on web (Chrome blocks self-signed certs). Mobile has the cert bypass workaround but web cannot use it.
+
 ---
 
 ## Database
@@ -95,3 +109,7 @@ Technical decisions made during development, with rationale.
 **Decision:** Each customer's requests are numbered 1, 2, 3... independently.
 **Why:** User-friendly display reference (e.g., "طلب #3") instead of exposing UUIDs in the UI.
 **Implementation:** `COUNT(requests WHERE customerId == userId) + 1` at creation time.
+
+### Manual migration for Color column
+**Decision:** Created migration `20260625000001_AddColorToVehicles` manually rather than via `dotnet ef migrations add`.
+**Why:** The `Color` property existed in the EF model and `AppDbContextModelSnapshot` but was never added to the migration files. The database was missing the column, causing `column v.Color does not exist` errors. A manual migration was the safest fix without dropping/recreating the database.

@@ -30,6 +30,8 @@ repo/
 │   ├── Models/
 │   ├── DTOs/
 │   ├── Data/AppDbContext.cs
+│   ├── Helpers/CurrentUserService.cs
+│   ├── Migrations/
 │   └── Program.cs
 ├── car_decoration_app/lib/                    ← Flutter App
 │   ├── screens/   (customer/ shop/ admin/ auth/)
@@ -45,11 +47,11 @@ repo/
 
 | الملف | المحتوى |
 |-------|---------|
-| `docs/project_overview.md` | وصف المشروع، التقنيات، أنواع المستخدمين |
-| `docs/architecture.md` | طبقات الباكند والفرونت، middleware pipeline |
-| `docs/database_schema.md` | جميع الجداول والعلاقات والـ Enums |
+| `docs/project_overview.md` | وصف المشروع، التقنيات، أنواع المستخدمين، كيفية التشغيل |
+| `docs/architecture.md` | طبقات الباكند والفرونت، middleware pipeline، JWT |
+| `docs/database_schema.md` | جميع الجداول والعلاقات والـ Enums والـ Migrations |
 | `docs/api_contracts.md` | كل endpoint مع Request/Response |
-| `docs/ui_rules.md` | الألوان، الـ Theme، شاشات التطبيق |
+| `docs/ui_rules.md` | الألوان، الـ Theme، شاشات التطبيق وحالتها |
 | `docs/tasks.md` | ✅ ما تم / ❌ ما تبقى / 🐛 الأخطاء |
 | `docs/decisions.md` | قرارات تقنية مع السبب والبدائل |
 
@@ -70,19 +72,37 @@ Customer → Request (multi-shop) → Shop accepts → ChatRoom opens
 ## Current Status (آخر تحديث: 2026-06-25)
 
 - Backend: يعمل على PostgreSQL، جميع endpoints مكتملة
-- Flutter: يعمل على موبايل وChromeWeb، بيانات حقيقية من API
+- Flutter: يعمل على موبايل وChromeWeb، بيانات حقيقية من API ✅
+- Vehicles + Requests + Shops: تحمل من API بنجاح ✅
 - Mock data: محذوف بالكامل
 - Serilog: مفعّل، CORS: يعمل، Sentry: مضبوط
 
-## Known Issues (راجع docs/tasks.md للتفاصيل)
+## Ports & URLs
 
-- ملفات المستخدم المحلية قديمة (RequestsController, VehicleService, Vehicle.cs, RequestDtos.cs) — تم إرسال المحتوى للاستبدال اليدوي
-- git pull لا يعمل على جهاز المستخدم المحلي
+| | |
+|--|--|
+| HTTP (dev) | `http://0.0.0.0:5053` |
+| HTTPS | `https://0.0.0.0:7209` |
+| Flutter Web baseUrl | `http://localhost:5053` |
+| Flutter Mobile baseUrl | `http://192.168.8.11:5053` |
 
 ## Critical Code Notes
 
-**Flutter Web bug fix:** دائماً استخدم `catchError((Object e) {...})` بمعامل واحد — معاملان يسببان crash على web بسبب DDC StackTrace cast.
+**Flutter Web bug:** دائماً استخدم `catchError((Object e) {...})` بمعامل واحد — معاملان يسببان crash على web بسبب DDC StackTrace cast.
 
 **CORS fix:** `app.UseRouting()` يجب أن يكون قبل `app.UseCors()` في Program.cs — بدونه كل OPTIONS preflight يرجع 405.
 
+**HTTPS redirect:** `if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection()` — بدون هذا الشرط، 307 redirect يحذف Authorization header ويسبب 401.
+
+**JWT claims:** `options.MapInboundClaims = false` مطلوب في .NET 8 — بدونه `sub` يُعاد تسميته تلقائياً. `CurrentUserService` يجرّب: `ClaimTypes.NameIdentifier` → `"sub"` → `"nameid"`.
+
 **Npgsql:** `AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true)` مطلوب في Program.cs قبل `builder`.
+
+**Migrations:** بعد أي تغيير على Models → `dotnet ef database update` على جهاز المستخدم.
+
+## What's Left (الأهم)
+
+- `SendQuoteScreen` لا يستدعي API بعد (يستخدم local state فقط)
+- `ShopMyStoreScreen` placeholder
+- لا يوجد pagination
+- Cloud storage للملفات المرفوعة

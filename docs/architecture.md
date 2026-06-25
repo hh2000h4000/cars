@@ -33,24 +33,32 @@ Global query filter on all DbSets: `.Where(e => !e.IsDeleted)` — soft delete i
 ### Authentication
 
 - Passwords hashed with BCrypt (`BCrypt.Net-Next`)
-- JWT issued on login/register with claims: `NameIdentifier` (UserId), `Email`, `Role`, `fullName`
-- `ICurrentUserService` injected into all services — reads `UserId` from `IHttpContextAccessor`
-- Role-based access: `[Authorize]` on all protected routes, no explicit `[Authorize(Roles="...")]` except admin checks done in service layer
+- JWT issued on login/register with claims: `sub` (UserId), `email`, `role`, `fullName`
+- `MapInboundClaims = false` **must be set** in `AddJwtBearer` — without it, .NET 8 remaps `sub` to the long `ClaimTypes.NameIdentifier` URI which breaks claim lookup
+- `ICurrentUserService` tries three claim names in order: `ClaimTypes.NameIdentifier` → `"sub"` → `"nameid"`
+- Role-based access: `[Authorize]` on all protected routes; admin checks done in service layer
+
+```csharp
+// CurrentUserService.cs — resilient claim extraction
+var idClaim = user?.FindFirstValue(ClaimTypes.NameIdentifier)
+           ?? user?.FindFirstValue("sub")
+           ?? user?.FindFirstValue("nameid");
+```
 
 ### File Uploads
 
-- Files stored at `wwwroot/uploads/` (or `uploads/` folder relative to app)
-- Served as static files at `/uploads/**`
+- Files stored at `uploads/` folder relative to app root (NOT `wwwroot`)
+- Served as static files at `/uploads/**` via `UseStaticFiles` with `PhysicalFileProvider`
 - Upload endpoint returns URL strings that are stored in DB
 
 ### Middleware Pipeline (Order Matters)
 
 ```csharp
-UseSerilogRequestLogging()   // logs every HTTP request
-UseRouting()                 // must be BEFORE UseCors
-UseCors("AllowAll")          // wide open: any origin, method, header
-UseHttpsRedirection()
-UseStaticFiles()             // serves /uploads
+UseSerilogRequestLogging()          // logs every HTTP request
+UseRouting()                        // must be BEFORE UseCors
+UseCors("AllowAll")                 // wide open: any origin, method, header
+if (!IsDevelopment) UseHttpsRedirection()  // disabled in dev to avoid 307 stripping auth header
+UseStaticFiles()                    // serves /uploads
 // Swagger (dev only)
 UseAuthentication()
 UseAuthorization()
@@ -58,6 +66,8 @@ MapControllers()
 ```
 
 > **Critical:** `UseRouting()` must be explicit and before `UseCors()`. Without it, CORS preflight (OPTIONS) returns 405 on web browsers.
+
+> **Critical:** `UseHttpsRedirection()` must be wrapped in `if (!IsDevelopment())`. In dev, a 307 redirect from HTTP → HTTPS causes the browser to drop the `Authorization` header, resulting in 401 on all authenticated endpoints.
 
 ### CORS
 
@@ -71,15 +81,16 @@ No credentials/cookies — stateless JWT only.
 
 Serilog configured at startup:
 - Console: `[HH:mm:ss LVL] Message`
-- File: `logs/api-YYYYMMDD.log` (daily rolling, 30-day retention, 50MB per file)
+- File: `logs/api-YYYYMMDD.log` (daily rolling, 30-day retention)
 - HTTP request logging via `UseSerilogRequestLogging()`
 - Each controller has `ILogger<T>` injected for error logging
 
 ### Database
 
 - PostgreSQL via `Npgsql.EntityFrameworkCore.PostgreSQL`
-- `AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true)` — required for `DateTime` (non-UTC) compatibility
+- `AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true)` — required for `DateTime` (non-UTC) compatibility; must be set **before** `WebApplication.CreateBuilder()`
 - Connection string key: `"Default"` in `appsettings.json`
+- API listens on: `http://0.0.0.0:5053` and `https://0.0.0.0:7209`
 - Migrations tracked in `Migrations/` folder
 
 ---
@@ -117,24 +128,34 @@ All API calls use `catchError((Object e) {...})` — single parameter to avoid F
 ### API Client (`ApiClient`)
 
 ```dart
-static Dio dio  // singleton
+static final String baseUrl = kIsWeb
+    ? 'http://localhost:5053'        // Chrome on same machine
+    : 'http://192.168.8.11:5053';   // physical device on LAN
 
 // Interceptors:
 onRequest → reads token from FlutterSecureStorage, adds Authorization header
 onResponse → logs response status
-onError → logs error
+onError → logs error with response body
 ```
 
 Token and user info stored in `FlutterSecureStorage` under keys:
 - `token`
 - `role`
 - `fullName`
-- `userId`
+- `email`
+
+User ID is extracted by decoding the JWT payload directly (not stored separately):
+```dart
+static Future<String?> getUserId() async {
+  // decodes token.split('.')[1] → base64url → JSON → map['sub']
+}
+```
 
 ### Platform Differences
 
-- `flutter_secure_storage` works on both mobile and web
+- `flutter_secure_storage` works on both mobile and web (uses localStorage on web)
 - Image upload uses `image_picker` (mobile) or `html.File` (web) — handled in `AppProvider`
+- HTTPS certificate bypass (self-signed cert) applied on mobile/desktop only via `if (!kIsWeb) platform.setHttpClientAdapter(dio)`
 - Sentry DSN injected via `--dart-define=SENTRY_DSN=...` or baked in as default value
 
 ### Service Layer Pattern
@@ -164,15 +185,15 @@ No repositories, no interfaces — direct Dio calls.
 ### Request → Acceptance Flow
 
 1. Customer creates `Request` → `RequestShop` rows created for each selected shop (status: Pending)
-2. Shop sees request in `/api/requests/shop`
+2. Shop sees request in `GET /api/requests/shop`
 3. Shop calls `PUT /api/requests/{id}/accept` → `RequestShop.Status = Accepted`, `ChatRoom` auto-created
 4. Customer and shop can now chat
 
 ### Quotation → Acceptance Flow
 
 1. Shop sends quotation via `POST /api/quotations`
-2. Customer views quotations for their request
-3. Customer accepts one → all other quotations for that request auto-rejected → `Request.Status = Active`
+2. Customer views quotations via `GET /api/quotations/request/{requestId}`
+3. Customer accepts one via `PUT /api/quotations/{id}/accept` → all other quotations for that request auto-rejected → `Request.Status = Active`
 
 ### Shop Rating
 

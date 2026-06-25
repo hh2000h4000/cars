@@ -9,14 +9,14 @@ Soft delete: all tables filtered by `IsDeleted = false` globally
 ## Enums
 
 ```csharp
-UserRole        : Customer, ShopOwner, Admin
-UserStatus      : Active, Suspended
-ShopStatus      : Pending, Approved, Rejected, DocsRequested
-RequestStatus   : Pending, Active, Completed, Cancelled
+UserRole          : Customer, ShopOwner, Admin
+UserStatus        : Active, Suspended
+ShopStatus        : Pending, Approved, Rejected, DocsRequested
+RequestStatus     : Pending, Active, Completed, Cancelled
 RequestShopStatus : Pending, Accepted, Rejected
-QuotationStatus : Pending, Accepted, Rejected
-DisputeReason   : ServiceQuality, Pricing, Delay, Other
-DisputeStatus   : UnderReview, WaitingShop, Resolved
+QuotationStatus   : Pending, Accepted, Rejected
+DisputeReason     : ServiceQuality, Pricing, Delay, Other
+DisputeStatus     : UnderReview, WaitingShop, Resolved
 ```
 
 ---
@@ -31,8 +31,8 @@ DisputeStatus   : UnderReview, WaitingShop, Resolved
 | Phone | text | UNIQUE |
 | Email | text | UNIQUE, stored lowercase |
 | PasswordHash | text | BCrypt |
-| Role | int | UserRole enum |
-| Status | int | UserStatus enum |
+| Role | text | UserRole enum |
+| Status | text | UserStatus enum |
 | CreatedAt | timestamp | |
 | UpdatedAt | timestamp? | |
 | IsDeleted | bool | default false |
@@ -43,15 +43,15 @@ DisputeStatus   : UnderReview, WaitingShop, Resolved
 | Column | Type | Notes |
 |--------|------|-------|
 | Id | uuid PK | |
-| OwnerId | uuid FK → Users | |
+| OwnerId | uuid FK → Users | UNIQUE (one shop per user) |
 | Name | text | |
 | CrNumber | text | UNIQUE (commercial registration) |
 | City | text | |
 | Phone | text | |
 | LogoUrl | text? | |
-| Status | int | ShopStatus enum |
-| Rating | float | default 0, auto-updated |
-| TotalJobs | int | default 0, auto-updated |
+| Status | text | ShopStatus enum |
+| Rating | float | default 0, auto-updated after review |
+| TotalJobs | int | default 0, auto-updated after review |
 | + BaseEntity columns | | |
 
 ### Vehicles
@@ -62,8 +62,8 @@ DisputeStatus   : UnderReview, WaitingShop, Resolved
 | Brand | text | |
 | Model | text | |
 | Year | int | |
-| Color | text? | |
-| PlateNumber | text? | |
+| Color | text? | nullable |
+| PlateNumber | text? | nullable |
 | + BaseEntity columns | | |
 
 ### VehicleImages
@@ -73,7 +73,6 @@ DisputeStatus   : UnderReview, WaitingShop, Resolved
 | VehicleId | uuid FK → Vehicles | CASCADE DELETE |
 | Url | text | |
 | Order | int | display order |
-| + BaseEntity columns | | |
 
 ### Requests
 | Column | Type | Notes |
@@ -84,10 +83,10 @@ DisputeStatus   : UnderReview, WaitingShop, Resolved
 | Description | text | the service description |
 | Location | text | |
 | AppointmentDate | timestamp? | |
-| Status | int | RequestStatus enum |
-| SelectedShopId | uuid? FK → Shops | set after acceptance |
+| Status | text | RequestStatus enum |
+| SelectedShopId | uuid? FK → Shops | set after shop acceptance |
 | Notes | text? | |
-| RequestNumber | int | sequential per customer |
+| RequestNumber | int | sequential per customer (1, 2, 3...) |
 | + BaseEntity columns | | |
 
 ### RequestImages
@@ -97,7 +96,6 @@ DisputeStatus   : UnderReview, WaitingShop, Resolved
 | RequestId | uuid FK → Requests | CASCADE DELETE |
 | Url | text | |
 | Order | int | |
-| + BaseEntity columns | | |
 
 ### RequestShops (M:M join with status)
 | Column | Type | Notes |
@@ -105,7 +103,7 @@ DisputeStatus   : UnderReview, WaitingShop, Resolved
 | Id | uuid PK | |
 | RequestId | uuid FK → Requests | UNIQUE together with ShopId |
 | ShopId | uuid FK → Shops | UNIQUE together with RequestId |
-| Status | int | RequestShopStatus enum |
+| Status | text | RequestShopStatus enum |
 | + BaseEntity columns | | |
 
 ### Quotations
@@ -114,20 +112,20 @@ DisputeStatus   : UnderReview, WaitingShop, Resolved
 | Id | uuid PK | |
 | RequestId | uuid FK → Requests | |
 | ShopId | uuid FK → Shops | |
-| ServiceDetails | text | |
-| Parts | text | |
+| ServiceDetails | text | description of service |
+| Parts | text | required parts |
 | Warranty | text? | |
-| VisitFee | decimal(10,2) | |
-| Duration | text | |
-| FinalPrice | decimal(10,2) | |
-| Status | int | QuotationStatus enum |
+| VisitFee | decimal(10,2) | inspection fee |
+| Duration | text | e.g. "3 أيام" |
+| FinalPrice | decimal(10,2) | total price |
+| Status | text | QuotationStatus enum |
 | + BaseEntity columns | | |
 
 ### ChatRooms
 | Column | Type | Notes |
 |--------|------|-------|
 | Id | uuid PK | |
-| RequestId | uuid FK → Requests | |
+| RequestId | uuid FK → Requests | 1:1 (one chat per request-shop pair) |
 | ShopId | uuid FK → Shops | |
 | + BaseEntity columns | | |
 
@@ -135,10 +133,10 @@ DisputeStatus   : UnderReview, WaitingShop, Resolved
 | Column | Type | Notes |
 |--------|------|-------|
 | Id | uuid PK | |
-| ChatRoomId | uuid FK → ChatRooms | |
+| ChatRoomId | uuid FK → ChatRooms | CASCADE DELETE |
 | SenderId | uuid FK → Users | |
-| Text | text? | |
-| Attachments | jsonb | List\<string\> of URLs |
+| Text | text? | nullable (message may be image-only) |
+| Attachments | text | JSON array of URLs (serialized List\<string\>) |
 | + BaseEntity columns | | |
 
 ### Disputes
@@ -147,10 +145,10 @@ DisputeStatus   : UnderReview, WaitingShop, Resolved
 | Id | uuid PK | |
 | RequestId | uuid FK → Requests | 1:1 |
 | UserId | uuid FK → Users | who raised it |
-| Reason | int | DisputeReason enum |
+| Reason | text | DisputeReason enum |
 | Details | text | |
-| Evidence | jsonb | List\<string\> of URLs |
-| Status | int | DisputeStatus enum |
+| Evidence | text | JSON array of URLs |
+| Status | text | DisputeStatus enum |
 | + BaseEntity columns | | |
 
 ### Reviews
@@ -194,6 +192,7 @@ ChatRoom (1) ── (many) Message
 | Migration | Description |
 |-----------|-------------|
 | `20260622070949_InitialCreate` | Full initial schema |
-| `20260623103329_AddNotesAndRequestNumber` | Added `Notes` and `RequestNumber` to Requests |
+| `20260623103329_AddNotesAndRequestNumber` | Added `Notes` and `RequestNumber` to Requests; converted timestamps to `timestamp without time zone` |
+| `20260625000001_AddColorToVehicles` | Added `Color` column to Vehicles (was missing from initial migration despite being in model) |
 
-Run migrations: `dotnet ef database update`
+Apply: `dotnet ef database update`

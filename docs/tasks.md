@@ -20,7 +20,12 @@
 - [x] CORS AllowAll policy (OPTIONS preflight working correctly)
 - [x] Soft delete with global query filters
 - [x] `[HttpGet("my")]` route on RequestsController (fixes 405 bug)
-- [x] `Color` field added to Vehicle model and VehicleService
+- [x] `Color` field added to Vehicle model, VehicleService, migration
+- [x] `MapInboundClaims = false` in JWT config (required for .NET 8 claim name mapping)
+- [x] `CurrentUserService` tries multiple claim names: `NameIdentifier` → `sub` → `nameid`
+- [x] HTTPS redirect disabled in Development (prevents 307 stripping Authorization header)
+- [x] HTTP port 5053 added to `appsettings.json` Urls field
+- [x] Migration `20260625000001_AddColorToVehicles` created and applied
 
 ### Flutter App
 - [x] Role-based routing (Customer / ShopOwner / Admin)
@@ -28,9 +33,9 @@
 - [x] Customer shell with 4 tabs
 - [x] Shop shell with 4 tabs
 - [x] Admin shell with 3 tabs
-- [x] Vehicles screen: list, add, edit
-- [x] Requests screen: list, detail, create (multi-step), edit
-- [x] Shop browsing and profile screen
+- [x] Vehicles screen: list, add, edit — loading from real API ✅
+- [x] Requests screen: list, detail, create (multi-step), edit — loading from real API ✅
+- [x] Shop browsing and profile screen — loading from real API ✅
 - [x] Shop selection for new request
 - [x] Quotation detail screen
 - [x] Chat screen (customer ↔ shop)
@@ -44,15 +49,11 @@
 - [x] Dio interceptors: auth header, logging (with try/catch so handler.next() always runs)
 - [x] `catchError((Object e) {...})` single-param pattern (fixes Flutter web DDC StackTrace cast bug)
 - [x] Image upload via multipart
-
----
-
-## In Progress / Needs Verification 🔄
-
-- [ ] Verify vehicles appear in UI after backend fix (Color field in SQL)
-- [ ] Verify requests load after `[HttpGet("my")]` fix
-- [ ] End-to-end test: create request → shop accepts → chat opens
-- [ ] End-to-end test: shop sends quotation → customer accepts → request goes Active
+- [x] QuotationService endpoints corrected: GET `/api/quotations/request/{id}`, PUT `/api/quotations/{id}/accept`
+- [x] ChatService endpoints corrected: GET `/api/chats`, GET `/api/chats/{id}`, POST `/api/chats/send`
+- [x] Quotation model fields corrected: `finalPrice`, `duration`, `serviceDetails`, `shopName` (flat)
+- [x] ChatMessage model field corrected: `text` (was `content`)
+- [x] ApiClient baseUrl: HTTP port 5053 (web: `localhost`, device: `192.168.8.11`)
 
 ---
 
@@ -81,6 +82,7 @@
 - [ ] Image upload progress indicator
 - [ ] Offline mode / error retry UI
 - [ ] Quotation detail from shop side (shop can see their sent quotations)
+- [ ] SendQuoteScreen still uses `provider.submitQuote()` (local state only) — needs real API call
 
 ### Infrastructure
 - [ ] Cloud deployment (server, domain, SSL)
@@ -88,6 +90,7 @@
 - [ ] CI/CD pipeline
 - [ ] Database backups
 - [ ] Production secrets management (not hardcoded JWT key)
+- [ ] Restrict CORS to production domain (currently AllowAll)
 
 ---
 
@@ -95,9 +98,7 @@
 
 | # | Description | Status |
 |---|-------------|--------|
-| 1 | User's local `RequestsController.cs` missing `[HttpGet("my")]` → 405 on GET /api/requests | Fix provided (manual file replace) |
-| 2 | User's local `VehicleService.cs` missing `Color` in SELECT → SQL error | Fix provided (manual file replace) |
-| 3 | User's local `Vehicle.cs` missing `Color` property | Fix provided (manual file replace) |
-| 4 | git pull not syncing to user's local machine | Workaround: manual file copy-paste |
-| 5 | ShopMyStoreScreen is placeholder | Known, deferred |
-| 6 | No pagination — large datasets will be slow | Known, deferred |
+| 1 | ShopMyStoreScreen is placeholder | Known, deferred |
+| 2 | No pagination — large datasets will be slow | Known, deferred |
+| 3 | SendQuoteScreen doesn't call API — only updates local provider state | Not fixed yet |
+| 4 | Files served from `/uploads` are lost if server is restarted or redeployed | Known, deferred (needs cloud storage) |

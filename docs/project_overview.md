@@ -76,25 +76,57 @@ repo/
 └── docs/                   # This documentation
 ```
 
-## Current Status
+## Current Status (آخر تحديث: 2026-06-25)
 
-- Backend API: functional, running on PostgreSQL
-- Flutter app: functional on mobile and Chrome web
-- Auth: working (register, login, JWT)
-- Vehicles: CRUD working
-- Shops: listing and approval working
-- Requests: CRUD working (405 bug was fixed by adding `[HttpGet("my")]`)
-- Quotations: implemented
-- Chat: implemented
-- Disputes: implemented
-- Reviews: implemented
-- Upload: implemented (local disk storage)
-- Serilog logging: active
-- Sentry error tracking: configured in Flutter
+| Feature | Status |
+|---------|--------|
+| Backend API | ✅ Running on PostgreSQL |
+| Auth (register/login/JWT) | ✅ Working |
+| Vehicles CRUD | ✅ Working — loads in Flutter app |
+| Shops (listing/approval) | ✅ Working — loads in Flutter app |
+| Requests CRUD | ✅ Working — loads in Flutter app |
+| Quotations | ✅ Implemented |
+| Chat | ✅ Implemented |
+| Disputes | ✅ Implemented |
+| Reviews | ✅ Implemented |
+| File Upload | ✅ Local disk storage |
+| Serilog Logging | ✅ Active |
+| Sentry Error Tracking | ✅ Configured in Flutter |
+| Flutter Web (Chrome) | ✅ Working |
+| Flutter Mobile | ✅ Working |
 
 ## Language
 
 - UI text: Arabic (RTL)
 - Code/identifiers: English
 - API error messages: Arabic strings
-- Font: Tajawal (Google Fonts, Arabic-optimized)
+- Font: Tajawal (Google Fonts, Arabic-optimized, bundled locally)
+
+## Running the Project
+
+### Backend
+```bash
+cd api/CarDecoration.API/CarDecoration.API
+dotnet run
+# Listens on http://0.0.0.0:5053 and https://0.0.0.0:7209
+```
+
+### Flutter (Web)
+```bash
+cd car_decoration_app
+flutter run -d chrome
+# Connects to http://localhost:5053
+```
+
+### Flutter (Physical Device)
+```bash
+flutter run -d <device>
+# Connects to http://192.168.8.11:5053
+# Update ApiClient.baseUrl if IP changes
+```
+
+### Database Migrations
+```bash
+cd api/CarDecoration.API/CarDecoration.API
+dotnet ef database update
+```

@@ -1,7 +1,11 @@
 # API Contracts
 
-Base URL: `http://localhost:5000` (dev) / configured in Flutter's `ApiClient`
-Auth: `Authorization: Bearer <JWT>` header on all protected routes
+Base URL:
+- **Web (Chrome):** `http://localhost:5053`
+- **Physical device:** `http://192.168.8.11:5053` (update IP if network changes)
+- **HTTPS:** `https://localhost:7209` (not used in dev — causes 307 auth strip)
+
+Auth: `Authorization: Bearer <JWT>` header on all protected routes (🔒)
 Error format: `{ "message": "Arabic error string" }`
 
 ---
@@ -72,7 +76,8 @@ Note: Shop created with Status=Pending, requires admin approval
 ### GET `/api/vehicles`
 Returns current user's vehicles.
 ```json
-Response 200: [
+Response 200:
+[
   {
     "id": "uuid",
     "brand": "string",
@@ -119,7 +124,8 @@ Response 200: { "message": "تم حذف المركبة" }
 ### GET `/api/shops`
 Public — no auth required.
 ```json
-Response 200: [
+Response 200:
+[
   {
     "id": "uuid",
     "name": "string",
@@ -217,12 +223,14 @@ Response 200:
 Returns current customer's requests.
 ```json
 Response 200: [RequestResponse]
+Note: Route must be declared BEFORE GET /api/requests/{id} in controller to avoid 405
 ```
 
 ### GET `/api/requests/shop`
 Returns requests sent to the current user's shop.
 ```json
-Response 200: [
+Response 200:
+[
   {
     "id": "uuid",
     "customerId": "uuid",
@@ -239,13 +247,13 @@ Response 200: [
 ]
 ```
 
-### PUT `/api/requests/{id}/accept`
+### PUT `/api/requests/{id}/accept` 🔒 (ShopOwner)
 Shop accepts a request → ChatRoom is auto-created.
 ```json
 Response 200: { "message": "تم قبول الطلب وفتح المحادثة", "chatRoomId": "uuid" }
 ```
 
-### PUT `/api/requests/{id}`
+### PUT `/api/requests/{id}` 🔒 (Customer)
 Customer edits request (only allowed when Status=Pending).
 ```json
 Request:
@@ -260,7 +268,7 @@ Request:
 Response 200: RequestResponse
 ```
 
-### DELETE `/api/requests/{id}`
+### DELETE `/api/requests/{id}` 🔒 (Customer)
 Customer cancels request.
 ```json
 Response 200: { "message": "تم إلغاء الطلب" }
@@ -270,7 +278,7 @@ Response 200: { "message": "تم إلغاء الطلب" }
 
 ## Quotations — `/api/quotations` 🔒
 
-### POST `/api/quotations`
+### POST `/api/quotations` (ShopOwner)
 Shop sends quotation for a request.
 ```json
 Request:
@@ -301,13 +309,13 @@ Response 200:
 }
 ```
 
-### GET `/api/quotations/request/{requestId}`
+### GET `/api/quotations/request/{requestId}` (Customer)
 Customer views all quotations for their request.
 ```json
 Response 200: [QuotationResponse]
 ```
 
-### PUT `/api/quotations/{id}/accept`
+### PUT `/api/quotations/{id}/accept` (Customer)
 Customer accepts a quotation. All other quotations for that request are auto-rejected. Request.Status → Active.
 ```json
 Response 200: { "message": "تم قبول العرض" }
@@ -318,9 +326,10 @@ Response 200: { "message": "تم قبول العرض" }
 ## Chats — `/api/chats` 🔒
 
 ### GET `/api/chats`
-Returns all chat rooms for the current user.
+Returns all chat rooms for the current user (both customer and shop).
 ```json
-Response 200: [
+Response 200:
+[
   {
     "id": "uuid",
     "requestId": "uuid",
@@ -332,7 +341,7 @@ Response 200: [
 ```
 
 ### GET `/api/chats/{id}`
-Returns a single chat room with messages.
+Returns a single chat room with all messages.
 ```json
 Response 200: ChatRoomResponse (same shape as list item)
 ```
@@ -362,7 +371,7 @@ Response 200:
 
 ## Disputes — `/api/disputes` 🔒
 
-### POST `/api/disputes`
+### POST `/api/disputes` (Customer)
 Customer raises a dispute.
 ```json
 Request:
@@ -387,19 +396,19 @@ Response 200:
 }
 ```
 
-### GET `/api/disputes/my`
-Customer's disputes.
+### GET `/api/disputes/my` (Customer)
+Customer's own disputes.
 ```json
 Response 200: [DisputeResponse]
 ```
 
-### GET `/api/disputes`
+### GET `/api/disputes` 🔒 (Admin)
 Admin views all disputes.
 ```json
 Response 200: [DisputeResponse]
 ```
 
-### PUT `/api/disputes/{id}/status`
+### PUT `/api/disputes/{id}/status` 🔒 (Admin)
 Admin updates dispute status.
 ```json
 Request: { "status": "UnderReview|WaitingShop|Resolved" }
@@ -410,7 +419,7 @@ Response 200: { "message": "تم تحديث حالة الشكوى" }
 
 ## Reviews — `/api/reviews` 🔒
 
-### POST `/api/reviews`
+### POST `/api/reviews` (Customer)
 Customer submits review after job completion.
 ```json
 Request:
@@ -450,14 +459,14 @@ Response 200: [ReviewResponse]
 
 ### POST `/api/upload`
 Single file upload (multipart/form-data).
-```json
+```
 Form field: "file" (IFormFile)
 Response 200: { "url": "/uploads/filename.ext" }
 ```
 
 ### POST `/api/upload/multiple`
 Multiple file upload.
-```json
+```
 Form field: "files" (multiple IFormFile)
 Response 200: { "urls": ["/uploads/file1.ext", "/uploads/file2.ext"] }
 ```
