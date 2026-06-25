@@ -47,7 +47,7 @@ public class ShopService
     }
 
     // ── للإدارة: عرض المتاجر بانتظار الاعتماد ──
-    public async Task<List<ShopResponse>> GetPendingShopsAsync()
+    public async Task<List<PendingShopResponse>> GetPendingShopsAsync()
     {
         var role = _currentUser.UserRole
             ?? throw new Exception("غير مصرح");
@@ -56,11 +56,12 @@ public class ShopService
             throw new Exception("غير مصرح");
 
         return await _db.Shops
-            .Where(s => s.Status == ShopStatus.Pending)
+            .Include(s => s.Owner)
+            .Where(s => s.Status == ShopStatus.Pending || s.Status == ShopStatus.Rejected || s.Status == ShopStatus.DocsRequested)
             .OrderByDescending(s => s.CreatedAt)
-            .Select(s => new ShopResponse(
-                s.Id, s.Name, s.City, s.Phone,
-                s.LogoUrl, s.Rating, s.TotalJobs, s.Status.ToString()))
+            .Select(s => new PendingShopResponse(
+                s.Id, s.Name, s.Owner.FullName, s.City, s.Phone,
+                s.CrNumber, s.LogoUrl, s.Status.ToString(), s.CreatedAt))
             .ToListAsync();
     }
 

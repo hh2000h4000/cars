@@ -30,8 +30,6 @@ class PendingShop {
   final String crNumber;
   final String city;
   final String submittedAt;
-  final bool hasCompleteDocs;
-  final List<String> services;
   AdminShopStatus status;
 
   PendingShop({
@@ -42,10 +40,35 @@ class PendingShop {
     required this.crNumber,
     required this.city,
     required this.submittedAt,
-    required this.hasCompleteDocs,
-    required this.services,
     this.status = AdminShopStatus.pending,
   });
+
+  factory PendingShop.fromJson(Map<String, dynamic> j) {
+    AdminShopStatus parseStatus(String s) {
+      switch (s) {
+        case 'Approved': return AdminShopStatus.approved;
+        case 'Rejected': return AdminShopStatus.rejected;
+        case 'DocsRequested': return AdminShopStatus.docsRequested;
+        default: return AdminShopStatus.pending;
+      }
+    }
+
+    final createdAt = DateTime.tryParse(j['createdAt'] as String? ?? '');
+    final submittedAt = createdAt != null
+        ? '${createdAt.day}/${createdAt.month}/${createdAt.year}'
+        : '–';
+
+    return PendingShop(
+      id: (j['id'] as String? ?? ''),
+      name: j['name'] as String? ?? '',
+      ownerName: j['ownerName'] as String? ?? '',
+      phone: j['phone'] as String? ?? '',
+      crNumber: j['crNumber'] as String? ?? '',
+      city: j['city'] as String? ?? '',
+      submittedAt: submittedAt,
+      status: parseStatus(j['status'] as String? ?? ''),
+    );
+  }
 
   String get mono => name.isNotEmpty ? name[0] : '؟';
 }

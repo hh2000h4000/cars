@@ -11,6 +11,18 @@ public record ShopResponse(
     string Status
 );
 
+public record PendingShopResponse(
+    Guid Id,
+    string Name,
+    string OwnerName,
+    string City,
+    string Phone,
+    string CrNumber,
+    string? LogoUrl,
+    string Status,
+    DateTime CreatedAt
+);
+
 public record ShopDetailsResponse(
     Guid Id,
     string Name,

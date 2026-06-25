@@ -144,28 +144,6 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ─── Admin ───────────────────────────────────────────────────
-  void approveShop(String shopId) {
-    for (final s in pendingShops) {
-      if (s.id == shopId) s.status = AdminShopStatus.approved;
-    }
-    notifyListeners();
-  }
-
-  void rejectShop(String shopId) {
-    for (final s in pendingShops) {
-      if (s.id == shopId) s.status = AdminShopStatus.rejected;
-    }
-    notifyListeners();
-  }
-
-  void requestDocsFromShop(String shopId) {
-    for (final s in pendingShops) {
-      if (s.id == shopId) s.status = AdminShopStatus.docsRequested;
-    }
-    notifyListeners();
-  }
-
   // ─── Vehicle ─────────────────────────────────────────────────
   void addVehicle(Vehicle v) {
     vehicles = [...vehicles, v];
