@@ -1,17 +1,41 @@
 import 'package:flutter/material.dart';
-
-import 'package:provider/provider.dart';
 import '../../theme.dart';
-import '../../providers/app_provider.dart';
+import '../../services/shop_admin_service.dart';
+import '../../services/dispute_admin_service.dart';
+import '../../models/pending_shop.dart';
 
-class AdminDashboardScreen extends StatelessWidget {
+class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
 
   @override
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+}
+
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+  int _pendingCount = 0;
+  int _openDisputeCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCounts();
+  }
+
+  Future<void> _loadCounts() async {
+    try {
+      final shops = await ShopAdminService.getPendingShops();
+      final disputes = await DisputeAdminService.getAllDisputes();
+      if (mounted) setState(() {
+        _pendingCount = shops.where((s) => s.status == AdminShopStatus.pending).length;
+        _openDisputeCount = disputes.where((d) => d.status.name != 'resolved').length;
+      });
+    } catch (_) {}
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final provider = context.watch<AppProvider>();
-    final pending = provider.pendingShops.where((s) => s.status.name == 'pending').length;
-    final disputes = provider.disputes.where((d) => d.status.name == 'underReview').length;
+    final pending = _pendingCount;
+    final disputes = _openDisputeCount;
 
     return Scaffold(
       backgroundColor: AppColors.dark,
@@ -78,9 +102,9 @@ class AdminDashboardScreen extends StatelessWidget {
                   ),
                   _StatCard(
                     label: 'نزاعات مفتوحة',
-                    value: disputes > 0 ? disputes.toString() : '2',
-                    valueColor: AppColors.red,
-                    subtitle: 'تتطلب مراجعة',
+                    value: disputes.toString(),
+                    valueColor: disputes > 0 ? AppColors.red : Colors.white,
+                    subtitle: disputes > 0 ? 'تتطلب مراجعة' : null,
                     subtitleColor: AppColors.red,
                   ),
                 ],
