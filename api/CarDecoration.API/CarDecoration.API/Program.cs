@@ -99,7 +99,8 @@ var app = builder.Build();
 app.UseSerilogRequestLogging();
 app.UseRouting();
 app.UseCors("AllowAll");
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
