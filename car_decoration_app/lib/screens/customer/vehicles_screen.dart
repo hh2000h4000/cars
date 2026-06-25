@@ -226,14 +226,14 @@ class _VehicleCard extends StatelessWidget {
               child: Row(
                 children: [
                   if (vehicle.plateNumber != null) ...[
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(7)),
-                      child: const Text('اللوحة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.goldText)),
-                    ),
+                    Text('اللوحة', style: const TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
                     const SizedBox(width: 8),
-                    Text(vehicle.plateNumber!,
-                      style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(8)),
+                      child: Text(vehicle.plateNumber!,
+                        style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    ),
                   ] else
                     Text('بدون لوحة', style: const TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
                   const Spacer(),
@@ -261,41 +261,38 @@ class _ImageThumbnails extends StatelessWidget {
     if (imageUrls.isEmpty) {
       return Row(
         children: [
+          ...List.generate(2, (_) => Padding(
+            padding: const EdgeInsets.only(left: 6),
+            child: ClipRRect(borderRadius: BorderRadius.circular(radius), child: _StripePlaceholder(size: size)),
+          )),
           Container(
             width: size, height: size,
             decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(radius), border: Border.all(color: AppColors.border)),
             alignment: Alignment.center,
             child: const Text('+3', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
           ),
-          ...List.generate(2, (_) => Padding(
-            padding: const EdgeInsets.only(right: 6),
-            child: ClipRRect(borderRadius: BorderRadius.circular(radius), child: _StripePlaceholder(size: size)),
-          )),
         ],
       );
     }
 
     return Row(
       children: [
-        if (imageUrls.length > maxShow)
-          Padding(
-            padding: const EdgeInsets.only(right: 6),
-            child: Container(
-              width: size, height: size,
-              decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(radius), border: Border.all(color: AppColors.border)),
-              alignment: Alignment.center,
-              child: Text('+${imageUrls.length - maxShow}',
-                style: const TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
-            ),
-          ),
         ...List.generate(imageUrls.length.clamp(0, maxShow), (i) => Padding(
-          padding: const EdgeInsets.only(right: 6),
+          padding: const EdgeInsets.only(left: 6),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(radius),
             child: Image.network(imageUrls[i], width: size, height: size, fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => _StripePlaceholder(size: size)),
           ),
         )),
+        if (imageUrls.length > maxShow)
+          Container(
+            width: size, height: size,
+            decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(radius), border: Border.all(color: AppColors.border)),
+            alignment: Alignment.center,
+            child: Text('+${imageUrls.length - maxShow}',
+              style: const TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
+          ),
       ],
     );
   }
