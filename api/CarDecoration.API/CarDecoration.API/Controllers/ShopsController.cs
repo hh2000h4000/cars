@@ -44,7 +44,7 @@ public class ShopsController : ControllerBase
     }
 
     [HttpGet("pending")]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public async Task<IActionResult> GetPendingShops()
     {
         try
