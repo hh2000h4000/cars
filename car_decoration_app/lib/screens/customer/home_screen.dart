@@ -120,6 +120,13 @@ class HomeScreen extends StatelessWidget {
                   ),
                   child: Stack(
                     children: [
+                      // Golden diagonal lines — same painter as shop cards
+                      Positioned.fill(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(22),
+                          child: CustomPaint(painter: _GoldenLinesPainter()),
+                        ),
+                      ),
                       Positioned(
                         top: -40, right: -20,
                         child: Container(
@@ -170,7 +177,7 @@ class HomeScreen extends StatelessWidget {
               child: GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, mainAxisSpacing: 16, crossAxisSpacing: 6, childAspectRatio: .85),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, mainAxisSpacing: 10, crossAxisSpacing: 6, childAspectRatio: .85),
                 itemCount: _categories.length,
                 itemBuilder: (_, i) {
                   final (name, icon) = _categories[i];
