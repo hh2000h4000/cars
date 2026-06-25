@@ -49,14 +49,10 @@ class ApiClient {
       },
       onError: (error, handler) {
         try {
+          final body = error.response?.data?.toString() ?? '';
           AppLogger.error(
-            'API Error: ${error.requestOptions.method} ${error.requestOptions.path}',
-            error: '${error.response?.statusCode} — ${error.message}',
-            context: {
-              'url': error.requestOptions.uri.toString(),
-              'status': error.response?.statusCode,
-              'response': error.response?.data?.toString(),
-            },
+            'API Error: ${error.requestOptions.method} ${error.requestOptions.path} → ${error.response?.statusCode}',
+            error: body.isNotEmpty ? body : error.message,
           );
         } catch (_) {}
         handler.next(error);
