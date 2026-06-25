@@ -171,43 +171,10 @@ class _VehicleCard extends StatelessWidget {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 14, 16, 12),
+              padding: const EdgeInsets.fromLTRB(16, 14, 12, 12),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  GestureDetector(
-                    onTap: () => _showMenu(context),
-                    behavior: HitTestBehavior.opaque,
-                    child: Padding(
-                      padding: const EdgeInsets.all(4),
-                      child: Icon(Icons.more_vert, size: 20, color: AppColors.textMuted),
-                    ),
-                  ),
-                  const Spacer(),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (vehicle.isMain) ...[
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-                              decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(999)),
-                              child: const Text('الرئيسية', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.goldText)),
-                            ),
-                            const SizedBox(width: 8),
-                          ],
-                          Text('${vehicle.brand} ${vehicle.model}',
-                            style: const TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text('${vehicle.year} · ${vehicle.color.isNotEmpty ? vehicle.color : "—"}',
-                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
-                    ],
-                  ),
-                  const SizedBox(width: 10),
                   Container(
                     width: 46, height: 46,
                     decoration: BoxDecoration(color: AppColors.dark, borderRadius: BorderRadius.circular(12)),
@@ -215,27 +182,62 @@ class _VehicleCard extends StatelessWidget {
                     child: Text(vehicle.mono,
                       style: const TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.goldLight)),
                   ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text('${vehicle.brand} ${vehicle.model}',
+                                style: const TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                            ),
+                            if (vehicle.isMain) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                                decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(999)),
+                                child: const Text('الرئيسية', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.goldText)),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text('${vehicle.year} · ${vehicle.color.isNotEmpty ? vehicle.color : "—"}',
+                          style: const TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                      ],
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => _showMenu(context),
+                    behavior: HitTestBehavior.opaque,
+                    child: const Padding(
+                      padding: EdgeInsets.all(4),
+                      child: Icon(Icons.more_vert, size: 20, color: AppColors.textMuted),
+                    ),
+                  ),
                 ],
               ),
             ),
             Divider(height: 1, color: AppColors.border),
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 11, 16, 13),
+              padding: const EdgeInsets.fromLTRB(16, 11, 12, 13),
               child: Row(
                 children: [
-                  _ImageThumbnails(imageUrls: vehicle.imageUrls),
-                  const Spacer(),
                   if (vehicle.plateNumber != null) ...[
-                    Text(vehicle.plateNumber!,
-                      style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(7)),
                       child: const Text('اللوحة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.goldText)),
                     ),
+                    const SizedBox(width: 8),
+                    Text(vehicle.plateNumber!,
+                      style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                   ] else
-                    Text('بدون لوحة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+                    Text('بدون لوحة', style: const TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+                  const Spacer(),
+                  _ImageThumbnails(imageUrls: vehicle.imageUrls),
                 ],
               ),
             ),
@@ -259,36 +261,25 @@ class _ImageThumbnails extends StatelessWidget {
     if (imageUrls.isEmpty) {
       return Row(
         children: [
+          Container(
+            width: size, height: size,
+            decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(radius), border: Border.all(color: AppColors.border)),
+            alignment: Alignment.center,
+            child: const Text('+3', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
+          ),
           ...List.generate(2, (_) => Padding(
-            padding: const EdgeInsets.only(left: 6),
+            padding: const EdgeInsets.only(right: 6),
             child: ClipRRect(borderRadius: BorderRadius.circular(radius), child: _StripePlaceholder(size: size)),
           )),
-          Padding(
-            padding: const EdgeInsets.only(left: 6),
-            child: Container(
-              width: size, height: size,
-              decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(radius), border: Border.all(color: AppColors.border)),
-              alignment: Alignment.center,
-              child: const Text('+3', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
-            ),
-          ),
         ],
       );
     }
 
     return Row(
       children: [
-        ...List.generate(imageUrls.length.clamp(0, maxShow), (i) => Padding(
-          padding: const EdgeInsets.only(left: 6),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(radius),
-            child: Image.network(imageUrls[i], width: size, height: size, fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _StripePlaceholder(size: size)),
-          ),
-        )),
         if (imageUrls.length > maxShow)
           Padding(
-            padding: const EdgeInsets.only(left: 6),
+            padding: const EdgeInsets.only(right: 6),
             child: Container(
               width: size, height: size,
               decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(radius), border: Border.all(color: AppColors.border)),
@@ -297,6 +288,14 @@ class _ImageThumbnails extends StatelessWidget {
                 style: const TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
             ),
           ),
+        ...List.generate(imageUrls.length.clamp(0, maxShow), (i) => Padding(
+          padding: const EdgeInsets.only(right: 6),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(radius),
+            child: Image.network(imageUrls[i], width: size, height: size, fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => _StripePlaceholder(size: size)),
+          ),
+        )),
       ],
     );
   }
