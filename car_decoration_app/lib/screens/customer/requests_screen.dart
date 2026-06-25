@@ -42,26 +42,24 @@ class _RequestsScreenState extends State<RequestsScreen> {
               padding: const EdgeInsets.fromLTRB(22, 16, 22, 0),
               child: Row(
                 children: [
+                  // في RTL: أول عنصر = يمين
+                  const Text('طلباتي', style: TextStyle(fontFamily: 'Tajawal', fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                  const Spacer(),
                   GestureDetector(
                     onTap: () => Navigator.pushNamed(context, '/customer/requests/new'),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-                      decoration: BoxDecoration(
-                        color: AppColors.dark,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      decoration: BoxDecoration(color: AppColors.dark, borderRadius: BorderRadius.circular(12)),
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.add, color: AppColors.goldLight, size: 17),
-                          SizedBox(width: 5),
                           Text('طلب جديد', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.goldLight)),
+                          SizedBox(width: 5),
+                          Icon(Icons.add, color: AppColors.goldLight, size: 17),
                         ],
                       ),
                     ),
                   ),
-                  const Spacer(),
-                  const Text('طلباتي', style: TextStyle(fontFamily: 'Tajawal', fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
                 ],
               ),
             ),
@@ -69,13 +67,13 @@ class _RequestsScreenState extends State<RequestsScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(22, 14, 22, 16),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.start, // start = يمين في RTL
                 children: [
-                  _FilterTab(label: 'مكتملة', active: _filterIndex == 2, onTap: () => setState(() => _filterIndex = 2)),
+                  _FilterTab(label: 'الكل',     active: _filterIndex == 0, onTap: () => setState(() => _filterIndex = 0)),
                   const SizedBox(width: 8),
-                  _FilterTab(label: 'نشطة', active: _filterIndex == 1, onTap: () => setState(() => _filterIndex = 1)),
+                  _FilterTab(label: 'نشطة',     active: _filterIndex == 1, onTap: () => setState(() => _filterIndex = 1)),
                   const SizedBox(width: 8),
-                  _FilterTab(label: 'الكل', active: _filterIndex == 0, onTap: () => setState(() => _filterIndex = 0)),
+                  _FilterTab(label: 'مكتملة',   active: _filterIndex == 2, onTap: () => setState(() => _filterIndex = 2)),
                 ],
               ),
             ),
@@ -156,8 +154,9 @@ class _RequestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasQuotes = request.quotationCount > 0;
-    final showViewLink = request.status == RequestStatus.pending ||
+    final hasQuotes  = request.quotationCount > 0;
+    final showBottom = hasQuotes ||
+        request.status == RequestStatus.pending ||
         request.status == RequestStatus.offers;
 
     return GestureDetector(
@@ -175,30 +174,29 @@ class _RequestCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start, // start = يمين في RTL
                 children: [
-                  // Status chip + date row
+                  // Status chip (يمين) + date (يسار)
                   Row(
                     children: [
+                      _StatusChip(status: request.status), // أول = يمين في RTL
+                      const Spacer(),
                       Text(
                         '${_formatDate(request.dateLabel)} · #${request.requestNumber}',
                         style: const TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted),
                       ),
-                      const Spacer(),
-                      _StatusChip(status: request.status),
                     ],
                   ),
                   const SizedBox(height: 10),
-                  // Service description
+                  // وصف الخدمة — كبير وبولد
                   Text(
                     request.serviceType,
-                    textAlign: TextAlign.right,
                     style: const TextStyle(fontFamily: 'Tajawal', fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                   ),
                   const SizedBox(height: 6),
-                  // Vehicle info
+                  // معلومات السيارة
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         '${request.vehicleBrand} ${request.vehicleModel} ${request.vehicleYear}',
@@ -211,24 +209,25 @@ class _RequestCard extends StatelessWidget {
                 ],
               ),
             ),
-            // ── Bottom section (quotes / action) ─────────────────
-            if (hasQuotes || showViewLink) ...[
+            // ── Bottom section ────────────────────────────────────
+            if (showBottom) ...[
               Divider(height: 1, color: AppColors.border),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 11, 16, 12),
                 child: Row(
                   children: [
-                    if (showViewLink)
-                      Text(
-                        'عرض العروض ›',
-                        style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.goldText),
-                      ),
-                    const Spacer(),
+                    // عدد العروض يمين (أول = يمين في RTL)
                     if (hasQuotes)
                       Text(
                         '${request.quotationCount} عروض جديدة',
                         style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.goldText),
                       ),
+                    const Spacer(),
+                    // رابط عرض العروض يسار
+                    Text(
+                      'عرض العروض ›',
+                      style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.goldText),
+                    ),
                   ],
                 ),
               ),
@@ -248,12 +247,9 @@ class _StatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     Color bg, textColor;
     switch (status.colorType) {
-      case 'green':
-        bg = AppColors.greenLight; textColor = AppColors.green; break;
-      case 'red':
-        bg = AppColors.redLight; textColor = AppColors.red; break;
-      default:
-        bg = AppColors.goldBg; textColor = AppColors.goldText;
+      case 'green': bg = AppColors.greenLight; textColor = AppColors.green; break;
+      case 'red':   bg = AppColors.redLight;   textColor = AppColors.red;   break;
+      default:      bg = AppColors.goldBg;     textColor = AppColors.goldText;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
