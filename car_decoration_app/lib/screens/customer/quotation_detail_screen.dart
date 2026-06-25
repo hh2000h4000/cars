@@ -102,7 +102,7 @@ class QuotationDetailScreen extends StatelessWidget {
                             children: [
                               Text('السعر الإجمالي', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white54)),
                               const Spacer(),
-                              Text('${q.price} ريال', style: TextStyle(fontFamily: 'Tajawal', fontSize: 28, fontWeight: FontWeight.w900, color: AppColors.goldLight)),
+                              Text('${q.finalPrice.toStringAsFixed(0)} ريال', style: TextStyle(fontFamily: 'Tajawal', fontSize: 28, fontWeight: FontWeight.w900, color: AppColors.goldLight)),
                             ],
                           ),
                           const SizedBox(height: 12),
@@ -112,7 +112,7 @@ class QuotationDetailScreen extends StatelessWidget {
                           const SizedBox(height: 6),
                           _PriceRow('الضمان', q.warranty),
                           const SizedBox(height: 6),
-                          _PriceRow('مدة التنفيذ', q.executionTime),
+                          _PriceRow('مدة التنفيذ', q.duration),
                         ],
                       ),
                     ),

@@ -4,55 +4,57 @@ import 'api_client.dart';
 class ChatRoom {
   final String id;
   final String requestId;
-  final String otherPartyName;
-  final String otherPartyMono;
-  final String lastMessage;
-  final String lastMessageTime;
+  final String shopName;
+  final String customerName;
+  final String shopMono;
+  final String customerMono;
 
   const ChatRoom({
     required this.id,
     required this.requestId,
-    required this.otherPartyName,
-    required this.otherPartyMono,
-    required this.lastMessage,
-    required this.lastMessageTime,
+    required this.shopName,
+    required this.customerName,
+    required this.shopMono,
+    required this.customerMono,
   });
 
   factory ChatRoom.fromJson(Map<String, dynamic> json) {
-    final name = json['otherPartyName'] as String? ?? '';
+    final shopName = json['shopName'] as String? ?? '';
+    final customerName = json['customerName'] as String? ?? '';
     return ChatRoom(
       id: json['id'] as String,
       requestId: json['requestId'] as String? ?? '',
-      otherPartyName: name,
-      otherPartyMono: name.isNotEmpty ? name[0] : '؟',
-      lastMessage: json['lastMessage'] as String? ?? '',
-      lastMessageTime: json['lastMessageTime'] as String? ?? '',
+      shopName: shopName,
+      customerName: customerName,
+      shopMono: shopName.isNotEmpty ? shopName[0] : '؟',
+      customerMono: customerName.isNotEmpty ? customerName[0] : '؟',
     );
   }
 }
 
 class ChatService {
   static Future<List<ChatRoom>> getChatRooms() async {
-    final res = await ApiClient.dio.get('/api/chat/rooms');
+    final res = await ApiClient.dio.get('/api/chats');
     final list = res.data as List<dynamic>;
     return list.map((e) => ChatRoom.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   static Future<List<ChatMessage>> getMessages(String roomId) async {
     final currentUserId = await ApiClient.getUserId() ?? '';
-    final res = await ApiClient.dio.get('/api/chat/rooms/$roomId/messages');
-    final list = res.data as List<dynamic>;
-    return list
+    final res = await ApiClient.dio.get('/api/chats/$roomId');
+    final data = res.data as Map<String, dynamic>;
+    final messages = data['messages'] as List<dynamic>? ?? [];
+    return messages
         .map((e) => ChatMessage.fromJson(e as Map<String, dynamic>, currentUserId))
         .toList();
   }
 
-  static Future<ChatMessage> sendMessage(String roomId, String content) async {
+  static Future<ChatMessage> sendMessage(String roomId, String text) async {
     final currentUserId = await ApiClient.getUserId() ?? '';
-    final res = await ApiClient.dio.post(
-      '/api/chat/rooms/$roomId/messages',
-      data: {'content': content},
-    );
+    final res = await ApiClient.dio.post('/api/chats/send', data: {
+      'chatRoomId': roomId,
+      'text': text,
+    });
     return ChatMessage.fromJson(res.data as Map<String, dynamic>, currentUserId);
   }
 }

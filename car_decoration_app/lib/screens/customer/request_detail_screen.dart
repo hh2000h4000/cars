@@ -238,7 +238,7 @@ class _QuotationCard extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('${quotation.price} ريال', style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                          Text('${quotation.finalPrice.toStringAsFixed(0)} ريال', style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
                           Text('+ ${quotation.visitFee} رسوم زيارة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
                         ],
                       ),
@@ -247,7 +247,7 @@ class _QuotationCard extends StatelessWidget {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      _InfoChip(Icons.schedule_outlined, quotation.executionTime),
+                      _InfoChip(Icons.schedule_outlined, quotation.duration),
                       const SizedBox(width: 8),
                       _InfoChip(Icons.verified_outlined, quotation.warranty),
                     ],

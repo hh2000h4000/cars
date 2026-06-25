@@ -25,7 +25,7 @@ class ChatMessage {
     return ChatMessage(
       id: json['id'] as String,
       isMe: json['senderId'] == currentUserId,
-      text: json['content'] as String? ?? '',
+      text: json['text'] as String? ?? '',
       time: time,
     );
   }
