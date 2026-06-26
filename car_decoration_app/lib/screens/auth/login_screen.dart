@@ -78,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
         final role = data['role'] as String? ?? 'Customer';
         if (role == 'Admin') {
           Navigator.pushNamedAndRemoveUntil(context, '/admin/dashboard', (_) => false);
-        } else if (role == 'Shop') {
+        } else if (role == 'ShopOwner') {
           Navigator.pushNamedAndRemoveUntil(context, '/shop/dashboard', (_) => false);
         } else {
           Navigator.pushNamedAndRemoveUntil(context, '/customer/home', (_) => false);

@@ -51,11 +51,11 @@ Future<void> main() async {
 
       if (isLoggedIn) {
         final role = await ApiClient.getRole();
-        switch (role?.toLowerCase()) {
-          case 'shop':
+        switch (role) {
+          case 'ShopOwner':
             initialRoute = '/shop/dashboard';
             break;
-          case 'admin':
+          case 'Admin':
             initialRoute = '/admin/dashboard';
             break;
           default:
