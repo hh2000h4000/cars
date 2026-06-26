@@ -89,6 +89,41 @@ Customer → Request (multi-shop) → Shop accepts → ChatRoom opens
 | Flutter Web baseUrl | `http://localhost:5053` |
 | Flutter Mobile baseUrl | `http://192.168.8.11:5053` |
 
+## قاعدة العمل — الخيار الأمثل دائماً
+
+> **هذا التطبيق مخصص للإنتاج الحقيقي ويجب أن يتحمّل أي حجم من المستخدمين.**
+> قبل تنفيذ أي ميزة، يجب تقديم الخيار الأمثل والخيار العادي، مع العلم أن الأمثل هو المطلوب دائماً.
+
+### مرجع الخيارات حسب نوع الميزة
+
+| الميزة | ❌ بدائي (لا تفعل) | ✅ أمثل (افعل دائماً) |
+|--------|-------------------|----------------------|
+| رسائل فورية / دردشة | Polling (timer كل X ثانية) | WebSocket / SignalR |
+| إشعارات push | Polling | FCM / APNs |
+| عدد غير مقروء | يُحسب في الجهاز من messages array | عمود في DB، يُحسب بـ SQL COUNT |
+| تتبع "مقروء" | SecureStorage في الجهاز | عمود `LastReadAt` في DB |
+| قائمة محادثات | إرجاع كل الرسائل لكل محادثة | إرجاع summary خفيف (آخر رسالة + unreadCount) |
+| بحث نصي | `LIKE '%keyword%'` | Full-text search (PostgreSQL `tsvector`) |
+| رفع ملفات | حفظ على Local Disk | Cloud Storage (Azure Blob / AWS S3) |
+| صور المنتجات / الملفات | Base64 في DB | روابط URL لـ Cloud Storage |
+| تحميل قوائم كبيرة | إرجاع كل السجلات | Pagination (limit/offset أو cursor) |
+| تسجيل الدخول | تخزين كلمة المرور نصاً | BCrypt hash |
+| توثيق الـ API | بدون توثيق | JWT Bearer موثق |
+| أخطاء البروداكشن | console.log فقط | Sentry + Serilog |
+| استعلامات DB | N+1 queries | Eager loading أو projections |
+| اتصال SignalR عند العودة للتطبيق | إعادة تشغيل كاملة | `withAutomaticReconnect()` + `didChangeAppLifecycleState` |
+
+### البروتوكول قبل كل ميزة جديدة
+
+قبل كتابة أي كود لميزة، يجب الإجابة على:
+1. **ما الطريقة التي تستخدمها التطبيقات العالمية (واتساب / أوبر / إنستغرام) لهذه الميزة؟**
+2. **هل الطريقة الحالية ستصمد مع 10,000 مستخدم متزامن؟**
+3. **هل يوجد في المشروع شيء مشابه نُفِّذ بشكل أضعف يحتاج مراجعة؟**
+
+إذا كان الخيار الأمثل يحتاج وقتاً أطول — يُذكر ذلك صراحةً، ولا يُنفَّذ الخيار الأضعف بدون موافقة صريحة.
+
+---
+
 ## Critical Code Notes
 
 **Flutter Web bug:** دائماً استخدم `catchError((Object e) {...})` بمعامل واحد — معاملان يسببان crash على web بسبب DDC StackTrace cast.
