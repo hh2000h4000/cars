@@ -357,19 +357,6 @@ class _MessageBubble extends StatelessWidget {
             msg.isMe ? MainAxisAlignment.start : MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          // Avatar for other party (shown on far left in RTL = end side)
-          if (!msg.isMe) ...[
-            Container(
-              width: 28, height: 28,
-              margin: const EdgeInsets.only(left: 6),
-              decoration: BoxDecoration(
-                color: AppColors.dark,
-                borderRadius: BorderRadius.circular(9),
-              ),
-              alignment: Alignment.center,
-              child: const Icon(Icons.person, color: AppColors.goldLight, size: 14),
-            ),
-          ],
           Column(
             crossAxisAlignment:
                 msg.isMe ? CrossAxisAlignment.start : CrossAxisAlignment.end,
@@ -435,19 +422,6 @@ class _MessageBubble extends StatelessWidget {
               ),
             ],
           ),
-          // Avatar for me (shown on far right in RTL = start side)
-          if (msg.isMe) ...[
-            Container(
-              width: 28, height: 28,
-              margin: const EdgeInsets.only(right: 6),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [AppColors.goldLight, AppColors.gold]),
-                borderRadius: BorderRadius.circular(9),
-              ),
-              alignment: Alignment.center,
-              child: const Icon(Icons.person, color: AppColors.dark, size: 14),
-            ),
-          ],
         ],
       ),
     );
