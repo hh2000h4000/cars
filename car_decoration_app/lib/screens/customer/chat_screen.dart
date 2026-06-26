@@ -45,6 +45,11 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   }
 
   void _handleIncomingMessage(Map<String, dynamic> data) {
+    // Skip messages I sent — _sendMessage() already adds them via HTTP response.
+    // This prevents duplicates when SignalR fires before the HTTP response arrives.
+    final senderRole = data['senderRole'] as String? ?? '';
+    if (senderRole.isNotEmpty && senderRole == _myRole) return;
+
     final incomingId = data['id']?.toString() ?? '';
     if (_messages.any((m) => m.id == incomingId)) return;
     final msg = ChatMessage.fromJson(data, '', currentRole: _myRole);
