@@ -210,6 +210,27 @@ public class RequestService
             request.CreatedAt);
     }
 
+    // المتجر يُنهي الطلب بعد اكتمال العمل
+    public async Task CompleteAsync(Guid requestId)
+    {
+        var userId = _currentUser.UserId
+            ?? throw new Exception("غير مصرح");
+
+        var shop = await _db.Shops
+            .FirstOrDefaultAsync(s => s.OwnerId == userId && s.Status == ShopStatus.Approved)
+            ?? throw new Exception("المتجر غير موجود");
+
+        var request = await _db.Requests
+            .FirstOrDefaultAsync(r => r.Id == requestId && r.SelectedShopId == shop.Id && !r.IsDeleted)
+            ?? throw new Exception("الطلب غير موجود أو غير مرتبط بمتجرك");
+
+        if (request.Status != RequestStatus.Active)
+            throw new Exception("لا يمكن إنهاء الطلب في حالته الحالية");
+
+        request.Status = RequestStatus.Completed;
+        await _db.SaveChangesAsync();
+    }
+
     // إلغاء طلب من قِبل العميل
     public async Task CancelAsync(Guid id)
     {

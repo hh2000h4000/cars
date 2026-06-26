@@ -19,4 +19,8 @@ class ShopRequestService {
     final data = res.data as Map<String, dynamic>;
     return data['chatRoomId'] as String? ?? '';
   }
+
+  static Future<void> completeRequest(String requestId) async {
+    await ApiClient.dio.put('/api/requests/$requestId/complete');
+  }
 }

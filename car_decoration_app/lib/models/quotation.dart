@@ -33,6 +33,12 @@ class Quotation {
     this.chatRoomId,
   });
 
+  static final empty = Quotation(
+    id: '', shopId: '', shopName: 'المتجر', shopMono: 'م',
+    shopRating: 0, finalPrice: 0, visitFee: '', warranty: '',
+    duration: '', serviceDetails: '', parts: [],
+  );
+
   factory Quotation.fromJson(Map<String, dynamic> json) {
     final shopName = json['shopName'] as String? ?? 'متجر';
     final statusStr = (json['status'] as String?)?.toLowerCase() ?? 'pending';

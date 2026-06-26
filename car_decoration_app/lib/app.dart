@@ -106,7 +106,7 @@ class CarDecorationApp extends StatelessWidget {
         page = ChatScreen(chatRoomId: args as String? ?? '');
         break;
       case '/customer/review':
-        page = const ReviewScreen();
+        page = ReviewScreen(args: args as ReviewArgs);
         break;
       case '/customer/complaint':
         page = ComplaintScreen(requestId: args as String? ?? '1042');

@@ -6,6 +6,7 @@ import '../../providers/app_provider.dart';
 import '../../models/service_request.dart';
 import '../../models/quotation.dart';
 import '../../services/quotation_service.dart';
+import 'review_screen.dart';
 
 class RequestDetailScreen extends StatefulWidget {
   final String requestId;
@@ -228,6 +229,23 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                         textColor: AppColors.red,
                         borderColor: AppColors.red.withOpacity(.4),
                       ),
+
+                    if (request.status == RequestStatus.completed) ...[
+                      DarkButton(
+                        label: 'تقييم الخدمة',
+                        onTap: () {
+                          final accepted = _quotations.firstWhere(
+                            (q) => q.status == QuotationStatus.accepted,
+                            orElse: () => _quotations.isNotEmpty ? _quotations.first : Quotation.empty,
+                          );
+                          Navigator.pushNamed(context, '/customer/review',
+                            arguments: ReviewArgs(
+                              requestId: widget.requestId,
+                              shopName: accepted.shopName,
+                            ));
+                        },
+                      ),
+                    ],
                   ],
                 ),
               ),

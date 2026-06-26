@@ -94,6 +94,21 @@ public class RequestsController : ControllerBase
         }
     }
 
+    [HttpPut("{id}/complete")]
+    public async Task<IActionResult> Complete(Guid id)
+    {
+        try
+        {
+            await _service.CompleteAsync(id);
+            return Ok(new { message = "تم إنهاء الطلب بنجاح" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Complete request failed for {RequestId}", id);
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> Cancel(Guid id)
     {

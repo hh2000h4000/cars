@@ -14,14 +14,44 @@ class ShopRequestDetailScreen extends StatefulWidget {
 
 class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
   bool _accepting = false;
+  bool _completing = false;
   late ShopRequestShopStatus _shopStatus;
+  late String _requestStatus;
   String? _chatRoomId;
 
   @override
   void initState() {
     super.initState();
     _shopStatus = widget.request.shopStatus;
+    _requestStatus = widget.request.status;
     _chatRoomId = widget.request.chatRoomId;
+  }
+
+  Future<void> _complete() async {
+    setState(() => _completing = true);
+    try {
+      await ShopRequestService.completeRequest(widget.request.id);
+      if (mounted) {
+        setState(() {
+          _requestStatus = 'Completed';
+          _completing = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('تم إنهاء الطلب بنجاح — سيتلقى العميل إشعاراً للتقييم',
+            style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
+          backgroundColor: AppColors.green,
+        ));
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _completing = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(e.toString().replaceAll('Exception: ', ''),
+            style: const TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
+          backgroundColor: AppColors.red,
+        ));
+      }
+    }
   }
 
   Future<void> _accept() async {
@@ -57,6 +87,8 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
     final r = widget.request;
     final isPending = _shopStatus == ShopRequestShopStatus.pending;
     final isAccepted = _shopStatus == ShopRequestShopStatus.accepted;
+    final isActive = _requestStatus == 'Active';
+    final isCompleted = _requestStatus == 'Completed';
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -259,38 +291,76 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
           color: Colors.white,
           border: Border(top: BorderSide(color: AppColors.border)),
         ),
-        child: isPending
-            ? DarkButton(
-                label: _accepting ? 'جاري القبول...' : 'قبول الطلب وفتح المحادثة',
-                onTap: _accepting ? null : _accept,
-                height: 50,
+        child: isCompleted
+            ? Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: AppColors.green.withOpacity(.08),
+                  border: Border.all(color: AppColors.green.withOpacity(.3)),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.check_circle_rounded, color: AppColors.green, size: 20),
+                    SizedBox(width: 8),
+                    Text('تم إنهاء الطلب بنجاح',
+                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.green)),
+                  ],
+                ),
               )
-            : _chatRoomId != null
-                ? Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: DarkButton(
-                          label: 'إرسال عرض سعر',
-                          onTap: () => Navigator.pushNamed(context, '/shop/send-quote', arguments: widget.request),
-                          height: 50,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: OutlinedDarkButton(
-                          label: 'المحادثة',
-                          onTap: () => Navigator.pushNamed(context, '/customer/chat', arguments: _chatRoomId),
-                          height: 50,
-                        ),
-                      ),
-                    ],
-                  )
-                : DarkButton(
-                    label: 'إرسال عرض سعر',
-                    onTap: () => Navigator.pushNamed(context, '/shop/send-quote', arguments: widget.request),
+            : isPending
+                ? DarkButton(
+                    label: _accepting ? 'جاري القبول...' : 'قبول الطلب وفتح المحادثة',
+                    onTap: _accepting ? null : _accept,
                     height: 50,
-                  ),
+                  )
+                : isActive && _chatRoomId != null
+                    ? Row(
+                        children: [
+                          Expanded(
+                            child: DarkButton(
+                              label: _completing ? 'جاري الإنهاء...' : 'إنهاء الطلب',
+                              onTap: _completing ? null : _complete,
+                              height: 50,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: OutlinedDarkButton(
+                              label: 'المحادثة',
+                              onTap: () => Navigator.pushNamed(context, '/customer/chat', arguments: _chatRoomId),
+                              height: 50,
+                            ),
+                          ),
+                        ],
+                      )
+                    : _chatRoomId != null
+                        ? Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: DarkButton(
+                                  label: 'إرسال عرض سعر',
+                                  onTap: () => Navigator.pushNamed(context, '/shop/send-quote', arguments: widget.request),
+                                  height: 50,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: OutlinedDarkButton(
+                                  label: 'المحادثة',
+                                  onTap: () => Navigator.pushNamed(context, '/customer/chat', arguments: _chatRoomId),
+                                  height: 50,
+                                ),
+                              ),
+                            ],
+                          )
+                        : DarkButton(
+                            label: 'إرسال عرض سعر',
+                            onTap: () => Navigator.pushNamed(context, '/shop/send-quote', arguments: widget.request),
+                            height: 50,
+                          ),
       ),
     );
   }
