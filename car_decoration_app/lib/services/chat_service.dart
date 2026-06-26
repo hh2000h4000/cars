@@ -1,4 +1,5 @@
 import '../models/chat_message.dart';
+import '../models/paged_result.dart';
 import 'api_client.dart';
 
 class ChatRoom {
@@ -67,11 +68,12 @@ class ChatRoomDetail {
 
 class ChatService {
   // Lightweight list — unreadCount is computed server-side, no SecureStorage needed
-  static Future<List<ChatRoom>> getChatRooms() async {
-    final res = await ApiClient.dio.get('/api/chats');
-    return (res.data as List<dynamic>)
-        .map((e) => ChatRoom.fromJson(e as Map<String, dynamic>))
-        .toList();
+  static Future<PagedResult<ChatRoom>> getChatRooms({int page = 1, int pageSize = 50}) async {
+    final res = await ApiClient.dio.get('/api/chats', queryParameters: {
+      'page': page,
+      'pageSize': pageSize,
+    });
+    return PagedResult.fromJson(res.data as Map<String, dynamic>, ChatRoom.fromJson);
   }
 
   static Future<ChatRoomDetail> getRoomDetail(String roomId) async {

@@ -1,4 +1,5 @@
-﻿using CarDecoration.API.Services;
+using CarDecoration.API.DTOs;
+using CarDecoration.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,11 +32,11 @@ public class ShopsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetShops([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    public async Task<IActionResult> GetShops([FromQuery] PaginationRequest pagination)
     {
         try
         {
-            var result = await _service.GetApprovedShopsAsync(page, pageSize);
+            var result = await _service.GetApprovedShopsAsync(pagination);
             return Ok(result);
         }
         catch (Exception ex)
@@ -60,11 +61,11 @@ public class ShopsController : ControllerBase
 
     [HttpGet("pending")]
     [Authorize]
-    public async Task<IActionResult> GetPendingShops()
+    public async Task<IActionResult> GetPendingShops([FromQuery] PaginationRequest pagination)
     {
         try
         {
-            var result = await _service.GetPendingShopsAsync();
+            var result = await _service.GetPendingShopsAsync(pagination);
             return Ok(result);
         }
         catch (Exception ex)

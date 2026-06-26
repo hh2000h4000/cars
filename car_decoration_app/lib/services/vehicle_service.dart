@@ -1,11 +1,14 @@
 import '../models/vehicle.dart';
+import '../models/paged_result.dart';
 import 'api_client.dart';
 
 class VehicleService {
-  static Future<List<Vehicle>> getMyVehicles() async {
-    final res = await ApiClient.dio.get('/api/vehicles');
-    final list = res.data as List<dynamic>;
-    return list.map((e) => Vehicle.fromJson(e as Map<String, dynamic>)).toList();
+  static Future<PagedResult<Vehicle>> getMyVehicles({int page = 1, int pageSize = 50}) async {
+    final res = await ApiClient.dio.get('/api/vehicles', queryParameters: {
+      'page': page,
+      'pageSize': pageSize,
+    });
+    return PagedResult.fromJson(res.data as Map<String, dynamic>, Vehicle.fromJson);
   }
 
   static Future<Vehicle> addVehicle({

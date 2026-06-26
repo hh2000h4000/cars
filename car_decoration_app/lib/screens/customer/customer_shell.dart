@@ -75,8 +75,8 @@ class _CustomerShellState extends State<CustomerShell>
 
   Future<void> _refreshBadge() async {
     try {
-      final rooms = await ChatService.getChatRooms();
-      final count = rooms.fold(0, (sum, r) => sum + r.unreadCount);
+      final result = await ChatService.getChatRooms();
+      final count = result.items.fold(0, (sum, r) => sum + r.unreadCount);
       if (mounted) setState(() => _unreadCount = count);
     } catch (_) {}
   }

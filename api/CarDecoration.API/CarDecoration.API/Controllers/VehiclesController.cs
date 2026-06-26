@@ -1,4 +1,4 @@
-﻿using CarDecoration.API.DTOs;
+using CarDecoration.API.DTOs;
 using CarDecoration.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,11 +20,11 @@ public class VehiclesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetMyVehicles()
+    public async Task<IActionResult> GetMyVehicles([FromQuery] PaginationRequest pagination)
     {
         try
         {
-            var result = await _service.GetMyVehiclesAsync();
+            var result = await _service.GetMyVehiclesAsync(pagination);
             return Ok(result);
         }
         catch (Exception ex)

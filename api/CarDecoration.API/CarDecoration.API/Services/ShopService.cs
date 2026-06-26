@@ -26,26 +26,14 @@ public class ShopService
         return new MyShopResponse(shop.Id, shop.Name, shop.City, shop.Rating, shop.TotalJobs);
     }
 
-    public async Task<PagedResult<ShopResponse>> GetApprovedShopsAsync(int page, int pageSize)
-    {
-        page = Math.Max(1, page);
-        pageSize = Math.Clamp(pageSize, 1, 50);
-
-        var query = _db.Shops
+    public Task<PagedResult<ShopResponse>> GetApprovedShopsAsync(PaginationRequest pagination)
+        => _db.Shops
             .Where(s => s.Status == ShopStatus.Approved)
-            .OrderByDescending(s => s.Rating);
-
-        var total = await query.CountAsync();
-        var items = await query
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .OrderByDescending(s => s.Rating)
             .Select(s => new ShopResponse(
                 s.Id, s.Name, s.City, s.Phone,
                 s.LogoUrl, s.Rating, s.TotalJobs, s.Status.ToString()))
-            .ToListAsync();
-
-        return PagedResult<ShopResponse>.Create(items, total, page, pageSize);
-    }
+            .ToPagedAsync(pagination);
 
     public async Task<ShopDetailsResponse> GetShopDetailsAsync(Guid id)
     {
@@ -66,22 +54,18 @@ public class ShopService
     }
 
     // ── للإدارة: عرض المتاجر بانتظار الاعتماد ──
-    public async Task<List<PendingShopResponse>> GetPendingShopsAsync()
+    public Task<PagedResult<PendingShopResponse>> GetPendingShopsAsync(PaginationRequest pagination)
     {
-        var role = _currentUser.UserRole
-            ?? throw new Exception("غير مصرح");
+        var role = _currentUser.UserRole ?? throw new Exception("غير مصرح");
+        if (role != "Admin") throw new Exception("غير مصرح");
 
-        if (role != "Admin")
-            throw new Exception("غير مصرح");
-
-        return await _db.Shops
-            .Include(s => s.Owner)
+        return _db.Shops
             .Where(s => s.Status == ShopStatus.Pending || s.Status == ShopStatus.Rejected || s.Status == ShopStatus.DocsRequested)
             .OrderByDescending(s => s.CreatedAt)
             .Select(s => new PendingShopResponse(
                 s.Id, s.Name, s.Owner.FullName, s.City, s.Phone,
                 s.CrNumber, s.LogoUrl, s.Status.ToString(), s.CreatedAt))
-            .ToListAsync();
+            .ToPagedAsync(pagination);
     }
 
     public async Task ApproveShopAsync(Guid id)

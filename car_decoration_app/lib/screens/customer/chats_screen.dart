@@ -22,10 +22,10 @@ class _ChatsScreenState extends State<ChatsScreen> {
 
   Future<void> _load() async {
     try {
-      final rooms = await ChatService.getChatRooms();
+      final result = await ChatService.getChatRooms();
       if (mounted) {
         setState(() {
-          _rooms = rooms;
+          _rooms = result.items;
           _loading = false;
         });
       }

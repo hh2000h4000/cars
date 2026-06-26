@@ -33,11 +33,11 @@ public class ReviewsController : ControllerBase
 
     [HttpGet("shop/{shopId}")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetShopReviews(Guid shopId)
+    public async Task<IActionResult> GetShopReviews(Guid shopId, [FromQuery] PaginationRequest pagination)
     {
         try
         {
-            var result = await _service.GetShopReviewsAsync(shopId);
+            var result = await _service.GetShopReviewsAsync(shopId, pagination);
             return Ok(result);
         }
         catch (Exception ex)

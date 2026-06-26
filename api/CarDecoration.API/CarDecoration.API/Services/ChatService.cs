@@ -112,21 +112,24 @@ public class ChatService
     }
 
     // قائمة المحادثات — خفيفة، بدون تحميل كل الرسائل
-    public async Task<List<ChatRoomSummaryResponse>> GetMyChatRoomsAsync()
+    public async Task<PagedResult<ChatRoomSummaryResponse>> GetMyChatRoomsAsync(PaginationRequest pagination)
     {
-        var userId = _currentUser.UserId
-            ?? throw new Exception("غير مصرح");
-
+        var userId = _currentUser.UserId ?? throw new Exception("غير مصرح");
         var role = _currentUser.UserRole;
         var isCustomer = role == "Customer";
 
         if (role != "Customer" && role != "ShopOwner")
             throw new Exception("غير مصرح");
 
-        var rooms = await _db.ChatRooms
+        var baseQuery = _db.ChatRooms
             .Where(c => isCustomer
                 ? c.Request.CustomerId == userId
-                : c.Shop.OwnerId == userId)
+                : c.Shop.OwnerId == userId);
+
+        var total = await baseQuery.CountAsync();
+
+        // Anonymous projection to avoid EF ternary translation issues; map to DTO in memory
+        var rows = await baseQuery
             .Select(c => new {
                 c.Id,
                 c.RequestId,
@@ -140,7 +143,6 @@ public class ChatService
                     .OrderByDescending(m => m.CreatedAt)
                     .Select(m => (DateTime?)m.CreatedAt)
                     .FirstOrDefault(),
-                // Compute both sides — pick the right one in memory
                 UnreadAsCustomer = c.Messages.Count(m =>
                     m.SenderId != userId &&
                     (c.LastReadCustomerAt == null || m.CreatedAt > c.LastReadCustomerAt)),
@@ -149,17 +151,17 @@ public class ChatService
                     (c.LastReadShopOwnerAt == null || m.CreatedAt > c.LastReadShopOwnerAt)),
             })
             .OrderByDescending(c => c.LastMessageAt ?? DateTime.MinValue)
+            .Skip((pagination.Page - 1) * pagination.PageSize)
+            .Take(pagination.PageSize)
             .ToListAsync();
 
-        return rooms.Select(c => new ChatRoomSummaryResponse(
-            c.Id,
-            c.RequestId,
-            c.ShopName,
-            c.CustomerName,
-            c.LastMessageText,
-            c.LastMessageAt,
+        var items = rows.Select(c => new ChatRoomSummaryResponse(
+            c.Id, c.RequestId, c.ShopName, c.CustomerName,
+            c.LastMessageText, c.LastMessageAt,
             isCustomer ? c.UnreadAsCustomer : c.UnreadAsShopOwner
         )).ToList();
+
+        return PagedResult<ChatRoomSummaryResponse>.Create(items, total, pagination.Page, pagination.PageSize);
     }
 
     // تفاصيل المحادثة — كل الرسائل لشاشة الدردشة

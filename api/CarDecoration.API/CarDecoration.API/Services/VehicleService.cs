@@ -17,19 +17,18 @@ public class VehicleService
         _currentUser = currentUser;
     }
 
-    public async Task<List<VehicleResponse>> GetMyVehiclesAsync()
+    public Task<PagedResult<VehicleResponse>> GetMyVehiclesAsync(PaginationRequest pagination)
     {
-        var userId = _currentUser.UserId
-            ?? throw new Exception("غير مصرح");
+        var userId = _currentUser.UserId ?? throw new Exception("غير مصرح");
 
-        return await _db.Vehicles
+        return _db.Vehicles
             .Where(v => v.OwnerId == userId)
             .OrderByDescending(v => v.CreatedAt)
             .Select(v => new VehicleResponse(
                 v.Id, v.Brand, v.Model, v.Year, v.Color, v.PlateNumber,
                 v.VehicleImages.OrderBy(i => i.Order).Select(i => i.Url).ToList(),
                 v.CreatedAt))
-            .ToListAsync();
+            .ToPagedAsync(pagination);
     }
 
     public async Task<VehicleResponse> AddVehicleAsync(CreateVehicleRequest req)

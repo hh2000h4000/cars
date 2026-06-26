@@ -267,8 +267,8 @@ class AppProvider extends ChangeNotifier {
 
     await Future.wait([
       VehicleService.getMyVehicles()
-          .then((v) => vehicles = v)
-          .catchError((Object e) { AppLogger.error('initFromApi: vehicles', error: e); errors.add('سيارات: $e'); return <Vehicle>[]; }),
+          .then((r) { vehicles = r.items; })
+          .catchError((Object e) { AppLogger.error('initFromApi: vehicles', error: e); errors.add('سيارات: $e'); }),
       ShopService.getShops()
           .then((r) { shops = r.items; _shopsPage = 1; _hasMoreShops = r.hasNextPage; })
           .catchError((Object e) { AppLogger.error('initFromApi: shops', error: e); }),

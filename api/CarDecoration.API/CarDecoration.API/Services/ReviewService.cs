@@ -89,10 +89,8 @@ public class ReviewService
                              r.Status == RequestStatus.Completed);
     }
 
-    public async Task<List<ReviewResponse2>> GetShopReviewsAsync(Guid shopId)
-    {
-        return await _db.Reviews
-            .Include(r => r.Request).ThenInclude(r => r.SelectedShop)
+    public Task<PagedResult<ReviewResponse2>> GetShopReviewsAsync(Guid shopId, PaginationRequest pagination)
+        => _db.Reviews
             .Where(r => r.ShopId == shopId)
             .OrderByDescending(r => r.CreatedAt)
             .Select(r => new ReviewResponse2(
@@ -102,6 +100,5 @@ public class ReviewService
                 (r.QualityRating + r.CommunicationRating +
                  r.CommitmentRating + r.GeneralRating) / 4.0,
                 r.Comment, r.CreatedAt))
-            .ToListAsync();
-    }
+            .ToPagedAsync(pagination);
 }

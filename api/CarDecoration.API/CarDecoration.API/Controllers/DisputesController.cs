@@ -1,4 +1,4 @@
-﻿using CarDecoration.API.DTOs;
+using CarDecoration.API.DTOs;
 using CarDecoration.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -32,11 +32,11 @@ public class DisputesController : ControllerBase
     }
 
     [HttpGet("my")]
-    public async Task<IActionResult> GetMyDisputes()
+    public async Task<IActionResult> GetMyDisputes([FromQuery] PaginationRequest pagination)
     {
         try
         {
-            var result = await _service.GetMyDisputesAsync();
+            var result = await _service.GetMyDisputesAsync(pagination);
             return Ok(result);
         }
         catch (Exception ex)
@@ -46,11 +46,11 @@ public class DisputesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllDisputes()
+    public async Task<IActionResult> GetAllDisputes([FromQuery] PaginationRequest pagination)
     {
         try
         {
-            var result = await _service.GetAllDisputesAsync();
+            var result = await _service.GetAllDisputesAsync(pagination);
             return Ok(result);
         }
         catch (Exception ex)

@@ -1,4 +1,4 @@
-﻿using CarDecoration.API.DTOs;
+using CarDecoration.API.DTOs;
 using CarDecoration.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,11 +18,11 @@ public class ChatsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetMyChatRooms()
+    public async Task<IActionResult> GetMyChatRooms([FromQuery] PaginationRequest pagination)
     {
         try
         {
-            var result = await _service.GetMyChatRoomsAsync();
+            var result = await _service.GetMyChatRoomsAsync(pagination);
             return Ok(result);
         }
         catch (Exception ex)

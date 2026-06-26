@@ -69,14 +69,11 @@ public class DisputeService
     }
 
     // العميل يعرض نزاعاته
-    public async Task<List<DisputeResponse>> GetMyDisputesAsync()
+    public Task<PagedResult<DisputeResponse>> GetMyDisputesAsync(PaginationRequest pagination)
     {
-        var userId = _currentUser.UserId
-            ?? throw new Exception("غير مصرح");
+        var userId = _currentUser.UserId ?? throw new Exception("غير مصرح");
 
-        return await _db.Disputes
-            .Include(d => d.Request).ThenInclude(r => r.Customer)
-            .Include(d => d.Request).ThenInclude(r => r.SelectedShop)
+        return _db.Disputes
             .Where(d => d.UserId == userId)
             .OrderByDescending(d => d.CreatedAt)
             .Select(d => new DisputeResponse(
@@ -89,21 +86,16 @@ public class DisputeService
                 d.Evidence,
                 d.Status.ToString(),
                 d.CreatedAt))
-            .ToListAsync();
+            .ToPagedAsync(pagination);
     }
 
     // الإدارة تعرض كل النزاعات
-    public async Task<List<DisputeResponse>> GetAllDisputesAsync()
+    public Task<PagedResult<DisputeResponse>> GetAllDisputesAsync(PaginationRequest pagination)
     {
-        var role = _currentUser.UserRole
-            ?? throw new Exception("غير مصرح");
+        var role = _currentUser.UserRole ?? throw new Exception("غير مصرح");
+        if (role != "Admin") throw new Exception("غير مصرح");
 
-        if (role != "Admin")
-            throw new Exception("غير مصرح");
-
-        return await _db.Disputes
-            .Include(d => d.Request).ThenInclude(r => r.Customer)
-            .Include(d => d.Request).ThenInclude(r => r.SelectedShop)
+        return _db.Disputes
             .OrderByDescending(d => d.CreatedAt)
             .Select(d => new DisputeResponse(
                 d.Id,
@@ -115,7 +107,7 @@ public class DisputeService
                 d.Evidence,
                 d.Status.ToString(),
                 d.CreatedAt))
-            .ToListAsync();
+            .ToPagedAsync(pagination);
     }
 
     // الإدارة تغير حالة النزاع
