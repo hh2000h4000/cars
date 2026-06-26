@@ -5,6 +5,7 @@ import '../../widgets/widgets.dart';
 import '../../models/chat_message.dart';
 import '../../services/chat_service.dart';
 import '../../services/api_client.dart';
+import '../../services/signalr_service.dart';
 
 class ChatScreen extends StatefulWidget {
   final String chatRoomId;
@@ -25,7 +26,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   bool _sending = false;
   String? _error;
   String _myRole = '';
-  Timer? _pollTimer;
+  StreamSubscription<Map<String, dynamic>>? _msgSub;
 
   @override
   void initState() {
@@ -37,14 +38,29 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   Future<void> _init() async {
     _myRole = await ApiClient.getRole() ?? '';
     await _loadRoom();
-    // Poll every 5 seconds for new messages
-    _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) => _pollMessages());
+
+    // Subscribe to real-time messages for this room
+    await SignalRService.instance.joinRoom(widget.chatRoomId);
+    _msgSub = SignalRService.instance.onMessage.listen(_handleIncomingMessage);
+  }
+
+  void _handleIncomingMessage(Map<String, dynamic> data) {
+    final incomingId = data['id']?.toString() ?? '';
+    // Skip if already in list (e.g. our own message returned by REST)
+    if (_messages.any((m) => m.id == incomingId)) return;
+    final msg = ChatMessage.fromJson(data, '', currentRole: _myRole);
+    if (mounted) {
+      setState(() => _messages.add(msg));
+      _scrollToBottom();
+      _markAsRead();
+    }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _pollTimer?.cancel();
+    _msgSub?.cancel();
+    SignalRService.instance.leaveRoom(widget.chatRoomId);
     _controller.dispose();
     _scrollController.dispose();
     _focusNode.dispose();
@@ -71,18 +87,6 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
         });
       }
     }
-  }
-
-  Future<void> _pollMessages() async {
-    if (!mounted || _sending) return;
-    try {
-      final detail = await ChatService.getRoomDetail(widget.chatRoomId);
-      if (mounted && detail.messages.length > _messages.length) {
-        setState(() => _messages = detail.messages);
-        _scrollToBottom();
-        _markAsRead();
-      }
-    } catch (_) {}
   }
 
   void _markAsRead() {

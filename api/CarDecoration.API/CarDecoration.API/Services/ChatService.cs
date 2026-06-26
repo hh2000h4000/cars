@@ -1,7 +1,9 @@
 ﻿using CarDecoration.API.Data;
 using CarDecoration.API.DTOs;
 using CarDecoration.API.Helpers;
+using CarDecoration.API.Hubs;
 using CarDecoration.API.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarDecoration.API.Services;
@@ -10,11 +12,13 @@ public class ChatService
 {
     private readonly AppDbContext _db;
     private readonly ICurrentUserService _currentUser;
+    private readonly IHubContext<ChatHub> _hub;
 
-    public ChatService(AppDbContext db, ICurrentUserService currentUser)
+    public ChatService(AppDbContext db, ICurrentUserService currentUser, IHubContext<ChatHub> hub)
     {
         _db = db;
         _currentUser = currentUser;
+        _hub = hub;
     }
 
     // إرسال رسالة
@@ -52,7 +56,7 @@ public class ChatService
 
         var sender = await _db.Users.FindAsync(userId);
 
-        return new MessageResponse(
+        var response = new MessageResponse(
             message.Id,
             userId,
             sender!.FullName,
@@ -60,6 +64,19 @@ public class ChatService
             message.Text,
             message.Attachments,
             message.CreatedAt);
+
+        // Push message to everyone in the room group (real-time delivery)
+        await _hub.Clients
+            .Group($"room_{req.ChatRoomId}")
+            .SendAsync("ReceiveMessage", response);
+
+        // Notify the OTHER party so their badge/shell updates instantly
+        var recipientId = isCustomer ? chatRoom.Shop.OwnerId : chatRoom.Request.CustomerId;
+        await _hub.Clients
+            .User(recipientId.ToString())
+            .SendAsync("NewMessageNotification", req.ChatRoomId.ToString());
+
+        return response;
     }
 
     // عرض المحادثة

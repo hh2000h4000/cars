@@ -1,8 +1,11 @@
 using System.Text;
+using System.Text.Json;
 using CarDecoration.API.Data;
 using CarDecoration.API.Helpers;
+using CarDecoration.API.Hubs;
 using CarDecoration.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -42,6 +45,14 @@ builder.Services.AddScoped<QuotationService>();
 builder.Services.AddScoped<ChatService>();
 builder.Services.AddScoped<DisputeService>();
 builder.Services.AddScoped<ReviewService>();
+
+// SignalR — real-time chat
+builder.Services.AddSignalR().AddJsonProtocol(options =>
+{
+    options.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+});
+builder.Services.AddSingleton<IUserIdProvider, JwtUserIdProvider>();
+
 // JWT
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()!;
 builder.Services.AddSingleton(jwtSettings);
@@ -51,6 +62,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.MapInboundClaims = false;
+        // SignalR sends the token via query string for WebSocket connections
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    context.HttpContext.Request.Path.StartsWithSegments("/hubs"))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
+        };
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -117,5 +142,6 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();

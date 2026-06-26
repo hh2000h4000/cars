@@ -6,6 +6,7 @@ import '../../theme.dart';
 import '../../providers/app_provider.dart';
 import '../../services/api_client.dart';
 import '../../services/chat_service.dart';
+import '../../services/signalr_service.dart';
 import 'home_screen.dart';
 import 'requests_screen.dart';
 import 'vehicles_screen.dart';
@@ -19,17 +20,19 @@ class CustomerShell extends StatefulWidget {
   State<CustomerShell> createState() => _CustomerShellState();
 }
 
-class _CustomerShellState extends State<CustomerShell> {
+class _CustomerShellState extends State<CustomerShell>
+    with WidgetsBindingObserver {
   int _index = 0;
   int _unreadCount = 0;
   String _myRole = '';
-  Timer? _badgeTimer;
+  StreamSubscription<String>? _notifSub;
 
   static const _chatTabIndex = 3;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final token = await ApiClient.getToken();
       if (token == null) {
@@ -49,13 +52,27 @@ class _CustomerShellState extends State<CustomerShell> {
         }
       }
     });
-    _initBadge();
+    _connectSignalR();
   }
 
-  Future<void> _initBadge() async {
+  Future<void> _connectSignalR() async {
     _myRole = await ApiClient.getRole() ?? '';
+    await SignalRService.instance.connect();
+    // Update badge immediately on load
     await _refreshBadge();
-    _badgeTimer = Timer.periodic(const Duration(seconds: 8), (_) => _refreshBadge());
+    // Then update badge on every new message notification
+    _notifSub = SignalRService.instance.onNotification.listen((_) {
+      _refreshBadge();
+    });
+  }
+
+  // Called when app comes back to foreground — reconnect if needed
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      SignalRService.instance.connect();
+      _refreshBadge();
+    }
   }
 
   Future<void> _refreshBadge() async {
@@ -77,7 +94,8 @@ class _CustomerShellState extends State<CustomerShell> {
 
   @override
   void dispose() {
-    _badgeTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    _notifSub?.cancel();
     super.dispose();
   }
 
@@ -100,10 +118,7 @@ class _CustomerShellState extends State<CustomerShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _index,
-        children: _screens,
-      ),
+      body: IndexedStack(index: _index, children: _screens),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -123,10 +138,7 @@ class _CustomerShellState extends State<CustomerShell> {
                   child: GestureDetector(
                     onTap: () {
                       setState(() => _index = i);
-                      // Refresh badge count after visiting chats tab
-                      if (i == _chatTabIndex) {
-                        Future.delayed(const Duration(seconds: 2), _refreshBadge);
-                      }
+                      if (i == _chatTabIndex) _refreshBadge();
                     },
                     behavior: HitTestBehavior.opaque,
                     child: Column(
@@ -153,10 +165,8 @@ class _CustomerShellState extends State<CustomerShell> {
                                   child: Text(
                                     _unreadCount > 9 ? '9+' : '$_unreadCount',
                                     style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.w900,
-                                      fontFamily: 'Tajawal',
+                                      color: Colors.white, fontSize: 9,
+                                      fontWeight: FontWeight.w900, fontFamily: 'Tajawal',
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -165,19 +175,14 @@ class _CustomerShellState extends State<CustomerShell> {
                           ],
                         ),
                         const SizedBox(height: 3),
-                        Text(
-                          label,
-                          style: TextStyle(fontFamily: 'Tajawal',
-                            fontSize: 10.5,
+                        Text(label,
+                          style: TextStyle(fontFamily: 'Tajawal', fontSize: 10.5,
                             fontWeight: active ? FontWeight.w800 : FontWeight.w600,
-                            color: active ? AppColors.dark : AppColors.textMuted,
-                          ),
-                        ),
+                            color: active ? AppColors.dark : AppColors.textMuted)),
                         const SizedBox(height: 2),
                         AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
-                          width: active ? 16 : 0,
-                          height: 2.5,
+                          width: active ? 16 : 0, height: 2.5,
                           decoration: BoxDecoration(
                             color: AppColors.goldText,
                             borderRadius: BorderRadius.circular(999),

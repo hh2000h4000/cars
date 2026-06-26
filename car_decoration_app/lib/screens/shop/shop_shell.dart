@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../theme.dart';
 import '../../services/api_client.dart';
 import '../../services/chat_service.dart';
+import '../../services/signalr_service.dart';
 import 'shop_dashboard_screen.dart';
 import 'shop_requests_screen.dart';
 import 'shop_chats_screen.dart';
@@ -16,30 +17,42 @@ class ShopShell extends StatefulWidget {
   State<ShopShell> createState() => _ShopShellState();
 }
 
-class _ShopShellState extends State<ShopShell> {
+class _ShopShellState extends State<ShopShell> with WidgetsBindingObserver {
   int _index = 0;
   int _unreadCount = 0;
   String _myRole = '';
-  Timer? _badgeTimer;
+  StreamSubscription<String>? _notifSub;
 
   static const _chatTabIndex = 2;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final token = await ApiClient.getToken();
       if (token == null && mounted) {
         Navigator.pushNamedAndRemoveUntil(context, '/auth/login', (r) => false);
       }
     });
-    _initBadge();
+    _connectSignalR();
   }
 
-  Future<void> _initBadge() async {
+  Future<void> _connectSignalR() async {
     _myRole = await ApiClient.getRole() ?? '';
+    await SignalRService.instance.connect();
     await _refreshBadge();
-    _badgeTimer = Timer.periodic(const Duration(seconds: 8), (_) => _refreshBadge());
+    _notifSub = SignalRService.instance.onNotification.listen((_) {
+      _refreshBadge();
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      SignalRService.instance.connect();
+      _refreshBadge();
+    }
   }
 
   Future<void> _refreshBadge() async {
@@ -61,7 +74,8 @@ class _ShopShellState extends State<ShopShell> {
 
   @override
   void dispose() {
-    _badgeTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    _notifSub?.cancel();
     super.dispose();
   }
 
@@ -102,9 +116,7 @@ class _ShopShellState extends State<ShopShell> {
                   child: GestureDetector(
                     onTap: () {
                       setState(() => _index = i);
-                      if (i == _chatTabIndex) {
-                        Future.delayed(const Duration(seconds: 2), _refreshBadge);
-                      }
+                      if (i == _chatTabIndex) _refreshBadge();
                     },
                     behavior: HitTestBehavior.opaque,
                     child: Column(
@@ -128,10 +140,8 @@ class _ShopShellState extends State<ShopShell> {
                                   child: Text(
                                     _unreadCount > 9 ? '9+' : '$_unreadCount',
                                     style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.w900,
-                                      fontFamily: 'Tajawal',
+                                      color: Colors.white, fontSize: 9,
+                                      fontWeight: FontWeight.w900, fontFamily: 'Tajawal',
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
