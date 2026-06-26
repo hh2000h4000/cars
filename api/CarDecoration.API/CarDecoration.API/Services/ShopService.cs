@@ -17,6 +17,15 @@ public class ShopService
         _currentUser = currentUser;
     }
 
+    public async Task<MyShopResponse> GetMyShopAsync()
+    {
+        var userId = _currentUser.UserId ?? throw new Exception("غير مصرح");
+        var shop = await _db.Shops
+            .FirstOrDefaultAsync(s => s.OwnerId == userId && s.Status == ShopStatus.Approved)
+            ?? throw new Exception("المتجر غير موجود أو غير معتمد");
+        return new MyShopResponse(shop.Id, shop.Name, shop.City, shop.Rating, shop.TotalJobs);
+    }
+
     public async Task<List<ShopResponse>> GetApprovedShopsAsync()
     {
         return await _db.Shops

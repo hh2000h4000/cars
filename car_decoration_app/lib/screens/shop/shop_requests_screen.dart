@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-
-import 'package:provider/provider.dart';
 import '../../theme.dart';
-import '../../widgets/widgets.dart';
-import '../../providers/app_provider.dart';
-import '../../models/models.dart';
+import '../../models/shop_request.dart';
+import '../../services/shop_request_service.dart';
 
 class ShopRequestsScreen extends StatefulWidget {
   const ShopRequestsScreen({super.key});
@@ -14,15 +11,51 @@ class ShopRequestsScreen extends StatefulWidget {
 }
 
 class _ShopRequestsScreenState extends State<ShopRequestsScreen> {
+  List<ShopRequest> _all = [];
+  bool _loading = true;
+  String? _error;
   int _tab = 0;
 
   @override
-  Widget build(BuildContext context) {
-    final provider = context.watch<AppProvider>();
-    final inbox = provider.shopInbox;
-    final newCount = inbox.length;
+  void initState() {
+    super.initState();
+    _load();
+  }
 
-    final tabs = ['جديدة ($newCount)', 'بانتظار العميل', 'قيد التنفيذ'];
+  Future<void> _load() async {
+    setState(() { _loading = true; _error = null; });
+    try {
+      final requests = await ShopRequestService.getShopRequests();
+      if (mounted) setState(() { _all = requests; _loading = false; });
+    } catch (e) {
+      if (mounted) setState(() { _error = 'تعذر تحميل الطلبات'; _loading = false; });
+    }
+  }
+
+  List<ShopRequest> get _new =>
+      _all.where((r) => r.shopStatus == ShopRequestShopStatus.pending).toList();
+
+  List<ShopRequest> get _waiting =>
+      _all.where((r) =>
+          r.shopStatus == ShopRequestShopStatus.accepted &&
+          r.status != 'Active').toList();
+
+  List<ShopRequest> get _active =>
+      _all.where((r) => r.status == 'Active').toList();
+
+  @override
+  Widget build(BuildContext context) {
+    final newCount = _new.length;
+    final waitingCount = _waiting.length;
+    final activeCount = _active.length;
+
+    final tabs = [
+      'جديدة ($newCount)',
+      'بانتظار العميل ($waitingCount)',
+      'قيد التنفيذ ($activeCount)',
+    ];
+
+    final currentList = _tab == 0 ? _new : _tab == 1 ? _waiting : _active;
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -32,10 +65,28 @@ class _ShopRequestsScreenState extends State<ShopRequestsScreen> {
           children: [
             // ── Header ──
             Padding(
-              padding: const EdgeInsets.fromLTRB(22, 18, 22, 16),
-              child: Text('الطلبات الواردة',
-                style: TextStyle(fontFamily: 'Tajawal', fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+              padding: const EdgeInsets.fromLTRB(22, 18, 22, 0),
+              child: Row(
+                children: [
+                  Text('الطلبات الواردة',
+                    style: const TextStyle(fontFamily: 'Tajawal', fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: _load,
+                    child: Container(
+                      width: 38, height: 38,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: AppColors.border),
+                        borderRadius: BorderRadius.circular(11),
+                      ),
+                      child: const Icon(Icons.refresh_rounded, color: AppColors.textMuted, size: 18),
+                    ),
+                  ),
+                ],
+              ),
             ),
+            const SizedBox(height: 16),
 
             // ── Filter tabs ──
             SizedBox(
@@ -69,14 +120,22 @@ class _ShopRequestsScreenState extends State<ShopRequestsScreen> {
 
             // ── Content ──
             Expanded(
-              child: _tab == 0
-                  ? ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(22, 0, 22, 32),
-                      itemCount: inbox.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (_, i) => _RequestCard(item: inbox[i]),
-                    )
-                  : _EmptyTab(),
+              child: _loading
+                  ? const Center(child: CircularProgressIndicator(color: AppColors.goldText))
+                  : _error != null
+                      ? _ErrorState(message: _error!, onRetry: _load)
+                      : currentList.isEmpty
+                          ? const _EmptyTab()
+                          : RefreshIndicator(
+                              onRefresh: _load,
+                              color: AppColors.goldText,
+                              child: ListView.separated(
+                                padding: const EdgeInsets.fromLTRB(22, 0, 22, 32),
+                                itemCount: currentList.length,
+                                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                                itemBuilder: (_, i) => _RequestCard(request: currentList[i]),
+                              ),
+                            ),
             ),
           ],
         ),
@@ -87,8 +146,8 @@ class _ShopRequestsScreenState extends State<ShopRequestsScreen> {
 
 // ── Request card ──────────────────────────────────────────────────────────────
 class _RequestCard extends StatelessWidget {
-  final ShopInboxItem item;
-  const _RequestCard({required this.item});
+  final ShopRequest request;
+  const _RequestCard({required this.request});
 
   @override
   Widget build(BuildContext context) => Container(
@@ -105,76 +164,56 @@ class _RequestCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Customer row
               Row(
                 children: [
-                  // Avatar (visual RIGHT)
                   Container(
                     width: 46, height: 46,
                     decoration: BoxDecoration(color: AppColors.dark, borderRadius: BorderRadius.circular(14)),
                     alignment: Alignment.center,
-                    child: Text(item.mono,
-                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 17, fontWeight: FontWeight.w900, color: AppColors.goldLight)),
+                    child: Text(request.mono,
+                      style: const TextStyle(fontFamily: 'Tajawal', fontSize: 17, fontWeight: FontWeight.w900, color: AppColors.goldLight)),
                   ),
                   const SizedBox(width: 10),
-                  // Name + area/distance/time
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(item.customerName,
-                          style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                        Text(request.customerName,
+                          style: const TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                         const SizedBox(height: 2),
-                        Text('${item.area} · ${item.distance} · ${item.timeAgo}',
-                          style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                        Text('${request.location} · ${request.timeAgo}',
+                          style: const TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                       ],
                     ),
                   ),
-                  // Badge (visual LEFT)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: AppColors.goldBg,
-                      border: Border.all(color: AppColors.goldLight),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text('جديد',
-                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.goldText)),
-                  ),
+                  _StatusBadge(request.shopStatus),
                 ],
               ),
-              const SizedBox(height: 12),
-
-              // Service type
-              Text(item.serviceType,
-                style: TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+              const SizedBox(height: 10),
+              Text(request.description,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
               const SizedBox(height: 5),
-
-              // Vehicle with icon
               Row(
                 children: [
                   const Icon(Icons.directions_car_outlined, color: AppColors.textMuted, size: 14),
                   const SizedBox(width: 4),
-                  Text(item.vehicleInfo,
-                    style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                  Text(request.vehicleInfo,
+                    style: const TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                 ],
               ),
             ],
           ),
         ),
-
-        // Divider
         const Divider(height: 1, color: AppColors.border),
-
-        // Buttons
         Padding(
           padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
           child: Row(
             children: [
-              // View details (visual RIGHT)
               Expanded(
                 child: GestureDetector(
-                  onTap: () => Navigator.pushNamed(context, '/shop/request-detail', arguments: item.requestId),
+                  onTap: () => Navigator.pushNamed(context, '/shop/request-detail', arguments: request),
                   child: Container(
                     height: 42,
                     decoration: BoxDecoration(
@@ -183,27 +222,42 @@ class _RequestCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     alignment: Alignment.center,
-                    child: Text('عرض التفاصيل',
+                    child: const Text('عرض التفاصيل',
                       style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                   ),
                 ),
               ),
               const SizedBox(width: 10),
-              // Send quote (visual LEFT)
               Expanded(
-                child: GestureDetector(
-                  onTap: () => Navigator.pushNamed(context, '/shop/send-quote', arguments: item.requestId),
-                  child: Container(
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: AppColors.dark,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text('إرسال عرض',
-                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white)),
-                  ),
-                ),
+                child: request.shopStatus == ShopRequestShopStatus.pending
+                    ? GestureDetector(
+                        onTap: () => Navigator.pushNamed(context, '/shop/request-detail', arguments: request),
+                        child: Container(
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: AppColors.dark,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          alignment: Alignment.center,
+                          child: const Text('قبول وإرسال عرض',
+                            style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white)),
+                        ),
+                      )
+                    : request.chatRoomId != null
+                        ? GestureDetector(
+                            onTap: () => Navigator.pushNamed(context, '/customer/chat', arguments: request.chatRoomId),
+                            child: Container(
+                              height: 42,
+                              decoration: BoxDecoration(
+                                color: AppColors.dark,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              alignment: Alignment.center,
+                              child: const Text('فتح المحادثة',
+                                style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white)),
+                            ),
+                          )
+                        : const SizedBox.shrink(),
               ),
             ],
           ),
@@ -213,8 +267,33 @@ class _RequestCard extends StatelessWidget {
   );
 }
 
-// ── Empty state ───────────────────────────────────────────────────────────────
+class _StatusBadge extends StatelessWidget {
+  final ShopRequestShopStatus status;
+  const _StatusBadge(this.status);
+
+  @override
+  Widget build(BuildContext context) {
+    final (label, bg, fg) = switch (status) {
+      ShopRequestShopStatus.pending => ('جديد', AppColors.goldBg, AppColors.goldText),
+      ShopRequestShopStatus.accepted => ('مقبول', const Color(0xFFE8F5E9), AppColors.green),
+      ShopRequestShopStatus.rejected => ('مرفوض', const Color(0xFFFFEBEE), AppColors.red),
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: bg,
+        border: Border.all(color: fg.withOpacity(.3)),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(label,
+        style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w800, color: fg)),
+    );
+  }
+}
+
 class _EmptyTab extends StatelessWidget {
+  const _EmptyTab();
+
   @override
   Widget build(BuildContext context) => Center(
     child: Column(
@@ -226,11 +305,32 @@ class _EmptyTab extends StatelessWidget {
           child: const Icon(Icons.inbox_outlined, color: AppColors.goldText, size: 32),
         ),
         const SizedBox(height: 14),
-        Text('لا توجد طلبات',
+        const Text('لا توجد طلبات',
           style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
         const SizedBox(height: 6),
-        Text('ستظهر هنا الطلبات عند وصولها',
+        const Text('ستظهر هنا الطلبات عند وصولها',
           style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
+      ],
+    ),
+  );
+}
+
+class _ErrorState extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+  const _ErrorState({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(message, style: const TextStyle(fontFamily: 'Tajawal', fontSize: 14, color: AppColors.textSecondary)),
+        const SizedBox(height: 12),
+        TextButton(
+          onPressed: onRetry,
+          child: const Text('إعادة المحاولة', style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700, color: AppColors.goldText)),
+        ),
       ],
     ),
   );

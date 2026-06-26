@@ -120,7 +120,8 @@ public class RequestService
         return await _db.RequestShops
             .Include(rs => rs.Request).ThenInclude(r => r.Customer)
             .Include(rs => rs.Request).ThenInclude(r => r.Vehicle)
-            .Where(rs => rs.ShopId == shop.Id && rs.Status == RequestShopStatus.Pending)
+            .Include(rs => rs.Request).ThenInclude(r => r.ChatRoom)
+            .Where(rs => rs.ShopId == shop.Id)
             .OrderByDescending(rs => rs.CreatedAt)
             .Select(rs => new ShopRequestResponse(
                 rs.Request.Id,
@@ -133,6 +134,8 @@ public class RequestService
                 rs.Request.Location,
                 rs.Request.AppointmentDate,
                 rs.Request.Status.ToString(),
+                rs.Status.ToString(),
+                rs.Request.ChatRoom != null ? (Guid?)rs.Request.ChatRoom.Id : null,
                 rs.Request.CreatedAt))
             .ToListAsync();
     }

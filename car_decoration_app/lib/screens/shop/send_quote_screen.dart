@@ -1,16 +1,111 @@
 import 'package:flutter/material.dart';
-
-import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
-import '../../providers/app_provider.dart';
+import '../../models/shop_request.dart';
+import '../../services/quotation_service.dart';
 
-class SendQuoteScreen extends StatelessWidget {
-  final String requestId;
-  const SendQuoteScreen({super.key, required this.requestId});
+class SendQuoteScreen extends StatefulWidget {
+  final ShopRequest request;
+  const SendQuoteScreen({super.key, required this.request});
+
+  @override
+  State<SendQuoteScreen> createState() => _SendQuoteScreenState();
+}
+
+class _SendQuoteScreenState extends State<SendQuoteScreen> {
+  final _priceController = TextEditingController();
+  final _visitFeeController = TextEditingController(text: '0');
+  final _durationController = TextEditingController();
+  final _detailsController = TextEditingController();
+  String _warranty = '';
+  final List<String> _parts = [];
+  final _partController = TextEditingController();
+  bool _submitting = false;
+
+  static const _warrantyOptions = ['بدون ضمان', '٦ أشهر', 'سنة', 'سنتان'];
+
+  @override
+  void dispose() {
+    _priceController.dispose();
+    _visitFeeController.dispose();
+    _durationController.dispose();
+    _detailsController.dispose();
+    _partController.dispose();
+    super.dispose();
+  }
+
+  void _addPart() {
+    final text = _partController.text.trim();
+    if (text.isEmpty) return;
+    setState(() { _parts.add(text); _partController.clear(); });
+  }
+
+  void _removePart(int index) => setState(() => _parts.removeAt(index));
+
+  Future<void> _submit() async {
+    final priceStr = _priceController.text.trim();
+    final duration = _durationController.text.trim();
+    final details = _detailsController.text.trim();
+
+    if (priceStr.isEmpty) {
+      _showError('يرجى إدخال السعر الإجمالي');
+      return;
+    }
+    if (duration.isEmpty) {
+      _showError('يرجى إدخال مدة التنفيذ');
+      return;
+    }
+    if (details.isEmpty) {
+      _showError('يرجى إدخال تفاصيل الخدمة');
+      return;
+    }
+
+    final price = double.tryParse(priceStr.replaceAll(',', ''));
+    if (price == null || price <= 0) {
+      _showError('السعر غير صحيح');
+      return;
+    }
+
+    final visitFee = double.tryParse(_visitFeeController.text.trim()) ?? 0;
+
+    setState(() => _submitting = true);
+    try {
+      await QuotationService.sendQuote(
+        requestId: widget.request.id,
+        finalPrice: price,
+        duration: duration,
+        serviceDetails: details,
+        parts: _parts.isEmpty ? 'غير محدد' : _parts.join('، '),
+        visitFee: visitFee,
+        warranty: _warranty.isEmpty || _warranty == 'بدون ضمان' ? null : _warranty,
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('تم إرسال العرض بنجاح — في انتظار رد العميل',
+            style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
+          backgroundColor: AppColors.green,
+        ));
+        Navigator.pop(context);
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _submitting = false);
+        _showError('فشل إرسال العرض. حاول مجدداً.');
+      }
+    }
+  }
+
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(msg, style: const TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
+      backgroundColor: AppColors.red,
+    ));
+  }
 
   @override
   Widget build(BuildContext context) {
+    final r = widget.request;
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SafeArea(
@@ -23,7 +118,8 @@ class SendQuoteScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Row(
                   children: [
-                    Text('إرسال عرض سعر', style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    const Text('إرسال عرض سعر',
+                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                     const Spacer(),
                     const AppBackButton(),
                   ],
@@ -34,26 +130,33 @@ class SendQuoteScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(14),
                 margin: const EdgeInsets.only(bottom: 22),
-                decoration: BoxDecoration(color: AppColors.goldBg, border: Border.all(color: AppColors.goldLight), borderRadius: BorderRadius.circular(14)),
+                decoration: BoxDecoration(
+                  color: AppColors.goldBg,
+                  border: Border.all(color: AppColors.goldLight),
+                  borderRadius: BorderRadius.circular(14),
+                ),
                 child: Row(
                   children: [
                     const Icon(Icons.description_outlined, color: AppColors.goldText, size: 22),
                     const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('طلب #$requestId', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.goldText)),
-                        Text('تظليل زجاج · لاند كروزر 2023', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
-                      ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(r.customerName,
+                            style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.goldText)),
+                          Text(r.vehicleInfo,
+                            style: const TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                        ],
+                      ),
                     ),
-                    const Spacer(),
                   ],
                 ),
               ),
 
               // Price
               _Label('السعر الإجمالي (ريال)'),
-              _NumberBox('1,850', large: true),
+              _InputBox(controller: _priceController, hint: 'مثال: 1850', large: true, keyboardType: TextInputType.number),
               const SizedBox(height: 14),
 
               Row(
@@ -63,7 +166,7 @@ class SendQuoteScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _Label('رسوم الزيارة'),
-                        _NumberBox('50'),
+                        _InputBox(controller: _visitFeeController, hint: '0', keyboardType: TextInputType.number),
                       ],
                     ),
                   ),
@@ -73,7 +176,7 @@ class SendQuoteScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _Label('مدة التنفيذ'),
-                        _TextBox('٣-٤ ساعات'),
+                        _InputBox(controller: _durationController, hint: 'مثال: ٣-٤ ساعات'),
                       ],
                     ),
                   ),
@@ -86,16 +189,26 @@ class SendQuoteScreen extends StatelessWidget {
                 height: 44,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
-                  children: ['بدون ضمان', '٦ أشهر', 'سنة', 'سنتان'].map((w) => Container(
-                    margin: const EdgeInsets.only(left: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: w == 'سنة' ? AppColors.goldBg : Colors.white,
-                      border: Border.all(color: w == 'سنة' ? AppColors.goldLight : AppColors.border),
-                      borderRadius: BorderRadius.circular(11),
-                    ),
-                    child: Text(w, style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: w == 'سنة' ? AppColors.goldText : AppColors.textSecondary)),
-                  )).toList(),
+                  children: _warrantyOptions.map((w) {
+                    final sel = _warranty == w;
+                    return GestureDetector(
+                      onTap: () => setState(() => _warranty = w),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        margin: const EdgeInsets.only(left: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: sel ? AppColors.goldBg : Colors.white,
+                          border: Border.all(color: sel ? AppColors.goldLight : AppColors.border),
+                          borderRadius: BorderRadius.circular(11),
+                        ),
+                        child: Text(w,
+                          style: TextStyle(
+                            fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700,
+                            color: sel ? AppColors.goldText : AppColors.textSecondary)),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
               const SizedBox(height: 18),
@@ -103,33 +216,70 @@ class SendQuoteScreen extends StatelessWidget {
               _Label('تفاصيل الخدمة'),
               Container(
                 height: 100,
-                decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(14)),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: AppColors.border),
+                  borderRadius: BorderRadius.circular(14),
+                ),
                 padding: const EdgeInsets.all(14),
-                alignment: Alignment.topRight,
-                child: Text(
-                  'تظليل النوافذ الجانبية والخلفية بأفلام 3M عالية الجودة، مع ضمان عدم التبقع أو التقشر لمدة سنة كاملة...',
+                child: TextField(
+                  controller: _detailsController,
+                  maxLines: null,
+                  expands: true,
                   textAlign: TextAlign.right,
-                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary, height: 1.6),
+                  textDirection: TextDirection.rtl,
+                  style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary, height: 1.6),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    hintText: 'صف الخدمة التي ستقدمها...',
+                    hintStyle: TextStyle(fontFamily: 'Tajawal', fontSize: 13, color: AppColors.textMuted),
+                  ),
                 ),
               ),
               const SizedBox(height: 18),
 
               _Label('المواد والقطع المستخدمة'),
-              Column(
+              ..._parts.asMap().entries.map((e) => _PartRow(
+                text: e.value,
+                onRemove: () => _removePart(e.key),
+              )),
+              const SizedBox(height: 8),
+              Row(
                 children: [
-                  _PartRow('أفلام 3M مستوى FX-ST'),
-                  _PartRow('مواد تنظيف احترافية'),
-                  _PartRow('ضمان ضد التبقع والتقشر'),
-                  const SizedBox(height: 8),
+                  Expanded(
+                    child: Container(
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: AppColors.border),
+                        borderRadius: BorderRadius.circular(11),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: TextField(
+                        controller: _partController,
+                        textAlign: TextAlign.right,
+                        textDirection: TextDirection.rtl,
+                        style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, color: AppColors.textPrimary),
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'أضف مادة...',
+                          hintStyle: TextStyle(fontFamily: 'Tajawal', fontSize: 13, color: AppColors.textMuted),
+                        ),
+                        onSubmitted: (_) => _addPart(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
                   GestureDetector(
-                    onTap: () {},
-                    child: Row(
-                      children: [
-                        const Icon(Icons.add_circle_outline, color: AppColors.goldText, size: 16),
-                        const SizedBox(width: 4),
-                        Text('+ إضافة مادة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.goldText)),
-                        const Spacer(),
-                      ],
+                    onTap: _addPart,
+                    child: Container(
+                      width: 44, height: 44,
+                      decoration: BoxDecoration(
+                        color: AppColors.goldBg,
+                        border: Border.all(color: AppColors.goldLight),
+                        borderRadius: BorderRadius.circular(11),
+                      ),
+                      child: const Icon(Icons.add, color: AppColors.goldText, size: 20),
                     ),
                   ),
                 ],
@@ -137,12 +287,8 @@ class SendQuoteScreen extends StatelessWidget {
               const SizedBox(height: 28),
 
               DarkButton(
-                label: 'إرسال العرض',
-                onTap: () {
-                  context.read<AppProvider>().submitQuote();
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                },
+                label: _submitting ? 'جاري الإرسال...' : 'إرسال العرض',
+                onTap: _submitting ? null : _submit,
               ),
             ],
           ),
@@ -158,50 +304,65 @@ class _Label extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: 7),
-    child: Text(text, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+    child: Text(text,
+      style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
   );
 }
 
-class _NumberBox extends StatelessWidget {
-  final String value;
+class _InputBox extends StatelessWidget {
+  final TextEditingController controller;
+  final String hint;
   final bool large;
-  const _NumberBox(this.value, {this.large = false});
+  final TextInputType keyboardType;
+  const _InputBox({required this.controller, required this.hint, this.large = false, this.keyboardType = TextInputType.text});
+
   @override
   Widget build(BuildContext context) => Container(
     height: large ? 58 : 48,
-    decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(14)),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      border: Border.all(color: AppColors.border),
+      borderRadius: BorderRadius.circular(14),
+    ),
     padding: const EdgeInsets.symmetric(horizontal: 16),
-    alignment: Alignment.centerRight,
-    child: Text(value, style: TextStyle(fontFamily: 'Tajawal', fontSize: large ? 22 : 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-  );
-}
-
-class _TextBox extends StatelessWidget {
-  final String value;
-  const _TextBox(this.value);
-  @override
-  Widget build(BuildContext context) => Container(
-    height: 48,
-    decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(14)),
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    alignment: Alignment.centerRight,
-    child: Text(value, style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+    child: TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      textAlign: TextAlign.right,
+      style: TextStyle(fontFamily: 'Tajawal', fontSize: large ? 20 : 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+      decoration: InputDecoration(
+        border: InputBorder.none,
+        hintText: hint,
+        hintStyle: const TextStyle(fontFamily: 'Tajawal', fontSize: 14, color: AppColors.textMuted),
+      ),
+    ),
   );
 }
 
 class _PartRow extends StatelessWidget {
   final String text;
-  const _PartRow(this.text);
+  final VoidCallback onRemove;
+  const _PartRow({required this.text, required this.onRemove});
+
   @override
   Widget build(BuildContext context) => Container(
     margin: const EdgeInsets.only(bottom: 8),
     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-    decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(11)),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      border: Border.all(color: AppColors.border),
+      borderRadius: BorderRadius.circular(11),
+    ),
     child: Row(
       children: [
-        Text(text, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-        const Spacer(),
-        const Icon(Icons.remove_circle_outline, color: AppColors.red, size: 16),
+        Expanded(
+          child: Text(text,
+            style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+        ),
+        GestureDetector(
+          onTap: onRemove,
+          child: const Icon(Icons.remove_circle_outline, color: AppColors.red, size: 16),
+        ),
       ],
     ),
   );

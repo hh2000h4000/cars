@@ -6,3 +6,4 @@ export 'chat_message.dart';
 export 'review.dart';
 export 'dispute.dart';
 export 'pending_shop.dart';
+export 'shop_request.dart';

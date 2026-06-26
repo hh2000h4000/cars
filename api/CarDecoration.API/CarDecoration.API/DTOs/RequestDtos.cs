@@ -47,5 +47,7 @@ public record ShopRequestResponse(
     string Location,
     DateTime? AppointmentDate,
     string Status,
+    string ShopStatus,
+    Guid? ChatRoomId,
     DateTime CreatedAt
 );

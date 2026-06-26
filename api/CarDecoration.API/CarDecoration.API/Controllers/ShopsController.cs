@@ -15,6 +15,21 @@ public class ShopsController : ControllerBase
         _service = service;
     }
 
+    [HttpGet("my")]
+    [Authorize]
+    public async Task<IActionResult> GetMyShop()
+    {
+        try
+        {
+            var result = await _service.GetMyShopAsync();
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetShops()
     {

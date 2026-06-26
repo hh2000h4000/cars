@@ -23,6 +23,7 @@ import 'screens/customer/location_picker_screen.dart';
 import 'screens/shop/shop_shell.dart';
 import 'screens/shop/shop_request_detail_screen.dart';
 import 'screens/shop/send_quote_screen.dart';
+import 'models/shop_request.dart';
 import 'screens/admin/admin_shell.dart';
 import 'screens/admin/admin_pending_screen.dart';
 import 'screens/admin/admin_disputes_screen.dart';
@@ -125,10 +126,10 @@ class CarDecorationApp extends StatelessWidget {
         page = const ShopShell();
         break;
       case '/shop/request-detail':
-        page = ShopRequestDetailScreen(requestId: args as String? ?? '1042');
+        page = ShopRequestDetailScreen(request: args as ShopRequest);
         break;
       case '/shop/send-quote':
-        page = SendQuoteScreen(requestId: args as String? ?? '1042');
+        page = SendQuoteScreen(request: args as ShopRequest);
         break;
       case '/admin/dashboard':
         page = const AdminShell();

@@ -35,6 +35,14 @@ public record ShopDetailsResponse(
     List<ReviewResponse> Reviews
 );
 
+public record MyShopResponse(
+    Guid Id,
+    string Name,
+    string City,
+    float Rating,
+    int TotalJobs
+);
+
 public record ReviewResponse(
     int QualityRating,
     int CommunicationRating,
