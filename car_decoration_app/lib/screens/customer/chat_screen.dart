@@ -399,14 +399,7 @@ class _MessageBubble extends StatelessWidget {
                   constraints: const BoxConstraints(maxWidth: 260),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
-                    gradient: msg.isMe
-                        ? const LinearGradient(
-                            colors: [AppColors.goldLight, AppColors.gold],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          )
-                        : null,
-                    color: msg.isMe ? null : Colors.white,
+                    color: msg.isMe ? AppColors.dark : Colors.white,
                     border: msg.isMe ? null : Border.all(color: AppColors.border),
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(16),
@@ -424,7 +417,7 @@ class _MessageBubble extends StatelessWidget {
                       fontFamily: 'Tajawal',
                       fontSize: 13.5,
                       fontWeight: FontWeight.w500,
-                      color: msg.isMe ? AppColors.dark : AppColors.textPrimary,
+                      color: msg.isMe ? Colors.white : AppColors.textPrimary,
                       height: 1.5,
                     )),
                 ),
