@@ -69,11 +69,14 @@ Customer → Request (multi-shop) → Shop accepts → ChatRoom opens
 → Job done → Customer reviews → Shop rating updated
 ```
 
-## Current Status (آخر تحديث: 2026-06-25)
+## Current Status (آخر تحديث: 2026-06-26)
 
-- Backend: يعمل على PostgreSQL، جميع endpoints مكتملة
+- Backend: يعمل على PostgreSQL، جميع endpoints مكتملة ✅
 - Flutter: يعمل على موبايل وChromeWeb، بيانات حقيقية من API ✅
-- Vehicles + Requests + Shops: تحمل من API بنجاح ✅
+- شاشات التاجر كاملة ومربوطة بـ API: Dashboard، Requests، Chats، SendQuote ✅
+- شاشة الدردشة: رسائلي يمين (داكن)، رسائل الطرف الثاني يسار (أبيض) — مثل واتساب ✅
+- اشعارات الرسائل غير المقروءة: gold badge في قائمة المحادثات ✅
+- التركيز يبقى على حقل النص بعد الإرسال ✅
 - Mock data: محذوف بالكامل
 - Serilog: مفعّل، CORS: يعمل، Sentry: مضبوط
 
@@ -102,7 +105,8 @@ Customer → Request (multi-shop) → Shop accepts → ChatRoom opens
 
 ## What's Left (الأهم)
 
-- `SendQuoteScreen` لا يستدعي API بعد (يستخدم local state فقط)
-- `ShopMyStoreScreen` placeholder
-- لا يوجد pagination
-- Cloud storage للملفات المرفوعة
+- `ShopMyStoreScreen` لا تزال placeholder ("قريباً")
+- Badge عدد الرسائل غير المقروءة على تاب المحادثات في bottom nav (مؤجل)
+- Push Notifications عبر FCM (يحتاج Firebase + backend integration)
+- لا يوجد pagination على أي endpoint
+- Cloud storage للملفات المرفوعة (حالياً local disk)

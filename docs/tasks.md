@@ -2,6 +2,13 @@
 
 ## Done ✅
 
+### Backend (جلسة 2026-06-26)
+- [x] `ShopRequestResponse` enriched with `ShopStatus` + `ChatRoomId` fields (DTOs/RequestDtos.cs)
+- [x] `GetShopRequestsAsync()` returns all statuses (not just Pending) + includes ChatRoom navigation
+- [x] `MyShopResponse` DTO added (Id, Name, City, Rating, TotalJobs)
+- [x] `GET /api/shops/my` endpoint — returns the authenticated shop owner's shop info
+- [x] `senderRole` already present in `MessageResponse` — used by Flutter for isMe detection
+
 ### Backend
 - [x] ASP.NET Core 8 project setup with PostgreSQL + EF Core
 - [x] User auth: register (customer), register (shop), login — JWT tokens
@@ -26,6 +33,23 @@
 - [x] HTTPS redirect disabled in Development (prevents 307 stripping Authorization header)
 - [x] HTTP port 5053 added to `appsettings.json` Urls field
 - [x] Migration `20260625000001_AddColorToVehicles` created and applied
+
+### Flutter App (جلسة 2026-06-26)
+- [x] `ShopRequest` model — full model with `ShopRequestShopStatus` enum, computed props: `mono`, `vehicleInfo`, `timeAgo`, `appointmentLabel`
+- [x] `ShopRequestService` — `getShopRequests()` + `acceptRequest()` (returns chatRoomId)
+- [x] `ShopRequestsScreen` rewritten — StatefulWidget, 3 tabs (جديدة / بانتظار العميل / قيد التنفيذ), refresh, error state
+- [x] `ShopRequestDetailScreen` rewritten — accepts `ShopRequest` object, accept button calls API, chat button appears when chatRoomId available
+- [x] `ShopChatsScreen` rewritten — loads from `ChatService.getChatRooms()`, shows customerName/mono
+- [x] `ShopDashboardScreen` rewritten — real stats from `GET /api/shops/my` + `ShopRequestService`, real shop name
+- [x] `SendQuoteScreen` rewritten — TextEditingControllers, warranty picker, parts list, calls `QuotationService.sendQuote()` via real API ✅
+- [x] App routes updated: `/shop/request-detail` + `/shop/send-quote` now pass `ShopRequest` object
+- [x] `ChatMessage.fromJson` updated — accepts `currentRole` param, uses `senderRole` for isMe detection (more reliable than GUID comparison)
+- [x] `ChatService` updated — passes `currentRole` to `ChatMessage.fromJson` in both `getRoomDetail()` and `sendMessage()`
+- [x] `ChatRoom` model updated — extracts `lastMessage`, `lastMessageTime`, `lastMessageAt`, `lastSenderRole` from embedded messages array
+- [x] `ChatScreen` rewritten — `FocusNode` keeps cursor in field after send, 5s polling timer, WhatsApp-style `_MessageBubble` (my messages right/dark, other left/white), `textInputAction: TextInputAction.send`
+- [x] `ChatsScreen` updated — unread badge (gold dot + bold) when other party sent after last visit; reloads on back-navigate from chat
+- [x] `ShopChatsScreen` updated — same unread badge logic as ChatsScreen
+- [x] `ApiClient` — added `writeData()` / `readData()` for generic SecureStorage access (used for chat lastReadAt tracking)
 
 ### Flutter App
 - [x] Role-based routing (Customer / ShopOwner / Admin)
@@ -74,7 +98,7 @@
 ### Flutter App
 - [ ] ShopMyStoreScreen — currently a placeholder ("قريباً")
 - [ ] AdminDashboardScreen — stats/metrics (currently placeholder)
-- [ ] Real-time chat (currently polling or manual refresh)
+- [ ] Real-time chat (حالياً polling كل 5 ثوانٍ — يمكن ترقيته لـ SignalR/WebSocket لاحقاً)
 - [ ] Push notifications (no FCM integration)
 - [ ] Profile/account settings screen
 - [ ] Logout button visible in UI
@@ -82,7 +106,7 @@
 - [ ] Image upload progress indicator
 - [ ] Offline mode / error retry UI
 - [ ] Quotation detail from shop side (shop can see their sent quotations)
-- [ ] SendQuoteScreen still uses `provider.submitQuote()` (local state only) — needs real API call
+- [ ] SendQuoteScreen — ✅ تم ربطه بالـ API في جلسة 2026-06-26
 
 ### Infrastructure
 - [ ] Cloud deployment (server, domain, SSL)
@@ -100,5 +124,5 @@
 |---|-------------|--------|
 | 1 | ShopMyStoreScreen is placeholder | Known, deferred |
 | 2 | No pagination — large datasets will be slow | Known, deferred |
-| 3 | SendQuoteScreen doesn't call API — only updates local provider state | Not fixed yet |
+| 3 | ~~SendQuoteScreen doesn't call API~~ | ✅ Fixed 2026-06-26 |
 | 4 | Files served from `/uploads` are lost if server is restarted or redeployed | Known, deferred (needs cloud storage) |
