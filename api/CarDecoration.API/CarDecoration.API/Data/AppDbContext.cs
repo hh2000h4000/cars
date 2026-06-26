@@ -28,6 +28,7 @@ public class AppDbContext : DbContext
     public DbSet<Message> Messages => Set<Message>();
     public DbSet<Dispute> Disputes => Set<Dispute>();
     public DbSet<Review> Reviews => Set<Review>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -161,6 +162,15 @@ public class AppDbContext : DbContext
              .WithOne(req => req.Review)
              .HasForeignKey<Review>(r => r.RequestId)
              .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ── RefreshToken ──
+        b.Entity<RefreshToken>(e => {
+            e.HasIndex(r => r.Token).IsUnique();
+            e.HasOne(r => r.User)
+             .WithMany()
+             .HasForeignKey(r => r.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
         });
     }
 

@@ -1,4 +1,5 @@
-﻿using CarDecoration.API.Data;
+using System.Security.Cryptography;
+using CarDecoration.API.Data;
 using CarDecoration.API.DTOs;
 using CarDecoration.API.Helpers;
 using CarDecoration.API.Models;
@@ -10,11 +11,29 @@ public class AuthService
 {
     private readonly AppDbContext _db;
     private readonly JwtTokenGenerator _jwt;
+    private readonly JwtSettings _settings;
 
-    public AuthService(AppDbContext db, JwtTokenGenerator jwt)
+    public AuthService(AppDbContext db, JwtTokenGenerator jwt, JwtSettings settings)
     {
         _db = db;
         _jwt = jwt;
+        _settings = settings;
+    }
+
+    private static string CreateRefreshToken()
+        => Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+
+    private async Task<AuthResponse> BuildResponseAsync(User user)
+    {
+        var raw = CreateRefreshToken();
+        _db.RefreshTokens.Add(new RefreshToken
+        {
+            UserId = user.Id,
+            Token = raw,
+            ExpiresAt = DateTime.UtcNow.AddDays(_settings.RefreshTokenExpiryDays),
+        });
+        await _db.SaveChangesAsync();
+        return new AuthResponse(_jwt.Generate(user), raw, user.FullName, user.Email, user.Role.ToString());
     }
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest req)
@@ -36,8 +55,7 @@ public class AuthService
 
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
-
-        return new AuthResponse(_jwt.Generate(user), user.FullName, user.Email, user.Role.ToString());
+        return await BuildResponseAsync(user);
     }
 
     public async Task<AuthResponse> LoginAsync(LoginRequest req)
@@ -51,7 +69,7 @@ public class AuthService
         if (!BCrypt.Net.BCrypt.Verify(req.Password, user.PasswordHash))
             throw new Exception("البريد الإلكتروني أو كلمة المرور غير صحيحة");
 
-        return new AuthResponse(_jwt.Generate(user), user.FullName, user.Email, user.Role.ToString());
+        return await BuildResponseAsync(user);
     }
 
     public async Task<AuthResponse> RegisterShopAsync(ShopRegisterRequest req)
@@ -91,8 +109,41 @@ public class AuthService
 
         _db.Shops.Add(shop);
         await _db.SaveChangesAsync();
-
         await tx.CommitAsync();
-        return new AuthResponse(_jwt.Generate(user), user.FullName, user.Email, user.Role.ToString());
+
+        return await BuildResponseAsync(user);
+    }
+
+    public async Task<AuthResponse> RefreshAsync(string token)
+    {
+        var stored = await _db.RefreshTokens
+            .Include(r => r.User)
+            .FirstOrDefaultAsync(r => r.Token == token)
+            ?? throw new Exception("رمز التحديث غير صالح");
+
+        if (stored.IsRevoked)
+            throw new Exception("رمز التحديث ملغى");
+
+        if (stored.ExpiresAt < DateTime.UtcNow)
+            throw new Exception("رمز التحديث منتهي الصلاحية");
+
+        if (stored.User.Status == UserStatus.Suspended)
+            throw new Exception("الحساب موقوف");
+
+        // Token rotation: revoke old, issue new pair
+        stored.IsRevoked = true;
+        await _db.SaveChangesAsync();
+
+        return await BuildResponseAsync(stored.User);
+    }
+
+    public async Task LogoutAsync(string token)
+    {
+        var stored = await _db.RefreshTokens.FirstOrDefaultAsync(r => r.Token == token);
+        if (stored != null)
+        {
+            stored.IsRevoked = true;
+            await _db.SaveChangesAsync();
+        }
     }
 }

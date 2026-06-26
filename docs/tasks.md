@@ -84,7 +84,7 @@
 ## قيد التنفيذ — تحسينات احترافية 🔧
 
 ### أولوية عالية 🔴
-- [ ] **JWT Refresh Token** — حالياً token واحد ينتهي ويُطرد المستخدم. الحل: Access Token قصير + Refresh Token طويل (يجدد تلقائياً)
+- [x] **JWT Refresh Token** — Access Token 15 دقيقة + Refresh Token 30 يوم مخزن في DB. Dio interceptor يجدد تلقائياً عند 401. Token rotation عند كل تجديد. تم: 2026-06-26
 - [ ] **Pagination** — كل endpoints ترجع كل السجلات. الحل: `?page&limit` على كل قائمة
 
 ### أولوية متوسطة 🟡

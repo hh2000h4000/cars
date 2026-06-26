@@ -11,10 +11,11 @@ class AuthService {
     });
     final data = res.data as Map<String, dynamic>;
     await ApiClient.saveUserData(
-      token: data['token'],
-      fullName: data['fullName'],
-      email: data['email'],
-      role: data['role'],
+      token: data['token'] as String,
+      refreshToken: data['refreshToken'] as String,
+      fullName: data['fullName'] as String,
+      email: data['email'] as String,
+      role: data['role'] as String,
     );
     return data;
   }
@@ -33,10 +34,11 @@ class AuthService {
     });
     final data = res.data as Map<String, dynamic>;
     await ApiClient.saveUserData(
-      token: data['token'],
-      fullName: data['fullName'],
-      email: data['email'],
-      role: data['role'],
+      token: data['token'] as String,
+      refreshToken: data['refreshToken'] as String,
+      fullName: data['fullName'] as String,
+      email: data['email'] as String,
+      role: data['role'] as String,
     );
     return data;
   }
@@ -63,15 +65,22 @@ class AuthService {
     });
     final data = res.data as Map<String, dynamic>;
     await ApiClient.saveUserData(
-      token: data['token'],
-      fullName: data['fullName'],
-      email: data['email'],
-      role: data['role'],
+      token: data['token'] as String,
+      refreshToken: data['refreshToken'] as String,
+      fullName: data['fullName'] as String,
+      email: data['email'] as String,
+      role: data['role'] as String,
     );
     return data;
   }
 
   static Future<void> logout() async {
+    try {
+      final refreshToken = await _storage.read(key: 'refreshToken');
+      if (refreshToken != null) {
+        await ApiClient.dio.post('/api/auth/logout', data: {'refreshToken': refreshToken});
+      }
+    } catch (_) {}
     await ApiClient.clearUserData();
   }
 

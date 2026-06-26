@@ -9,25 +9,27 @@ import 'app_logger.dart';
 import 'api_client_mobile.dart' if (dart.library.html) 'api_client_web.dart' as platform;
 
 class ApiClient {
-  // static const String baseUrl = 'https://10.0.2.2:7209'; // Android emulator
   static final String baseUrl = kIsWeb
-      ? 'http://localhost:5053'        // Chrome على نفس الجهاز
-      : 'http://192.168.8.11:5053';   // جهاز حقيقي
+      ? 'http://localhost:5053'
+      : 'http://192.168.8.11:5053';
 
   static final _storage = const FlutterSecureStorage();
+  static Dio? _instance;
+  static bool _isRefreshing = false;
 
-  static Dio get dio {
-    final dio = Dio(BaseOptions(
+  static Dio get dio => _instance ??= _build();
+
+  static Dio _build() {
+    final d = Dio(BaseOptions(
       baseUrl: baseUrl,
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       headers: {'Content-Type': 'application/json'},
     ));
 
-    // تجاوز شهادة HTTPS على موبايل/ديسكتوب فقط
-    if (!kIsWeb) platform.setHttpClientAdapter(dio);
+    if (!kIsWeb) platform.setHttpClientAdapter(d);
 
-    dio.interceptors.add(InterceptorsWrapper(
+    d.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         try {
           final token = await _storage.read(key: 'token');
@@ -48,7 +50,7 @@ class ApiClient {
         } catch (_) {}
         handler.next(response);
       },
-      onError: (error, handler) {
+      onError: (error, handler) async {
         try {
           final body = error.response?.data?.toString() ?? '';
           AppLogger.error(
@@ -56,47 +58,79 @@ class ApiClient {
             error: body.isNotEmpty ? body : error.message,
           );
         } catch (_) {}
-        // Redirect to login on 401 (except for auth endpoints)
-        if (error.response?.statusCode == 401) {
+
+        if (error.response?.statusCode == 401 && !_isRefreshing) {
           final path = error.requestOptions.path;
           if (!path.contains('/api/auth/')) {
-            clearUserData().then((_) {
-              appNavigatorKey.currentState?.pushNamedAndRemoveUntil(
-                '/auth/login',
-                (route) => false,
-              );
-            });
+            _isRefreshing = true;
+            final refreshed = await _tryRefresh();
+            _isRefreshing = false;
+
+            if (refreshed) {
+              try {
+                final retried = await dio.fetch(error.requestOptions);
+                return handler.resolve(retried);
+              } catch (_) {}
+            }
+
+            await clearUserData();
+            appNavigatorKey.currentState?.pushNamedAndRemoveUntil(
+              '/auth/login',
+              (route) => false,
+            );
           }
         }
         handler.next(error);
       },
     ));
 
-    return dio;
+    return d;
   }
 
-  static Future<void> saveToken(String token) async {
-    await _storage.write(key: 'token', value: token);
+  static Future<bool> _tryRefresh() async {
+    final refreshToken = await _storage.read(key: 'refreshToken');
+    if (refreshToken == null) return false;
+    try {
+      final plain = Dio(BaseOptions(
+        baseUrl: baseUrl,
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+        headers: {'Content-Type': 'application/json'},
+      ));
+      if (!kIsWeb) platform.setHttpClientAdapter(plain);
+
+      final res = await plain.post('/api/auth/refresh', data: {'refreshToken': refreshToken});
+      final data = res.data as Map<String, dynamic>;
+      await _storage.write(key: 'token', value: data['token'] as String);
+      await _storage.write(key: 'refreshToken', value: data['refreshToken'] as String);
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   static Future<void> saveUserData({
     required String token,
+    required String refreshToken,
     required String fullName,
     required String email,
     required String role,
   }) async {
     await _storage.write(key: 'token', value: token);
+    await _storage.write(key: 'refreshToken', value: refreshToken);
     await _storage.write(key: 'fullName', value: fullName);
     await _storage.write(key: 'email', value: email);
     await _storage.write(key: 'role', value: role);
   }
 
   static Future<void> clearUserData() async {
-    // Delete session keys only — saved_email/saved_password/remember_me are preserved
     await _storage.delete(key: 'token');
+    await _storage.delete(key: 'refreshToken');
     await _storage.delete(key: 'fullName');
     await _storage.delete(key: 'email');
     await _storage.delete(key: 'role');
+    // Reset singleton so next login gets a fresh Dio instance
+    _instance = null;
   }
 
   static Future<String?> getToken() => _storage.read(key: 'token');

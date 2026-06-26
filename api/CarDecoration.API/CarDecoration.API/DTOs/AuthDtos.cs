@@ -14,10 +14,13 @@ public record LoginRequest(
 
 public record AuthResponse(
     string Token,
+    string RefreshToken,
     string FullName,
     string Email,
     string Role
 );
+
+public record RefreshRequest(string RefreshToken);
 
 public record ShopRegisterRequest(
     string FullName,

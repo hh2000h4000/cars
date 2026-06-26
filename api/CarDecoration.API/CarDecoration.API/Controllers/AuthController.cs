@@ -1,4 +1,4 @@
-﻿using CarDecoration.API.DTOs;
+using CarDecoration.API.DTOs;
 using CarDecoration.API.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -53,8 +53,28 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            // Return inner exception so DB constraint errors are visible
             return BadRequest(new { message = ex.InnerException?.Message ?? ex.Message });
         }
+    }
+
+    [HttpPost("refresh")]
+    public async Task<IActionResult> Refresh(RefreshRequest req)
+    {
+        try
+        {
+            var result = await _auth.RefreshAsync(req.RefreshToken);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
+    }
+
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout(RefreshRequest req)
+    {
+        await _auth.LogoutAsync(req.RefreshToken);
+        return NoContent();
     }
 }
