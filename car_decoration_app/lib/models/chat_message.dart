@@ -3,7 +3,7 @@ class ChatMessage {
   final bool isMe;
   final String text;
   final String time;
-  final bool hasImage;
+  final List<String> imageUrls;
   final String senderRole;
 
   const ChatMessage({
@@ -11,9 +11,11 @@ class ChatMessage {
     required this.isMe,
     required this.text,
     required this.time,
-    this.hasImage = false,
+    this.imageUrls = const [],
     this.senderRole = '',
   });
+
+  bool get hasImage => imageUrls.isNotEmpty;
 
   factory ChatMessage.fromJson(
     Map<String, dynamic> json,
@@ -32,7 +34,6 @@ class ChatMessage {
     final senderId = (json['senderId'] as String? ?? '').toLowerCase();
     final senderRole = json['senderRole'] as String? ?? '';
 
-    // Role comparison is reliable; GUID comparison as fallback
     bool isMe;
     if (currentRole.isNotEmpty && senderRole.isNotEmpty) {
       isMe = senderRole == currentRole;
@@ -40,11 +41,14 @@ class ChatMessage {
       isMe = senderId.isNotEmpty && senderId == currentUserId.toLowerCase();
     }
 
+    final rawAttachments = json['attachments'] as List<dynamic>? ?? [];
+
     return ChatMessage(
       id: json['id'] as String? ?? '',
       isMe: isMe,
       text: json['text'] as String? ?? '',
       time: time,
+      imageUrls: rawAttachments.cast<String>(),
       senderRole: senderRole,
     );
   }

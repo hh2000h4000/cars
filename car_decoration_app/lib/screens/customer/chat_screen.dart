@@ -1,11 +1,15 @@
 import 'dart:async';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../../models/chat_message.dart';
 import '../../services/chat_service.dart';
 import '../../services/api_client.dart';
 import '../../services/signalr_service.dart';
+import '../../services/upload_service.dart';
 
 class ChatScreen extends StatefulWidget {
   final String chatRoomId;
@@ -19,9 +23,11 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
   final _focusNode = FocusNode();
+  final _imagePicker = ImagePicker();
 
   ChatRoom? _room;
   List<ChatMessage> _messages = [];
+  List<XFile> _pendingImages = [];
   bool _loading = true;
   bool _sending = false;
   String? _error;
@@ -38,23 +44,17 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   Future<void> _init() async {
     _myRole = await ApiClient.getRole() ?? '';
     await _loadRoom();
-
-    // Subscribe to real-time messages for this room
     await SignalRService.instance.joinRoom(widget.chatRoomId);
     _msgSub = SignalRService.instance.onMessage.listen(_handleIncomingMessage);
   }
 
   void _handleIncomingMessage(Map<String, dynamic> data) {
-    // Skip messages I sent — _sendMessage() already adds them via HTTP response.
-    // This prevents duplicates when SignalR fires before the HTTP response arrives.
     final senderRole = data['senderRole'] as String? ?? '';
     if (senderRole.isNotEmpty && senderRole == _myRole) return;
 
     final incomingId = data['id']?.toString() ?? '';
     if (_messages.any((m) => m.id == incomingId)) return;
     final msg = ChatMessage.fromJson(data, '', currentRole: _myRole);
-    // Yield to the event loop before calling setState to ensure
-    // we're not inside a build/layout phase when SignalR fires the callback
     Future.microtask(() {
       if (!mounted) return;
       setState(() => _messages.add(msg));
@@ -83,7 +83,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
           _messages = detail.messages;
           _loading = false;
         });
-        _scrollToBottom();
+        _scrollToBottom(animated: false);
         _markAsRead();
       }
     } catch (e) {
@@ -118,16 +118,104 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     });
   }
 
+  // ── Image picking ───────────────────────────────────────────────────────────
+
+  void _showImageSourceSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36, height: 4,
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              if (!kIsWeb)
+                _SheetOption(
+                  icon: Icons.camera_alt_rounded,
+                  label: 'الكاميرا',
+                  onTap: () { Navigator.pop(context); _pickImage(ImageSource.camera); },
+                ),
+              _SheetOption(
+                icon: Icons.photo_library_rounded,
+                label: 'المعرض',
+                onTap: () { Navigator.pop(context); _pickFromGallery(); },
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final file = await _imagePicker.pickImage(
+        source: source,
+        imageQuality: 75,
+        maxWidth: 1280,
+      );
+      if (file != null && mounted) {
+        setState(() => _pendingImages.add(file));
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _pickFromGallery() async {
+    try {
+      final files = await _imagePicker.pickMultiImage(
+        imageQuality: 75,
+        maxWidth: 1280,
+        limit: 5,
+      );
+      if (files.isNotEmpty && mounted) {
+        setState(() => _pendingImages.addAll(files));
+      }
+    } catch (_) {}
+  }
+
+  void _removePendingImage(int index) {
+    setState(() => _pendingImages.removeAt(index));
+  }
+
+  // ── Send ────────────────────────────────────────────────────────────────────
+
   Future<void> _sendMessage() async {
     final text = _controller.text.trim();
-    if (text.isEmpty || _sending) return;
+    if ((text.isEmpty && _pendingImages.isEmpty) || _sending) return;
 
     setState(() => _sending = true);
     _controller.clear();
-    _focusNode.requestFocus(); // stay focused after send
+    _focusNode.requestFocus();
 
     try {
-      final msg = await ChatService.sendMessage(widget.chatRoomId, text);
+      List<String> attachmentUrls = [];
+
+      if (_pendingImages.isNotEmpty) {
+        final images = List<XFile>.from(_pendingImages);
+        setState(() => _pendingImages = []);
+        final bytes = await Future.wait(images.map((f) => f.readAsBytes()));
+        attachmentUrls = await UploadService.uploadImages(bytes);
+      }
+
+      final msg = await ChatService.sendMessage(
+        widget.chatRoomId,
+        text,
+        attachments: attachmentUrls.isEmpty ? null : attachmentUrls,
+      );
+
       if (mounted) {
         setState(() {
           _messages.add(msg);
@@ -148,9 +236,10 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     }
   }
 
+  // ── Build ───────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
-    // Shop sees customer name; customer sees shop name
     final isShop = _myRole == 'ShopOwner';
     final otherName = isShop
         ? (_room?.customerName ?? 'العميل')
@@ -164,7 +253,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
       body: SafeArea(
         child: Column(
           children: [
-            // ── Header ──
+            // ── Header ──────────────────────────────────────────────────────
             Container(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
               decoration: BoxDecoration(
@@ -196,20 +285,11 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                       ],
                     ),
                   ),
-                  Container(
-                    width: 38, height: 38,
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      border: Border.all(color: AppColors.border),
-                      borderRadius: BorderRadius.circular(11),
-                    ),
-                    child: const Icon(Icons.call_outlined, color: AppColors.textSecondary, size: 18),
-                  ),
                 ],
               ),
             ),
 
-            // ── Body ──
+            // ── Messages ─────────────────────────────────────────────────────
             Expanded(
               child: _loading
                   ? const Center(child: CircularProgressIndicator(color: AppColors.goldText))
@@ -235,7 +315,6 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                           itemCount: _messages.length + 1,
                           itemBuilder: (_, i) {
                             if (i == 0) {
-                              final requestId = _room?.requestId ?? '';
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 20),
                                 child: Center(
@@ -245,22 +324,40 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                                       color: AppColors.dark.withOpacity(0.55),
                                       borderRadius: BorderRadius.circular(20),
                                     ),
-                                    child: Text(
-                                      requestId.isNotEmpty
-                                          ? 'المحادثة بخصوص الطلب'
-                                          : 'المحادثة',
-                                      style: const TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: Colors.white),
-                                    ),
+                                    child: const Text('المحادثة بخصوص الطلب',
+                                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: Colors.white)),
                                   ),
                                 ),
                               );
                             }
-                            return _MessageBubble(msg: _messages[i - 1]);
+                            return _MessageBubble(
+                              msg: _messages[i - 1],
+                              onImageTap: (url) => Navigator.push(context, MaterialPageRoute(
+                                builder: (_) => _FullScreenImage(url: url),
+                              )),
+                            );
                           },
                         ),
             ),
 
-            // ── Input bar ──
+            // ── Image preview strip ──────────────────────────────────────────
+            if (_pendingImages.isNotEmpty)
+              Container(
+                height: 88,
+                color: Colors.white,
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _pendingImages.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  itemBuilder: (_, i) => _PendingImageThumb(
+                    file: _pendingImages[i],
+                    onRemove: () => _removePendingImage(i),
+                  ),
+                ),
+              ),
+
+            // ── Input bar ────────────────────────────────────────────────────
             Container(
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
               decoration: BoxDecoration(
@@ -269,15 +366,28 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
               ),
               child: Row(
                 children: [
-                  Container(
-                    width: 38, height: 38,
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(11),
+                  // Image button
+                  GestureDetector(
+                    onTap: _sending ? null : _showImageSourceSheet,
+                    child: Container(
+                      width: 38, height: 38,
+                      decoration: BoxDecoration(
+                        color: _pendingImages.isNotEmpty
+                            ? AppColors.goldBg
+                            : AppColors.surface,
+                        borderRadius: BorderRadius.circular(11),
+                      ),
+                      child: Icon(
+                        Icons.image_rounded,
+                        color: _pendingImages.isNotEmpty
+                            ? AppColors.goldText
+                            : AppColors.textMuted,
+                        size: 18,
+                      ),
                     ),
-                    child: const Icon(Icons.image_outlined, color: AppColors.textMuted, size: 18),
                   ),
                   const SizedBox(width: 8),
+                  // Text field
                   Expanded(
                     child: Container(
                       constraints: const BoxConstraints(minHeight: 40, maxHeight: 120),
@@ -294,21 +404,22 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                         textInputAction: TextInputAction.send,
                         maxLines: null,
                         style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
-                        decoration: const InputDecoration(
-                          hintText: 'اكتب رسالة...',
-                          hintStyle: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textMuted),
+                        decoration: InputDecoration(
+                          hintText: _pendingImages.isNotEmpty ? 'أضف تعليقاً...' : 'اكتب رسالة...',
+                          hintStyle: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textMuted),
                           border: InputBorder.none,
                           enabledBorder: InputBorder.none,
                           focusedBorder: InputBorder.none,
                           filled: false,
                           isDense: true,
-                          contentPadding: EdgeInsets.symmetric(vertical: 8),
+                          contentPadding: const EdgeInsets.symmetric(vertical: 8),
                         ),
                         onSubmitted: (_) => _sendMessage(),
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
+                  // Send button
                   GestureDetector(
                     onTap: _sendMessage,
                     child: AnimatedContainer(
@@ -342,46 +453,126 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   }
 }
 
-class _MessageBubble extends StatelessWidget {
-  final ChatMessage msg;
-  const _MessageBubble({required this.msg});
+// ── Pending image thumbnail ────────────────────────────────────────────────────
+
+class _PendingImageThumb extends StatefulWidget {
+  final XFile file;
+  final VoidCallback onRemove;
+  const _PendingImageThumb({required this.file, required this.onRemove});
+
+  @override
+  State<_PendingImageThumb> createState() => _PendingImageThumbState();
+}
+
+class _PendingImageThumbState extends State<_PendingImageThumb> {
+  late Future<List<int>> _bytesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _bytesFuture = widget.file.readAsBytes().then((b) => b.toList());
+  }
 
   @override
   Widget build(BuildContext context) {
-    // isMe = true → رسالتي → اليمين (start في RTL)
-    // isMe = false → رسالة الطرف الآخر → اليسار (end في RTL)
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        FutureBuilder<List<int>>(
+          future: _bytesFuture,
+          builder: (_, snap) {
+            if (!snap.hasData) {
+              return Container(
+                width: 70, height: 70,
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.goldText)),
+              );
+            }
+            return ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.memory(
+                Uint8List.fromList(snap.data!),
+                width: 70, height: 70,
+                fit: BoxFit.cover,
+              ),
+            );
+          },
+        ),
+        Positioned(
+          right: -6, top: -6,
+          child: GestureDetector(
+            onTap: widget.onRemove,
+            child: Container(
+              width: 20, height: 20,
+              decoration: const BoxDecoration(
+                color: AppColors.red,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.close, color: Colors.white, size: 12),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Bottom sheet option ────────────────────────────────────────────────────────
+
+class _SheetOption extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  const _SheetOption({required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    behavior: HitTestBehavior.opaque,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+      child: Row(
+        children: [
+          Container(
+            width: 44, height: 44,
+            decoration: BoxDecoration(
+              color: AppColors.goldBg,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: AppColors.goldText, size: 22),
+          ),
+          const SizedBox(width: 14),
+          Text(label,
+            style: const TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+        ],
+      ),
+    ),
+  );
+}
+
+// ── Message bubble ─────────────────────────────────────────────────────────────
+
+class _MessageBubble extends StatelessWidget {
+  final ChatMessage msg;
+  final void Function(String url) onImageTap;
+  const _MessageBubble({required this.msg, required this.onImageTap});
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
-        mainAxisAlignment:
-            msg.isMe ? MainAxisAlignment.start : MainAxisAlignment.end,
+        mainAxisAlignment: msg.isMe ? MainAxisAlignment.start : MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Column(
-            crossAxisAlignment:
-                msg.isMe ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+            crossAxisAlignment: msg.isMe ? CrossAxisAlignment.start : CrossAxisAlignment.end,
             children: [
-              if (msg.hasImage)
-                Container(
-                  width: 210, height: 160,
-                  clipBehavior: Clip.hardEdge,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1E1C14),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      CustomPaint(painter: _StripePainter()),
-                      Positioned(
-                        bottom: 10, right: 12, left: 12,
-                        child: Text(msg.text,
-                          style: const TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w600, color: Colors.white)),
-                      ),
-                    ],
-                  ),
-                )
-              else
+              if (msg.hasImage) _buildImageContent(context),
+              if (msg.text.isNotEmpty)
                 Container(
                   constraints: const BoxConstraints(maxWidth: 260),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -389,8 +580,8 @@ class _MessageBubble extends StatelessWidget {
                     color: msg.isMe ? AppColors.dark : Colors.white,
                     border: msg.isMe ? null : Border.all(color: AppColors.border),
                     borderRadius: BorderRadius.only(
-                      topLeft: const Radius.circular(16),
-                      topRight: const Radius.circular(16),
+                      topLeft: Radius.circular(msg.hasImage ? 0 : 16),
+                      topRight: Radius.circular(msg.hasImage ? 0 : 16),
                       bottomLeft: Radius.circular(msg.isMe ? 16 : 4),
                       bottomRight: Radius.circular(msg.isMe ? 4 : 16),
                     ),
@@ -426,19 +617,137 @@ class _MessageBubble extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildImageContent(BuildContext context) {
+    final urls = msg.imageUrls;
+    final radius = BorderRadius.only(
+      topLeft: const Radius.circular(16),
+      topRight: const Radius.circular(16),
+      bottomLeft: Radius.circular(msg.text.isEmpty ? (msg.isMe ? 16 : 4) : 0),
+      bottomRight: Radius.circular(msg.text.isEmpty ? (msg.isMe ? 4 : 16) : 0),
+    );
+
+    if (urls.length == 1) {
+      return _NetworkImage(url: urls.first, radius: radius, onTap: () => onImageTap(urls.first));
+    }
+
+    // Grid for multiple images (max 4 visible)
+    final visible = urls.take(4).toList();
+    final extra = urls.length - 4;
+    return ClipRRect(
+      borderRadius: radius,
+      child: SizedBox(
+        width: 220,
+        child: GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 2,
+          crossAxisSpacing: 2,
+          children: List.generate(visible.length, (i) {
+            final isLast = i == visible.length - 1 && extra > 0;
+            return GestureDetector(
+              onTap: () => onImageTap(urls[i]),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.network(urls[i], fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(color: AppColors.surface,
+                      child: const Icon(Icons.broken_image_rounded, color: AppColors.textMuted))),
+                  if (isLast)
+                    Container(
+                      color: Colors.black54,
+                      alignment: Alignment.center,
+                      child: Text('+$extra',
+                        style: const TextStyle(fontFamily: 'Tajawal', fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white)),
+                    ),
+                ],
+              ),
+            );
+          }),
+        ),
+      ),
+    );
+  }
 }
 
-class _StripePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withOpacity(0.06)
-      ..strokeWidth = 14;
-    for (double i = -size.height; i < size.width + size.height; i += 26) {
-      canvas.drawLine(Offset(i, 0), Offset(i + size.height, size.height), paint);
-    }
-  }
+// ── Network image with loading ─────────────────────────────────────────────────
+
+class _NetworkImage extends StatelessWidget {
+  final String url;
+  final BorderRadius radius;
+  final VoidCallback onTap;
+  const _NetworkImage({required this.url, required this.radius, required this.onTap});
 
   @override
-  bool shouldRepaint(_StripePainter old) => false;
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: ClipRRect(
+      borderRadius: radius,
+      child: Image.network(
+        url,
+        width: 220, height: 180,
+        fit: BoxFit.cover,
+        loadingBuilder: (_, child, progress) => progress == null
+            ? child
+            : Container(
+                width: 220, height: 180,
+                color: AppColors.surface,
+                alignment: Alignment.center,
+                child: const CircularProgressIndicator(strokeWidth: 2, color: AppColors.goldText),
+              ),
+        errorBuilder: (_, __, ___) => Container(
+          width: 220, height: 180,
+          color: AppColors.surface,
+          alignment: Alignment.center,
+          child: const Icon(Icons.broken_image_rounded, color: AppColors.textMuted, size: 36),
+        ),
+      ),
+    ),
+  );
+}
+
+// ── Full-screen image viewer ───────────────────────────────────────────────────
+
+class _FullScreenImage extends StatelessWidget {
+  final String url;
+  const _FullScreenImage({required this.url});
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: Colors.black,
+    body: Stack(
+      children: [
+        Center(
+          child: InteractiveViewer(
+            child: Image.network(
+              url,
+              fit: BoxFit.contain,
+              loadingBuilder: (_, child, progress) => progress == null
+                  ? child
+                  : const Center(child: CircularProgressIndicator(color: Colors.white)),
+              errorBuilder: (_, __, ___) => const Center(
+                child: Icon(Icons.broken_image_rounded, color: Colors.white54, size: 60)),
+            ),
+          ),
+        ),
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                width: 38, height: 38,
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: const Icon(Icons.close, color: Colors.white, size: 20),
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }

@@ -93,12 +93,17 @@ class ChatService {
     return ChatRoomDetail(room: room, messages: messages);
   }
 
-  static Future<ChatMessage> sendMessage(String roomId, String text) async {
+  static Future<ChatMessage> sendMessage(
+    String roomId,
+    String text, {
+    List<String>? attachments,
+  }) async {
     final currentUserId = await ApiClient.getUserId() ?? '';
     final currentRole = await ApiClient.getRole() ?? '';
     final res = await ApiClient.dio.post('/api/chats/send', data: {
       'chatRoomId': roomId,
-      'text': text,
+      if (text.isNotEmpty) 'text': text,
+      if (attachments != null && attachments.isNotEmpty) 'attachments': attachments,
     });
     return ChatMessage.fromJson(
       res.data as Map<String, dynamic>,
