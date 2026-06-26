@@ -10,8 +10,8 @@ class ChatRoom {
   final String customerMono;
   final String lastMessage;
   final String lastMessageTime;
-  final String lastMessageAt;   // raw ISO string for unread comparison
-  final String lastSenderRole;  // "Customer" | "ShopOwner" | ""
+  final String lastMessageAt;
+  final int unreadCount;
 
   const ChatRoom({
     required this.id,
@@ -23,24 +23,13 @@ class ChatRoom {
     this.lastMessage = '',
     this.lastMessageTime = '',
     this.lastMessageAt = '',
-    this.lastSenderRole = '',
+    this.unreadCount = 0,
   });
 
   factory ChatRoom.fromJson(Map<String, dynamic> json) {
     final shopName = json['shopName'] as String? ?? '';
     final customerName = json['customerName'] as String? ?? '';
-
-    // Extract last message from embedded messages list
-    String lastMsg = '';
-    String lastMsgAt = '';
-    String lastSenderRole = '';
-    final messages = json['messages'] as List<dynamic>?;
-    if (messages != null && messages.isNotEmpty) {
-      final last = messages.last as Map<String, dynamic>;
-      lastMsg = last['text'] as String? ?? '';
-      lastMsgAt = last['sentAt'] as String? ?? '';
-      lastSenderRole = last['senderRole'] as String? ?? '';
-    }
+    final lastMsgAt = json['lastMessageAt'] as String? ?? '';
 
     String timeLabel = '';
     if (lastMsgAt.isNotEmpty) {
@@ -62,10 +51,10 @@ class ChatRoom {
       customerName: customerName,
       shopMono: shopName.isNotEmpty ? shopName[0] : '؟',
       customerMono: customerName.isNotEmpty ? customerName[0] : '؟',
-      lastMessage: lastMsg,
+      lastMessage: json['lastMessageText'] as String? ?? '',
       lastMessageTime: timeLabel,
       lastMessageAt: lastMsgAt,
-      lastSenderRole: lastSenderRole,
+      unreadCount: json['unreadCount'] as int? ?? 0,
     );
   }
 }
@@ -77,10 +66,12 @@ class ChatRoomDetail {
 }
 
 class ChatService {
+  // Lightweight list — unreadCount is computed server-side, no SecureStorage needed
   static Future<List<ChatRoom>> getChatRooms() async {
     final res = await ApiClient.dio.get('/api/chats');
-    final list = res.data as List<dynamic>;
-    return list.map((e) => ChatRoom.fromJson(e as Map<String, dynamic>)).toList();
+    return (res.data as List<dynamic>)
+        .map((e) => ChatRoom.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   static Future<ChatRoomDetail> getRoomDetail(String roomId) async {

@@ -91,11 +91,10 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     }
   }
 
-  void _markAsRead() {
-    ApiClient.writeData(
-      'chat_lastread_${widget.chatRoomId}',
-      DateTime.now().toUtc().toIso8601String(),
-    );
+  void _markAsRead() async {
+    try {
+      await ApiClient.dio.post('/api/chats/${widget.chatRoomId}/read');
+    } catch (_) {}
   }
 
   void _scrollToBottom({bool animated = true}) {
@@ -395,12 +394,18 @@ class _MessageBubble extends StatelessWidget {
                   constraints: const BoxConstraints(maxWidth: 260),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
-                    color: msg.isMe ? AppColors.dark : Colors.white,
+                    gradient: msg.isMe
+                        ? const LinearGradient(
+                            colors: [AppColors.goldLight, AppColors.gold],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          )
+                        : null,
+                    color: msg.isMe ? null : Colors.white,
                     border: msg.isMe ? null : Border.all(color: AppColors.border),
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(16),
                       topRight: const Radius.circular(16),
-                      // isMe على اليمين → tail في الزاوية اليمنى السفلية
                       bottomLeft: Radius.circular(msg.isMe ? 16 : 4),
                       bottomRight: Radius.circular(msg.isMe ? 4 : 16),
                     ),
@@ -409,12 +414,12 @@ class _MessageBubble extends StatelessWidget {
                     ],
                   ),
                   child: Text(msg.text,
-                    textAlign: msg.isMe ? TextAlign.right : TextAlign.right,
+                    textAlign: TextAlign.right,
                     style: TextStyle(
                       fontFamily: 'Tajawal',
                       fontSize: 13.5,
                       fontWeight: FontWeight.w500,
-                      color: msg.isMe ? Colors.white : AppColors.textPrimary,
+                      color: msg.isMe ? AppColors.dark : AppColors.textPrimary,
                       height: 1.5,
                     )),
                 ),

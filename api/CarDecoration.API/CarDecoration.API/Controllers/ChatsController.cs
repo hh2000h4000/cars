@@ -31,6 +31,20 @@ public class ChatsController : ControllerBase
         }
     }
 
+    [HttpPost("{id:guid}/read")]
+    public async Task<IActionResult> MarkAsRead(Guid id)
+    {
+        try
+        {
+            await _service.MarkAsReadAsync(id);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetChatRoom(Guid id)
     {

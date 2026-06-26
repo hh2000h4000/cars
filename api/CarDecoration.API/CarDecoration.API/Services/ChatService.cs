@@ -1,4 +1,4 @@
-﻿using CarDecoration.API.Data;
+using CarDecoration.API.Data;
 using CarDecoration.API.DTOs;
 using CarDecoration.API.Helpers;
 using CarDecoration.API.Hubs;
@@ -27,7 +27,6 @@ public class ChatService
         var userId = _currentUser.UserId
             ?? throw new Exception("غير مصرح");
 
-        // تأكد أن المستخدم طرف في هذه المحادثة
         var chatRoom = await _db.ChatRooms
             .Include(c => c.Request)
             .Include(c => c.Shop)
@@ -52,6 +51,13 @@ public class ChatService
         };
 
         _db.Messages.Add(message);
+
+        // Mark as read for the sender immediately
+        if (isCustomer)
+            chatRoom.LastReadCustomerAt = message.CreatedAt;
+        else
+            chatRoom.LastReadShopOwnerAt = message.CreatedAt;
+
         await _db.SaveChangesAsync();
 
         var sender = await _db.Users.FindAsync(userId);
@@ -65,12 +71,12 @@ public class ChatService
             message.Attachments,
             message.CreatedAt);
 
-        // Push message to everyone in the room group (real-time delivery)
+        // Push to everyone in the room group (real-time delivery)
         await _hub.Clients
             .Group($"room_{req.ChatRoomId}")
             .SendAsync("ReceiveMessage", response);
 
-        // Notify the OTHER party so their badge/shell updates instantly
+        // Notify the other party so their badge updates instantly
         var recipientId = isCustomer ? chatRoom.Shop.OwnerId : chatRoom.Request.CustomerId;
         await _hub.Clients
             .User(recipientId.ToString())
@@ -79,7 +85,84 @@ public class ChatService
         return response;
     }
 
-    // عرض المحادثة
+    // تحديد المحادثة كمقروءة
+    public async Task MarkAsReadAsync(Guid chatRoomId)
+    {
+        var userId = _currentUser.UserId
+            ?? throw new Exception("غير مصرح");
+
+        var chatRoom = await _db.ChatRooms
+            .Include(c => c.Request)
+            .Include(c => c.Shop)
+            .FirstOrDefaultAsync(c => c.Id == chatRoomId)
+            ?? throw new Exception("المحادثة غير موجودة");
+
+        var isCustomer = chatRoom.Request.CustomerId == userId;
+        var isShopOwner = chatRoom.Shop.OwnerId == userId;
+
+        if (!isCustomer && !isShopOwner)
+            throw new Exception("غير مصرح");
+
+        if (isCustomer)
+            chatRoom.LastReadCustomerAt = DateTime.UtcNow;
+        else
+            chatRoom.LastReadShopOwnerAt = DateTime.UtcNow;
+
+        await _db.SaveChangesAsync();
+    }
+
+    // قائمة المحادثات — خفيفة، بدون تحميل كل الرسائل
+    public async Task<List<ChatRoomSummaryResponse>> GetMyChatRoomsAsync()
+    {
+        var userId = _currentUser.UserId
+            ?? throw new Exception("غير مصرح");
+
+        var role = _currentUser.UserRole;
+        var isCustomer = role == "Customer";
+
+        if (role != "Customer" && role != "ShopOwner")
+            throw new Exception("غير مصرح");
+
+        var rooms = await _db.ChatRooms
+            .Where(c => isCustomer
+                ? c.Request.CustomerId == userId
+                : c.Shop.OwnerId == userId)
+            .Select(c => new {
+                c.Id,
+                c.RequestId,
+                ShopName = c.Shop.Name,
+                CustomerName = c.Request.Customer.FullName,
+                LastMessageText = c.Messages
+                    .OrderByDescending(m => m.CreatedAt)
+                    .Select(m => m.Text)
+                    .FirstOrDefault(),
+                LastMessageAt = c.Messages
+                    .OrderByDescending(m => m.CreatedAt)
+                    .Select(m => (DateTime?)m.CreatedAt)
+                    .FirstOrDefault(),
+                // Compute both sides — pick the right one in memory
+                UnreadAsCustomer = c.Messages.Count(m =>
+                    m.SenderId != userId &&
+                    (c.LastReadCustomerAt == null || m.CreatedAt > c.LastReadCustomerAt)),
+                UnreadAsShopOwner = c.Messages.Count(m =>
+                    m.SenderId != userId &&
+                    (c.LastReadShopOwnerAt == null || m.CreatedAt > c.LastReadShopOwnerAt)),
+            })
+            .OrderByDescending(c => c.LastMessageAt ?? DateTime.MinValue)
+            .ToListAsync();
+
+        return rooms.Select(c => new ChatRoomSummaryResponse(
+            c.Id,
+            c.RequestId,
+            c.ShopName,
+            c.CustomerName,
+            c.LastMessageText,
+            c.LastMessageAt,
+            isCustomer ? c.UnreadAsCustomer : c.UnreadAsShopOwner
+        )).ToList();
+    }
+
+    // تفاصيل المحادثة — كل الرسائل لشاشة الدردشة
     public async Task<ChatRoomResponse> GetChatRoomAsync(Guid chatRoomId)
     {
         var userId = _currentUser.UserId
@@ -116,40 +199,5 @@ public class ChatService
             chatRoom.Shop.Name,
             chatRoom.Request.Customer.FullName,
             messages);
-    }
-
-    // عرض كل محادثات العميل
-    public async Task<List<ChatRoomResponse>> GetMyChatRoomsAsync()
-    {
-        var userId = _currentUser.UserId
-            ?? throw new Exception("غير مصرح");
-
-        var role = _currentUser.UserRole;
-
-        IQueryable<ChatRoom> query = _db.ChatRooms
-            .Include(c => c.Request).ThenInclude(r => r.Customer)
-            .Include(c => c.Shop)
-            .Include(c => c.Messages).ThenInclude(m => m.Sender);
-
-        if (role == "Customer")
-            query = query.Where(c => c.Request.CustomerId == userId);
-        else if (role == "ShopOwner")
-            query = query.Where(c => c.Shop.OwnerId == userId);
-        else
-            throw new Exception("غير مصرح");
-
-        var chatRooms = await query
-            .OrderByDescending(c => c.CreatedAt)
-            .ToListAsync();
-
-        return chatRooms.Select(c => new ChatRoomResponse(
-            c.Id,
-            c.RequestId,
-            c.Shop.Name,
-            c.Request.Customer.FullName,
-            c.Messages.OrderBy(m => m.CreatedAt).Select(m => new MessageResponse(
-                m.Id, m.SenderId, m.Sender.FullName, m.Sender.Role.ToString(),
-                m.Text, m.Attachments, m.CreatedAt)).ToList()))
-        .ToList();
     }
 }

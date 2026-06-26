@@ -24,7 +24,6 @@ class _CustomerShellState extends State<CustomerShell>
     with WidgetsBindingObserver {
   int _index = 0;
   int _unreadCount = 0;
-  String _myRole = '';
   StreamSubscription<String>? _notifSub;
 
   static const _chatTabIndex = 3;
@@ -56,7 +55,6 @@ class _CustomerShellState extends State<CustomerShell>
   }
 
   Future<void> _connectSignalR() async {
-    _myRole = await ApiClient.getRole() ?? '';
     await SignalRService.instance.connect();
     // Update badge immediately on load
     await _refreshBadge();
@@ -78,16 +76,7 @@ class _CustomerShellState extends State<CustomerShell>
   Future<void> _refreshBadge() async {
     try {
       final rooms = await ChatService.getChatRooms();
-      int count = 0;
-      for (final room in rooms) {
-        if (room.lastMessageAt.isEmpty) continue;
-        if (room.lastSenderRole == _myRole) continue;
-        final lastRead = await ApiClient.readData('chat_lastread_${room.id}');
-        if (lastRead == null) { count++; continue; }
-        try {
-          if (DateTime.parse(room.lastMessageAt).isAfter(DateTime.parse(lastRead))) count++;
-        } catch (_) {}
-      }
+      final count = rooms.fold(0, (sum, r) => sum + r.unreadCount);
       if (mounted) setState(() => _unreadCount = count);
     } catch (_) {}
   }

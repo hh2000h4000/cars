@@ -43,6 +43,12 @@ namespace CarDecoration.API.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
+                    b.Property<DateTime?>("LastReadCustomerAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime?>("LastReadShopOwnerAt")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<Guid>("RequestId")
                         .HasColumnType("uuid");
 

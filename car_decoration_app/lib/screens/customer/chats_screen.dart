@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../../services/chat_service.dart';
-import '../../services/api_client.dart';
 
 class ChatsScreen extends StatefulWidget {
   const ChatsScreen({super.key});
@@ -14,8 +13,6 @@ class ChatsScreen extends StatefulWidget {
 class _ChatsScreenState extends State<ChatsScreen> {
   List<ChatRoom> _rooms = [];
   bool _loading = true;
-  String _myRole = '';
-  Map<String, String> _lastRead = {}; // roomId → ISO lastReadAt
 
   @override
   void initState() {
@@ -24,39 +21,16 @@ class _ChatsScreenState extends State<ChatsScreen> {
   }
 
   Future<void> _load() async {
-    _myRole = await ApiClient.getRole() ?? '';
     try {
       final rooms = await ChatService.getChatRooms();
-      final lastRead = <String, String>{};
-      for (final r in rooms) {
-        final stored = await ApiClient.readData('chat_lastread_${r.id}');
-        if (stored != null) lastRead[r.id] = stored;
-      }
       if (mounted) {
         setState(() {
           _rooms = rooms;
-          _lastRead = lastRead;
           _loading = false;
         });
       }
     } catch (_) {
       if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  bool _hasUnread(ChatRoom room) {
-    if (room.lastMessageAt.isEmpty) return false;
-    if (room.lastSenderRole.isEmpty) return false;
-    // Only unread if the last message is from the OTHER party
-    if (room.lastSenderRole == _myRole) return false;
-    final lastRead = _lastRead[room.id];
-    if (lastRead == null) return true; // never opened
-    try {
-      final msgTime = DateTime.parse(room.lastMessageAt);
-      final readTime = DateTime.parse(lastRead);
-      return msgTime.isAfter(readTime);
-    } catch (_) {
-      return false;
     }
   }
 
@@ -109,7 +83,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
                       separatorBuilder: (_, __) => const SizedBox(height: 10),
                       itemBuilder: (_, i) {
                         final room = _rooms[i];
-                        final unread = _hasUnread(room);
+                        final hasUnread = room.unreadCount > 0;
                         return GestureDetector(
                           onTap: () => _openChat(room.id),
                           child: Container(
@@ -117,8 +91,8 @@ class _ChatsScreenState extends State<ChatsScreen> {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               border: Border.all(
-                                color: unread ? AppColors.goldText.withOpacity(0.4) : AppColors.border,
-                                width: unread ? 1.5 : 1,
+                                color: hasUnread ? AppColors.goldText.withOpacity(0.4) : AppColors.border,
+                                width: hasUnread ? 1.5 : 1,
                               ),
                               borderRadius: BorderRadius.circular(18),
                             ),
@@ -136,7 +110,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
                                             style: TextStyle(
                                               fontFamily: 'Tajawal',
                                               fontSize: 15,
-                                              fontWeight: unread ? FontWeight.w900 : FontWeight.w800,
+                                              fontWeight: hasUnread ? FontWeight.w900 : FontWeight.w800,
                                               color: AppColors.textPrimary,
                                             )),
                                           const Spacer(),
@@ -145,8 +119,8 @@ class _ChatsScreenState extends State<ChatsScreen> {
                                               style: TextStyle(
                                                 fontFamily: 'Tajawal',
                                                 fontSize: 11.5,
-                                                fontWeight: unread ? FontWeight.w800 : FontWeight.w600,
-                                                color: unread ? AppColors.goldText : AppColors.textMuted,
+                                                fontWeight: hasUnread ? FontWeight.w800 : FontWeight.w600,
+                                                color: hasUnread ? AppColors.goldText : AppColors.textMuted,
                                               )),
                                         ],
                                       ),
@@ -161,18 +135,29 @@ class _ChatsScreenState extends State<ChatsScreen> {
                                               style: TextStyle(
                                                 fontFamily: 'Tajawal',
                                                 fontSize: 12.5,
-                                                fontWeight: unread ? FontWeight.w700 : FontWeight.w500,
-                                                color: unread ? AppColors.textPrimary : AppColors.textSecondary,
+                                                fontWeight: hasUnread ? FontWeight.w700 : FontWeight.w500,
+                                                color: hasUnread ? AppColors.textPrimary : AppColors.textSecondary,
                                               ),
                                             ),
                                           ),
-                                          if (unread)
+                                          if (hasUnread)
                                             Container(
-                                              width: 10, height: 10,
                                               margin: const EdgeInsets.only(right: 6),
-                                              decoration: const BoxDecoration(
-                                                color: AppColors.goldText,
-                                                shape: BoxShape.circle,
+                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.red,
+                                                borderRadius: BorderRadius.circular(999),
+                                              ),
+                                              constraints: const BoxConstraints(minWidth: 20, minHeight: 18),
+                                              child: Text(
+                                                room.unreadCount > 99 ? '99+' : '${room.unreadCount}',
+                                                style: const TextStyle(
+                                                  fontFamily: 'Tajawal',
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w900,
+                                                  color: Colors.white,
+                                                ),
+                                                textAlign: TextAlign.center,
                                               ),
                                             ),
                                         ],
