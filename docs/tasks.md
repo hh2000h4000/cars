@@ -85,7 +85,7 @@
 
 ### أولوية عالية 🔴
 - [x] **JWT Refresh Token** — Access Token 15 دقيقة + Refresh Token 30 يوم مخزن في DB. Dio interceptor يجدد تلقائياً عند 401. Token rotation عند كل تجديد. تم: 2026-06-26
-- [ ] **Pagination** — كل endpoints ترجع كل السجلات. الحل: Offset/Page (`?page=1&pageSize=20`). القرار: تم اختيار Offset على Cursor لأن البيانات ليست بمليارات السجلات والتعقيد لا يستحق. Endpoints المستهدفة: Shops، Requests (customer+shop)، Disputes (admin)
+- [x] **Pagination** — Offset/Page (`?page=1&pageSize=20`, max 50). `PagedResult<T>` DTO. Endpoints: Shops، Requests (customer + shop). AppProvider يدعم `loadMoreRequests/loadMoreShops`. الشاشات: زر "تحميل المزيد" في RequestsScreen، ShopRequestsScreen، ShopSelectScreen. تم: 2026-06-26
 
 ### أولوية متوسطة 🟡
 - [ ] **FCM Push Notifications** — الإشعارات لا تصل عند إغلاق التطبيق. الحل: Firebase Cloud Messaging
@@ -133,6 +133,6 @@
 | # | Description | Status |
 |---|-------------|--------|
 | 1 | ShopMyStoreScreen is placeholder | Known, deferred |
-| 2 | No pagination — large datasets will be slow | Known, deferred |
+| 2 | ~~No pagination~~ | ✅ Fixed 2026-06-26 |
 | 3 | ~~SendQuoteScreen doesn't call API~~ | ✅ Fixed 2026-06-26 |
 | 4 | Files served from `/uploads` are lost if server is restarted or redeployed | Known, deferred (needs cloud storage) |
