@@ -13,6 +13,7 @@ class Quotation {
   final String serviceDetails;
   final List<String> parts;
   final bool isBestValue;
+  final String? chatRoomId;
   QuotationStatus status;
 
   Quotation({
@@ -29,6 +30,7 @@ class Quotation {
     required this.parts,
     this.isBestValue = false,
     this.status = QuotationStatus.pending,
+    this.chatRoomId,
   });
 
   factory Quotation.fromJson(Map<String, dynamic> json) {
@@ -55,6 +57,7 @@ class Quotation {
       serviceDetails: json['serviceDetails'] as String? ?? '',
       parts: partsRaw.isNotEmpty ? partsRaw.split(',').map((e) => e.trim()).toList() : [],
       status: status,
+      chatRoomId: json['chatRoomId'] as String?,
     );
   }
 }

@@ -57,7 +57,7 @@ public class QuotationService
             quotation.Id, quotation.RequestId, shop.Id, shop.Name,
             quotation.ServiceDetails, quotation.Parts, quotation.Warranty,
             quotation.VisitFee, quotation.Duration, quotation.FinalPrice,
-            quotation.Status.ToString(), quotation.CreatedAt);
+            quotation.Status.ToString(), quotation.CreatedAt, null);
     }
 
     // العميل يعرض عروض الأسعار لطلبه
@@ -72,19 +72,19 @@ public class QuotationService
             ?? throw new Exception("الطلب غير موجود");
 
         return await _db.Quotations
-            .Include(q => q.Shop)
             .Where(q => q.RequestId == requestId)
             .OrderByDescending(q => q.CreatedAt)
             .Select(q => new QuotationResponse(
                 q.Id, q.RequestId, q.ShopId, q.Shop.Name,
                 q.ServiceDetails, q.Parts, q.Warranty,
                 q.VisitFee, q.Duration, q.FinalPrice,
-                q.Status.ToString(), q.CreatedAt))
+                q.Status.ToString(), q.CreatedAt,
+                q.Request.ChatRoom != null ? q.Request.ChatRoom.Id : (Guid?)null))
             .ToListAsync();
     }
 
-    // العميل يقبل عرض سعر
-    public async Task AcceptAsync(Guid quotationId)
+    // العميل يقبل عرض سعر — يُرجع chatRoomId للانتقال الفوري للمحادثة
+    public async Task<Guid> AcceptAsync(Guid quotationId)
     {
         var userId = _currentUser.UserId
             ?? throw new Exception("غير مصرح");
@@ -100,19 +100,29 @@ public class QuotationService
         if (quotation.Request.Status != RequestStatus.Pending)
             throw new Exception("لا يمكن قبول عرض لطلب غير معلق");
 
-        // قبول هذا العرض
         quotation.Status = QuotationStatus.Accepted;
 
-        // رفض باقي العروض تلقائياً
         var otherQuotations = await _db.Quotations
             .Where(q => q.RequestId == quotation.RequestId && q.Id != quotationId)
             .ToListAsync();
         otherQuotations.ForEach(q => q.Status = QuotationStatus.Rejected);
 
-        // تحديث الطلب
         quotation.Request.Status = RequestStatus.Active;
         quotation.Request.SelectedShopId = quotation.ShopId;
 
         await _db.SaveChangesAsync();
+
+        // إيجاد المحادثة أو إنشاؤها إذا لم تكن موجودة بعد
+        var chatRoom = await _db.ChatRooms
+            .FirstOrDefaultAsync(c => c.RequestId == quotation.RequestId && c.ShopId == quotation.ShopId);
+
+        if (chatRoom == null)
+        {
+            chatRoom = new ChatRoom { RequestId = quotation.RequestId, ShopId = quotation.ShopId };
+            _db.ChatRooms.Add(chatRoom);
+            await _db.SaveChangesAsync();
+        }
+
+        return chatRoom.Id;
     }
 }

@@ -86,6 +86,7 @@
 ### أولوية عالية 🔴
 - [x] **JWT Refresh Token** — Access Token 15 دقيقة + Refresh Token 30 يوم مخزن في DB. Dio interceptor يجدد تلقائياً عند 401. Token rotation عند كل تجديد. تم: 2026-06-26
 - [x] **Pagination** — Offset/Page (`?page=1&pageSize=20`, max 50). `PagedResult<T>` DTO. Endpoints: Shops، Requests (customer + shop). AppProvider يدعم `loadMoreRequests/loadMoreShops`. الشاشات: زر "تحميل المزيد" في RequestsScreen، ShopRequestsScreen، ShopSelectScreen. تم: 2026-06-26
+- [x] **Workflow Audit & Fix (2026-06-26)** — RequestDetailScreen يحمّل العروض من API (لا mock). QuotationDetailScreen يستقبل Quotation object كاملاً. قبول العرض يستدعي API الحقيقي ويُرجع chatRoomId. الباكند يُنشئ ChatRoom تلقائياً عند قبول العرض إن لم تكن موجودة. status enum نُظِّف (حُذف draft/offers/shopSelected/scheduled/disputed). AppProvider نُظِّف من الكود الوهمي. تم: 2026-06-26
 
 ### أولوية متوسطة 🟡
 - [ ] **FCM Push Notifications** — الإشعارات لا تصل عند إغلاق التطبيق. الحل: Firebase Cloud Messaging
@@ -136,3 +137,6 @@
 | 2 | ~~No pagination~~ | ✅ Fixed 2026-06-26 |
 | 3 | ~~SendQuoteScreen doesn't call API~~ | ✅ Fixed 2026-06-26 |
 | 4 | Files served from `/uploads` are lost if server is restarted or redeployed | Known, deferred (needs cloud storage) |
+| 5 | ~~Quotation acceptance called local-only AppProvider method (hardcoded request ID '1042')~~ | ✅ Fixed 2026-06-26 |
+| 6 | ~~Chat navigation after acceptance used hardcoded chatRoomId 'sh1'~~ | ✅ Fixed 2026-06-26 |
+| 7 | ~~RequestDetailScreen loaded quotations from mock data only (hardcoded requestId '1042')~~ | ✅ Fixed 2026-06-26 |

@@ -22,5 +22,6 @@ public record QuotationResponse(
     string Duration,
     decimal FinalPrice,
     string Status,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    Guid? ChatRoomId
 );

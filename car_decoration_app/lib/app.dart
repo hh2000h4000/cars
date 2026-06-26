@@ -24,6 +24,7 @@ import 'screens/shop/shop_shell.dart';
 import 'screens/shop/shop_request_detail_screen.dart';
 import 'screens/shop/send_quote_screen.dart';
 import 'models/shop_request.dart';
+import 'models/quotation.dart';
 import 'screens/admin/admin_shell.dart';
 import 'screens/admin/admin_pending_screen.dart';
 import 'screens/admin/admin_disputes_screen.dart';
@@ -99,7 +100,7 @@ class CarDecorationApp extends StatelessWidget {
         page = RequestDetailScreen(requestId: args as String? ?? '1042');
         break;
       case '/customer/quotation-detail':
-        page = QuotationDetailScreen(quotationId: args as String? ?? 'q1');
+        page = QuotationDetailScreen(quotation: args as Quotation);
         break;
       case '/customer/chat':
         page = ChatScreen(chatRoomId: args as String? ?? '');

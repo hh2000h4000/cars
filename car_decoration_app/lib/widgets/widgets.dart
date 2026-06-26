@@ -66,25 +66,28 @@ class DarkButton extends StatelessWidget {
 // ─── Outlined button ──────────────────────────────────────────────────────────
 class OutlinedDarkButton extends StatelessWidget {
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final Color? borderColor;
   final Color? textColor;
   final double height;
 
-  const OutlinedDarkButton({super.key, required this.label, required this.onTap, this.borderColor, this.textColor, this.height = 54});
+  const OutlinedDarkButton({super.key, required this.label, this.onTap, this.borderColor, this.textColor, this.height = 54});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        height: height,
-        decoration: BoxDecoration(
-          border: Border.all(color: borderColor ?? AppColors.dark, width: 1.5),
-          borderRadius: BorderRadius.circular(16),
+      child: Opacity(
+        opacity: onTap == null ? 0.5 : 1.0,
+        child: Container(
+          height: height,
+          decoration: BoxDecoration(
+            border: Border.all(color: borderColor ?? AppColors.dark, width: 1.5),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          alignment: Alignment.center,
+          child: Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: textColor ?? AppColors.dark)),
         ),
-        alignment: Alignment.center,
-        child: Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: textColor ?? AppColors.dark)),
       ),
     );
   }

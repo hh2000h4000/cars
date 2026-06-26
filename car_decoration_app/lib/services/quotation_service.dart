@@ -8,8 +8,9 @@ class QuotationService {
     return list.map((e) => Quotation.fromJson(e as Map<String, dynamic>)).toList();
   }
 
-  static Future<void> acceptQuotation(String quotationId) async {
-    await ApiClient.dio.put('/api/quotations/$quotationId/accept');
+  static Future<String> acceptQuotation(String quotationId) async {
+    final res = await ApiClient.dio.put('/api/quotations/$quotationId/accept');
+    return res.data['chatRoomId'] as String;
   }
 
   static Future<void> sendQuote({

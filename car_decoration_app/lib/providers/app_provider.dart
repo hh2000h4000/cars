@@ -18,18 +18,9 @@ class AppProvider extends ChangeNotifier {
   List<Vehicle> vehicles = [];
   List<Shop> shops = [];
   List<ServiceRequest> requests = [];
-  List<Quotation> quotations = [];
-  String? acceptedQuoteId;
   List<String> selectedShops = [];
   ReviewData reviewData = ReviewData();
   String selectedComplaintReason = '';
-
-  // Chat state
-  List<ChatMessage> messages = [];
-
-  // Shop state
-  bool sentQuote = false;
-  List<ShopInboxItem> shopInbox = [];
 
   // Admin state
   List<PendingShop> pendingShops = [];
@@ -52,42 +43,6 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ─── Quotation acceptance ─────────────────────────────────────
-  void acceptQuote(String quoteId) {
-    acceptedQuoteId = quoteId;
-    for (final q in quotations) {
-      if (q.id == quoteId) {
-        q.status = QuotationStatus.accepted;
-      } else {
-        q.status = QuotationStatus.rejected;
-      }
-    }
-    // Update request status
-    requests = requests.map<ServiceRequest>((r) {
-      if (r.id == '1042') {
-        return ServiceRequest(
-          id: r.id,
-          requestNumber: r.requestNumber,
-          serviceType: r.serviceType,
-          vehicleBrand: r.vehicleBrand,
-          vehicleModel: r.vehicleModel,
-          vehicleYear: r.vehicleYear,
-          vehicleColor: r.vehicleColor,
-          status: RequestStatus.shopSelected,
-          dateLabel: r.dateLabel,
-          quotationCount: r.quotationCount,
-          notes: r.notes,
-          selectedShopName: quotations.firstWhere((q) => q.id == quoteId).shopName,
-        );
-      }
-      return r;
-    }).toList();
-    notifyListeners();
-  }
-
-  Quotation? get acceptedQuotation =>
-      acceptedQuoteId != null ? quotations.firstWhere((q) => q.id == acceptedQuoteId) : null;
-
   // ─── Review ──────────────────────────────────────────────────
   void setReviewRating(String dimension, int value) {
     switch (dimension) {
@@ -102,45 +57,6 @@ class AppProvider extends ChangeNotifier {
   // ─── Complaint ───────────────────────────────────────────────
   void selectComplaintReason(String reason) {
     selectedComplaintReason = reason;
-    notifyListeners();
-  }
-
-  // ─── Chat ────────────────────────────────────────────────────
-  void sendMessage(String text) {
-    final id = DateTime.now().millisecondsSinceEpoch.toString();
-    messages = [
-      ...messages,
-      ChatMessage(id: id, isMe: true, text: text, time: 'الآن'),
-    ];
-    notifyListeners();
-
-    // Auto-reply
-    Future.delayed(const Duration(milliseconds: 1100), () {
-      messages = [
-        ...messages,
-        ChatMessage(id: '${id}_r', isMe: false, text: 'تمام، تم تسجيل ملاحظتك. سنحدّث عرض السعر فوراً.', time: 'الآن'),
-      ];
-      notifyListeners();
-    });
-  }
-
-  void sendImageMessage() {
-    final id = DateTime.now().millisecondsSinceEpoch.toString();
-    messages = [
-      ...messages,
-      ChatMessage(id: id, isMe: true, text: 'صورة مرفقة', time: 'الآن', hasImage: true),
-    ];
-    notifyListeners();
-  }
-
-  // ─── Shop Quote ──────────────────────────────────────────────
-  void submitQuote() {
-    sentQuote = true;
-    notifyListeners();
-  }
-
-  void resetSentQuote() {
-    sentQuote = false;
     notifyListeners();
   }
 
@@ -252,6 +168,16 @@ class AppProvider extends ChangeNotifier {
     } catch (_) {}
     loadingMoreShops = false;
     notifyListeners();
+  }
+
+  Future<void> reloadRequests() async {
+    try {
+      final r = await RequestService.getMyRequests();
+      requests = r.items;
+      _requestsPage = 1;
+      _hasMoreRequests = r.hasNextPage;
+      notifyListeners();
+    } catch (_) {}
   }
 
   // ─── API bootstrap ────────────────────────────────────────────

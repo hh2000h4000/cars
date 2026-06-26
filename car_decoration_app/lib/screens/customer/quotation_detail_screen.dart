@@ -1,19 +1,55 @@
 import 'package:flutter/material.dart';
-
-import 'package:provider/provider.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
-import '../../providers/app_provider.dart';
+import '../../models/quotation.dart';
+import '../../services/quotation_service.dart';
 
-class QuotationDetailScreen extends StatelessWidget {
-  final String quotationId;
-  const QuotationDetailScreen({super.key, required this.quotationId});
+class QuotationDetailScreen extends StatefulWidget {
+  final Quotation quotation;
+  const QuotationDetailScreen({super.key, required this.quotation});
+
+  @override
+  State<QuotationDetailScreen> createState() => _QuotationDetailScreenState();
+}
+
+class _QuotationDetailScreenState extends State<QuotationDetailScreen> {
+  late bool _accepted;
+  String? _chatRoomId;
+  bool _loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _accepted = widget.quotation.status == QuotationStatus.accepted;
+    _chatRoomId = widget.quotation.chatRoomId;
+  }
+
+  Future<void> _accept() async {
+    if (_loading) return;
+    setState(() => _loading = true);
+    try {
+      final chatRoomId = await QuotationService.acceptQuotation(widget.quotation.id);
+      if (!mounted) return;
+      setState(() {
+        _accepted = true;
+        _chatRoomId = chatRoomId;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.toString().replaceAll('Exception: ', ''),
+          style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13)),
+        backgroundColor: AppColors.red,
+        duration: const Duration(seconds: 4),
+      ));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<AppProvider>();
-    final q = provider.quotations.firstWhere((q) => q.id == quotationId, orElse: () => provider.quotations.first);
-    final isAccepted = provider.acceptedQuoteId == q.id;
+    final q = widget.quotation;
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -24,7 +60,8 @@ class QuotationDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(22, 12, 22, 16),
               child: Row(
                 children: [
-                  Text('تفاصيل العرض', style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                  const Text('تفاصيل العرض',
+                    style: TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
                   const Spacer(),
                   const AppBackButton(),
                 ],
@@ -52,7 +89,8 @@ class QuotationDetailScreen extends StatelessWidget {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(q.shopName, style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                              Text(q.shopName,
+                                style: const TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
                               const SizedBox(height: 3),
                               const Text('متجر معتمد', style: TextStyle(fontSize: 12)),
                             ],
@@ -63,22 +101,27 @@ class QuotationDetailScreen extends StatelessWidget {
                             children: [
                               Row(
                                 children: [
-                                  Text(q.shopRating.toString(), style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                  Text(q.shopRating.toString(),
+                                    style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                                   const SizedBox(width: 3),
                                   const Icon(Icons.star, color: AppColors.star, size: 13),
                                 ],
                               ),
-                              if (isAccepted)
+                              if (_accepted)
                                 Container(
                                   margin: const EdgeInsets.only(top: 6),
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                  decoration: BoxDecoration(color: AppColors.green.withOpacity(.1), borderRadius: BorderRadius.circular(999)),
-                                  child: Row(
+                                  decoration: BoxDecoration(
+                                    color: AppColors.green.withOpacity(.1),
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  child: const Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(Icons.check_circle, color: AppColors.green, size: 13),
-                                      const SizedBox(width: 4),
-                                      Text('تم القبول', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.green)),
+                                      Icon(Icons.check_circle, color: AppColors.green, size: 13),
+                                      SizedBox(width: 4),
+                                      Text('تم القبول',
+                                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.green)),
                                     ],
                                   ),
                                 ),
@@ -100,15 +143,17 @@ class QuotationDetailScreen extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              Text('السعر الإجمالي', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white54)),
+                              const Text('السعر الإجمالي',
+                                style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white54)),
                               const Spacer(),
-                              Text('${q.finalPrice.toStringAsFixed(0)} ريال', style: TextStyle(fontFamily: 'Tajawal', fontSize: 28, fontWeight: FontWeight.w900, color: AppColors.goldLight)),
+                              Text('${q.finalPrice.toStringAsFixed(0)} ريال',
+                                style: const TextStyle(fontFamily: 'Tajawal', fontSize: 28, fontWeight: FontWeight.w900, color: AppColors.goldLight)),
                             ],
                           ),
                           const SizedBox(height: 12),
                           const Divider(color: Colors.white12),
                           const SizedBox(height: 12),
-                          _PriceRow('رسوم الزيارة', '${q.visitFee} ريال'),
+                          _PriceRow('رسوم الزيارة', '${q.visitFee}'),
                           const SizedBox(height: 6),
                           _PriceRow('الضمان', q.warranty),
                           const SizedBox(height: 6),
@@ -122,14 +167,19 @@ class QuotationDetailScreen extends StatelessWidget {
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(16)),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: AppColors.border),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('تفاصيل الخدمة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                          const Text('تفاصيل الخدمة',
+                            style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                           const SizedBox(height: 10),
                           Text(q.serviceDetails, textAlign: TextAlign.right,
-                            style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary, height: 1.65)),
+                            style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary, height: 1.65)),
                         ],
                       ),
                     ),
@@ -140,11 +190,16 @@ class QuotationDetailScreen extends StatelessWidget {
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(16)),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: AppColors.border),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('المواد والقطع المستخدمة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                            const Text('المواد والقطع المستخدمة',
+                              style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                             const SizedBox(height: 10),
                             ...q.parts.map((p) => Padding(
                               padding: const EdgeInsets.only(bottom: 8),
@@ -155,7 +210,8 @@ class QuotationDetailScreen extends StatelessWidget {
                                     decoration: const BoxDecoration(color: AppColors.goldText, shape: BoxShape.circle),
                                   ),
                                   const SizedBox(width: 8),
-                                  Text(p, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                                  Text(p,
+                                    style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                                   const Spacer(),
                                 ],
                               ),
@@ -172,24 +228,29 @@ class QuotationDetailScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: isAccepted
+      bottomNavigationBar: _accepted
           ? Container(
               padding: EdgeInsets.fromLTRB(22, 14, 22, MediaQuery.of(context).padding.bottom + 14),
-              decoration: BoxDecoration(color: Colors.white, border: Border(top: BorderSide(color: AppColors.border))),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(top: BorderSide(color: AppColors.border)),
+              ),
               child: OutlinedDarkButton(
                 label: 'فتح المحادثة مع المتجر',
-                onTap: () => Navigator.pushNamed(context, '/customer/chat', arguments: 'sh1'),
+                onTap: _chatRoomId != null
+                    ? () => Navigator.pushNamed(context, '/customer/chat', arguments: _chatRoomId)
+                    : null,
               ),
             )
           : Container(
               padding: EdgeInsets.fromLTRB(22, 14, 22, MediaQuery.of(context).padding.bottom + 14),
-              decoration: BoxDecoration(color: Colors.white, border: Border(top: BorderSide(color: AppColors.border))),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(top: BorderSide(color: AppColors.border)),
+              ),
               child: DarkButton(
-                label: 'قبول هذا العرض',
-                onTap: () {
-                  provider.acceptQuote(q.id);
-                  Navigator.pop(context);
-                },
+                label: _loading ? 'جاري القبول...' : 'قبول هذا العرض',
+                onTap: _loading ? null : _accept,
               ),
             ),
     );
@@ -204,9 +265,11 @@ class _PriceRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(
     children: [
-      Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white38)),
+      Text(label,
+        style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white38)),
       const Spacer(),
-      Text(value, style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white70)),
+      Text(value,
+        style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white70)),
     ],
   );
 }

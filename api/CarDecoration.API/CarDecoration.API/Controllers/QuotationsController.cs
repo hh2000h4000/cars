@@ -50,8 +50,8 @@ public class QuotationsController : ControllerBase
     {
         try
         {
-            await _service.AcceptAsync(id);
-            return Ok(new { message = "تم قبول العرض وتفعيل الطلب" });
+            var chatRoomId = await _service.AcceptAsync(id);
+            return Ok(new { chatRoomId });
         }
         catch (Exception ex)
         {

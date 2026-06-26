@@ -1,35 +1,20 @@
-enum RequestStatus {
-  draft,
-  pending,
-  offers,
-  shopSelected,
-  scheduled,
-  inProgress,
-  completed,
-  cancelled,
-  disputed,
-}
+enum RequestStatus { pending, inProgress, completed, cancelled }
 
 extension RequestStatusLabel on RequestStatus {
   String get label {
     switch (this) {
-      case RequestStatus.draft: return 'مسودة';
-      case RequestStatus.pending: return 'بانتظار رد المتاجر';
-      case RequestStatus.offers: return 'عروض مستلمة';
-      case RequestStatus.shopSelected: return 'تم اختيار المتجر';
-      case RequestStatus.scheduled: return 'موعد مجدول';
+      case RequestStatus.pending:    return 'بانتظار رد المتاجر';
       case RequestStatus.inProgress: return 'قيد التنفيذ';
-      case RequestStatus.completed: return 'مكتمل';
-      case RequestStatus.cancelled: return 'ملغي';
-      case RequestStatus.disputed: return 'نزاع مفتوح';
+      case RequestStatus.completed:  return 'مكتمل';
+      case RequestStatus.cancelled:  return 'ملغي';
     }
   }
 
   String get colorType {
     switch (this) {
-      case RequestStatus.completed: return 'green';
-      case RequestStatus.disputed: return 'red';
-      default: return 'gold';
+      case RequestStatus.completed:  return 'green';
+      case RequestStatus.cancelled:  return 'red';
+      default:                       return 'gold';
     }
   }
 }
@@ -56,10 +41,10 @@ class ServiceRequest {
     final statusStr = (json['status'] as String?)?.toLowerCase() ?? 'pending';
     final RequestStatus status;
     switch (statusStr) {
-      case 'active': status = RequestStatus.inProgress; break;
-      case 'completed': status = RequestStatus.completed; break;
-      case 'cancelled': status = RequestStatus.cancelled; break;
-      default: status = RequestStatus.pending;
+      case 'active':     status = RequestStatus.inProgress; break;
+      case 'completed':  status = RequestStatus.completed; break;
+      case 'cancelled':  status = RequestStatus.cancelled; break;
+      default:           status = RequestStatus.pending;
     }
     final createdAt = json['createdAt'] as String?;
     String dateLabel = '';
