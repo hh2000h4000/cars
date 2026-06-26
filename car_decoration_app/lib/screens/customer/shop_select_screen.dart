@@ -161,15 +161,36 @@ class _ShopSelectScreenState extends State<ShopSelectScreen> {
 
             // Shop list
             Expanded(
-              child: ListView.separated(
+              child: ListView.builder(
                 padding: const EdgeInsets.fromLTRB(22, 0, 22, 24),
-                itemCount: shops.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                itemCount: shops.length + (provider.hasMoreShops ? 1 : 0),
                 itemBuilder: (_, i) {
+                  if (i == shops.length) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: GestureDetector(
+                        onTap: provider.loadingMoreShops ? null : provider.loadMoreShops,
+                        child: Container(
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(color: AppColors.border),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          alignment: Alignment.center,
+                          child: provider.loadingMoreShops
+                              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.goldText))
+                              : const Text('تحميل المزيد', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+                        ),
+                      ),
+                    );
+                  }
                   final shop = shops[i];
                   final selected = _sendToAll || provider.selectedShops.contains(shop.id);
 
-                  return GestureDetector(
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: i < shops.length - 1 || provider.hasMoreShops ? 10 : 0),
+                    child: GestureDetector(
                     onTap: _sendToAll ? null : () => provider.toggleShop(shop.id),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 180),
@@ -211,7 +232,7 @@ class _ShopSelectScreenState extends State<ShopSelectScreen> {
                         ),
                       ]),
                     ),
-                  );
+                  ));
                 },
               ),
             ),

@@ -31,11 +31,11 @@ public class ShopsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetShops()
+    public async Task<IActionResult> GetShops([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
         try
         {
-            var result = await _service.GetApprovedShopsAsync();
+            var result = await _service.GetApprovedShopsAsync(page, pageSize);
             return Ok(result);
         }
         catch (Exception ex)

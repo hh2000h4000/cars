@@ -85,7 +85,7 @@
 
 ### أولوية عالية 🔴
 - [x] **JWT Refresh Token** — Access Token 15 دقيقة + Refresh Token 30 يوم مخزن في DB. Dio interceptor يجدد تلقائياً عند 401. Token rotation عند كل تجديد. تم: 2026-06-26
-- [ ] **Pagination** — كل endpoints ترجع كل السجلات. الحل: `?page&limit` على كل قائمة
+- [ ] **Pagination** — كل endpoints ترجع كل السجلات. الحل: Offset/Page (`?page=1&pageSize=20`). القرار: تم اختيار Offset على Cursor لأن البيانات ليست بمليارات السجلات والتعقيد لا يستحق. Endpoints المستهدفة: Shops، Requests (customer+shop)، Disputes (admin)
 
 ### أولوية متوسطة 🟡
 - [ ] **FCM Push Notifications** — الإشعارات لا تصل عند إغلاق التطبيق. الحل: Firebase Cloud Messaging

@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import '../models/service_request.dart';
+import '../models/paged_result.dart';
 import 'api_client.dart';
 
 class RequestService {
-  static Future<List<ServiceRequest>> getMyRequests() async {
-    final res = await ApiClient.dio.get('/api/requests/my');
-    final list = res.data as List<dynamic>;
-    return list.map((e) => ServiceRequest.fromJson(e as Map<String, dynamic>)).toList();
+  static Future<PagedResult<ServiceRequest>> getMyRequests({int page = 1, int pageSize = 20}) async {
+    final res = await ApiClient.dio.get('/api/requests/my', queryParameters: {
+      'page': page,
+      'pageSize': pageSize,
+    });
+    return PagedResult.fromJson(
+      res.data as Map<String, dynamic>,
+      ServiceRequest.fromJson,
+    );
   }
 
   static Future<ServiceRequest> getRequest(String id) async {

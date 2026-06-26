@@ -90,11 +90,24 @@ class _RequestsScreenState extends State<RequestsScreen> {
                         ],
                       ),
                     )
-                  : ListView.separated(
+                  : ListView.builder(
                       padding: const EdgeInsets.fromLTRB(22, 0, 22, 32),
-                      itemCount: filtered.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (_, i) => _RequestCard(request: filtered[i]),
+                      itemCount: filtered.length + (provider.hasMoreRequests ? 1 : 0),
+                      itemBuilder: (_, i) {
+                        if (i == filtered.length) {
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 12),
+                            child: _LoadMoreButton(
+                              loading: provider.loadingMoreRequests,
+                              onTap: provider.loadMoreRequests,
+                            ),
+                          );
+                        }
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: i < filtered.length - 1 || provider.hasMoreRequests ? 12 : 0),
+                          child: _RequestCard(request: filtered[i]),
+                        );
+                      },
                     ),
             ),
           ],
@@ -237,6 +250,29 @@ class _RequestCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _LoadMoreButton extends StatelessWidget {
+  final bool loading;
+  final VoidCallback onTap;
+  const _LoadMoreButton({required this.loading, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: loading ? null : onTap,
+    child: Container(
+      height: 44,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      alignment: Alignment.center,
+      child: loading
+          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.goldText))
+          : const Text('تحميل المزيد', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+    ),
+  );
 }
 
 class _StatusChip extends StatelessWidget {

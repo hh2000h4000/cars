@@ -85,17 +85,25 @@ public class RequestService
             request.CreatedAt);
     }
     // العميل يعرض طلباته
-    public async Task<List<RequestResponse>> GetMyRequestsAsync()
+    public async Task<PagedResult<RequestResponse>> GetMyRequestsAsync(int page, int pageSize)
     {
         var userId = _currentUser.UserId
             ?? throw new Exception("غير مصرح");
 
-        return await _db.Requests
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 50);
+
+        var query = _db.Requests
+            .Where(r => r.CustomerId == userId && !r.IsDeleted)
+            .OrderByDescending(r => r.CreatedAt);
+
+        var total = await query.CountAsync();
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Include(r => r.Vehicle)
             .Include(r => r.RequestShops).ThenInclude(rs => rs.Shop)
             .Include(r => r.RequestImages)
-            .Where(r => r.CustomerId == userId && !r.IsDeleted)
-            .OrderByDescending(r => r.CreatedAt)
             .Select(r => new RequestResponse(
                 r.Id, r.RequestNumber, r.Vehicle.Id,
                 r.Vehicle.Brand, r.Vehicle.Model, r.Vehicle.Year, r.Vehicle.Color,
@@ -106,9 +114,12 @@ public class RequestService
                 r.RequestImages.OrderBy(i => i.Order).Select(i => i.Url).ToList(),
                 r.CreatedAt))
             .ToListAsync();
+
+        return PagedResult<RequestResponse>.Create(items, total, page, pageSize);
     }
+
     // المتجر يعرض الطلبات الموجهة له
-    public async Task<List<ShopRequestResponse>> GetShopRequestsAsync()
+    public async Task<PagedResult<ShopRequestResponse>> GetShopRequestsAsync(int page, int pageSize)
     {
         var userId = _currentUser.UserId
             ?? throw new Exception("غير مصرح");
@@ -117,12 +128,20 @@ public class RequestService
             .FirstOrDefaultAsync(s => s.OwnerId == userId && s.Status == ShopStatus.Approved)
             ?? throw new Exception("المتجر غير موجود أو غير معتمد");
 
-        return await _db.RequestShops
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 50);
+
+        var query = _db.RequestShops
+            .Where(rs => rs.ShopId == shop.Id)
+            .OrderByDescending(rs => rs.CreatedAt);
+
+        var total = await query.CountAsync();
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Include(rs => rs.Request).ThenInclude(r => r.Customer)
             .Include(rs => rs.Request).ThenInclude(r => r.Vehicle)
             .Include(rs => rs.Request).ThenInclude(r => r.ChatRoom)
-            .Where(rs => rs.ShopId == shop.Id)
-            .OrderByDescending(rs => rs.CreatedAt)
             .Select(rs => new ShopRequestResponse(
                 rs.Request.Id,
                 rs.Request.CustomerId,
@@ -138,6 +157,8 @@ public class RequestService
                 rs.Request.ChatRoom != null ? (Guid?)rs.Request.ChatRoom.Id : null,
                 rs.Request.CreatedAt))
             .ToListAsync();
+
+        return PagedResult<ShopRequestResponse>.Create(items, total, page, pageSize);
     }
 
     // المتجر يقبل الطلب ← تُنشأ المحادثة تلقائياً

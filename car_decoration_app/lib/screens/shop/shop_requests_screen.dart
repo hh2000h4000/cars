@@ -13,6 +13,9 @@ class ShopRequestsScreen extends StatefulWidget {
 class _ShopRequestsScreenState extends State<ShopRequestsScreen> {
   List<ShopRequest> _all = [];
   bool _loading = true;
+  bool _loadingMore = false;
+  bool _hasMore = false;
+  int _page = 1;
   String? _error;
   int _tab = 0;
 
@@ -25,10 +28,26 @@ class _ShopRequestsScreenState extends State<ShopRequestsScreen> {
   Future<void> _load() async {
     setState(() { _loading = true; _error = null; });
     try {
-      final requests = await ShopRequestService.getShopRequests();
-      if (mounted) setState(() { _all = requests; _loading = false; });
+      final result = await ShopRequestService.getShopRequests(page: 1);
+      if (mounted) setState(() { _all = result.items; _page = 1; _hasMore = result.hasNextPage; _loading = false; });
     } catch (e) {
       if (mounted) setState(() { _error = 'تعذر تحميل الطلبات'; _loading = false; });
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (!_hasMore || _loadingMore) return;
+    setState(() { _loadingMore = true; });
+    try {
+      final result = await ShopRequestService.getShopRequests(page: _page + 1);
+      if (mounted) setState(() {
+        _all = [..._all, ...result.items];
+        _page++;
+        _hasMore = result.hasNextPage;
+        _loadingMore = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() { _loadingMore = false; });
     }
   }
 
@@ -129,11 +148,21 @@ class _ShopRequestsScreenState extends State<ShopRequestsScreen> {
                           : RefreshIndicator(
                               onRefresh: _load,
                               color: AppColors.goldText,
-                              child: ListView.separated(
+                              child: ListView.builder(
                                 padding: const EdgeInsets.fromLTRB(22, 0, 22, 32),
-                                itemCount: currentList.length,
-                                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                                itemBuilder: (_, i) => _RequestCard(request: currentList[i]),
+                                itemCount: currentList.length + (_hasMore ? 1 : 0),
+                                itemBuilder: (_, i) {
+                                  if (i == currentList.length) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(top: 12),
+                                      child: _LoadMoreButton(loading: _loadingMore, onTap: _loadMore),
+                                    );
+                                  }
+                                  return Padding(
+                                    padding: EdgeInsets.only(bottom: i < currentList.length - 1 || _hasMore ? 12 : 0),
+                                    child: _RequestCard(request: currentList[i]),
+                                  );
+                                },
                               ),
                             ),
             ),
@@ -142,6 +171,30 @@ class _ShopRequestsScreenState extends State<ShopRequestsScreen> {
       ),
     );
   }
+}
+
+// ── Load more button ─────────────────────────────────────────────────────────
+class _LoadMoreButton extends StatelessWidget {
+  final bool loading;
+  final VoidCallback onTap;
+  const _LoadMoreButton({required this.loading, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: loading ? null : onTap,
+    child: Container(
+      height: 44,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      alignment: Alignment.center,
+      child: loading
+          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.goldText))
+          : const Text('تحميل المزيد', style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+    ),
+  );
 }
 
 // ── Request card ──────────────────────────────────────────────────────────────

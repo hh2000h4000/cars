@@ -26,15 +26,25 @@ public class ShopService
         return new MyShopResponse(shop.Id, shop.Name, shop.City, shop.Rating, shop.TotalJobs);
     }
 
-    public async Task<List<ShopResponse>> GetApprovedShopsAsync()
+    public async Task<PagedResult<ShopResponse>> GetApprovedShopsAsync(int page, int pageSize)
     {
-        return await _db.Shops
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 50);
+
+        var query = _db.Shops
             .Where(s => s.Status == ShopStatus.Approved)
-            .OrderByDescending(s => s.Rating)
+            .OrderByDescending(s => s.Rating);
+
+        var total = await query.CountAsync();
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(s => new ShopResponse(
                 s.Id, s.Name, s.City, s.Phone,
                 s.LogoUrl, s.Rating, s.TotalJobs, s.Status.ToString()))
             .ToListAsync();
+
+        return PagedResult<ShopResponse>.Create(items, total, page, pageSize);
     }
 
     public async Task<ShopDetailsResponse> GetShopDetailsAsync(Guid id)

@@ -35,11 +35,11 @@ public class RequestsController : ControllerBase
     }
 
     [HttpGet("my")]
-    public async Task<IActionResult> GetMyRequests()
+    public async Task<IActionResult> GetMyRequests([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
         try
         {
-            var result = await _service.GetMyRequestsAsync();
+            var result = await _service.GetMyRequestsAsync(page, pageSize);
             return Ok(result);
         }
         catch (Exception ex)
@@ -50,11 +50,11 @@ public class RequestsController : ControllerBase
     }
 
     [HttpGet("shop")]
-    public async Task<IActionResult> GetShopRequests()
+    public async Task<IActionResult> GetShopRequests([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
         try
         {
-            var result = await _service.GetShopRequestsAsync();
+            var result = await _service.GetShopRequestsAsync(page, pageSize);
             return Ok(result);
         }
         catch (Exception ex)

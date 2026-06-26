@@ -25,6 +25,13 @@ Technical decisions made during development, with rationale.
 
 ## Backend
 
+### Pagination: Offset/Page بدلاً من Cursor-based (2026-06-26)
+**القرار:** `?page=1&pageSize=20` مع response يحتوي `items`, `totalCount`, `totalPages`, `hasNextPage`.
+**لماذا Offset وليس Cursor:** البيانات ليست بمليارات السجلات. Cursor أفضل أداءً مع OFFSET كبير جداً، لكن التعقيد الزائد لا يستحق في هذه المرحلة.
+**متى نتحول لـ Cursor:** عند تجاوز مليون سجل في جدول أو ظهور بطء واضح في الصفحات المتأخرة.
+**Endpoints المطبق عليها:** `GET /api/shops`, `GET /api/requests`, `GET /api/requests/shop`, `GET /api/disputes`
+**Flutter:** زر "تحميل المزيد" (Load More) — لا infinite scroll لتجنب تعقيد إدارة الـ state.
+
 ### Soft delete everywhere
 **Decision:** No `DELETE` SQL — all entities have `IsDeleted` flag. EF Core global query filters hide deleted records.
 **Why:** Preserves data integrity, allows recovery, audit trail via `DeletedAt`/`DeletedBy`.

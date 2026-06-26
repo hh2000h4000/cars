@@ -214,6 +214,46 @@ class AppProvider extends ChangeNotifier {
     return r;
   }
 
+  // ─── Pagination state ─────────────────────────────────────────
+  int _requestsPage = 1;
+  bool _hasMoreRequests = false;
+  bool loadingMoreRequests = false;
+
+  int _shopsPage = 1;
+  bool _hasMoreShops = false;
+  bool loadingMoreShops = false;
+
+  bool get hasMoreRequests => _hasMoreRequests;
+  bool get hasMoreShops => _hasMoreShops;
+
+  Future<void> loadMoreRequests() async {
+    if (!_hasMoreRequests || loadingMoreRequests) return;
+    loadingMoreRequests = true;
+    notifyListeners();
+    try {
+      final r = await RequestService.getMyRequests(page: _requestsPage + 1);
+      requests = [...requests, ...r.items];
+      _requestsPage++;
+      _hasMoreRequests = r.hasNextPage;
+    } catch (_) {}
+    loadingMoreRequests = false;
+    notifyListeners();
+  }
+
+  Future<void> loadMoreShops() async {
+    if (!_hasMoreShops || loadingMoreShops) return;
+    loadingMoreShops = true;
+    notifyListeners();
+    try {
+      final r = await ShopService.getShops(page: _shopsPage + 1);
+      shops = [...shops, ...r.items];
+      _shopsPage++;
+      _hasMoreShops = r.hasNextPage;
+    } catch (_) {}
+    loadingMoreShops = false;
+    notifyListeners();
+  }
+
   // ─── API bootstrap ────────────────────────────────────────────
   bool initLoading = false;
   String? initError;
@@ -230,11 +270,11 @@ class AppProvider extends ChangeNotifier {
           .then((v) => vehicles = v)
           .catchError((Object e) { AppLogger.error('initFromApi: vehicles', error: e); errors.add('سيارات: $e'); return <Vehicle>[]; }),
       ShopService.getShops()
-          .then((s) => shops = s)
-          .catchError((Object e) { AppLogger.error('initFromApi: shops', error: e); return <Shop>[]; }),
+          .then((r) { shops = r.items; _shopsPage = 1; _hasMoreShops = r.hasNextPage; })
+          .catchError((Object e) { AppLogger.error('initFromApi: shops', error: e); }),
       RequestService.getMyRequests()
-          .then((r) => requests = r)
-          .catchError((Object e) { AppLogger.error('initFromApi: requests', error: e); errors.add('طلبات: $e'); return <ServiceRequest>[]; }),
+          .then((r) { requests = r.items; _requestsPage = 1; _hasMoreRequests = r.hasNextPage; })
+          .catchError((Object e) { AppLogger.error('initFromApi: requests', error: e); errors.add('طلبات: $e'); }),
     ]);
 
     initLoading = false;

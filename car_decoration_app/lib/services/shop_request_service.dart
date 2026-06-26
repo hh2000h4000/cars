@@ -1,13 +1,17 @@
 import '../models/shop_request.dart';
+import '../models/paged_result.dart';
 import 'api_client.dart';
 
 class ShopRequestService {
-  static Future<List<ShopRequest>> getShopRequests() async {
-    final res = await ApiClient.dio.get('/api/requests/shop');
-    final list = res.data as List<dynamic>;
-    return list
-        .map((e) => ShopRequest.fromJson(e as Map<String, dynamic>))
-        .toList();
+  static Future<PagedResult<ShopRequest>> getShopRequests({int page = 1, int pageSize = 20}) async {
+    final res = await ApiClient.dio.get('/api/requests/shop', queryParameters: {
+      'page': page,
+      'pageSize': pageSize,
+    });
+    return PagedResult.fromJson(
+      res.data as Map<String, dynamic>,
+      ShopRequest.fromJson,
+    );
   }
 
   static Future<String> acceptRequest(String requestId) async {

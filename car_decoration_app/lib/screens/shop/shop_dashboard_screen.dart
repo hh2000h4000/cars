@@ -36,14 +36,14 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
       final shopFuture = ApiClient.dio.get('/api/shops/my');
       final requestsFuture = ShopRequestService.getShopRequests();
       final shopRes = await shopFuture;
-      final requests = await requestsFuture;
+      final requestsResult = await requestsFuture;
       final shopData = shopRes.data as Map<String, dynamic>;
       if (mounted) {
         setState(() {
           _shopName = shopData['name'] as String? ?? '';
           _rating = (shopData['rating'] as num?)?.toDouble() ?? 0.0;
           _totalJobs = shopData['totalJobs'] as int? ?? 0;
-          _requests = requests;
+          _requests = requestsResult.items;
           _loading = false;
         });
       }
