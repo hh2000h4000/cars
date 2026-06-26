@@ -104,6 +104,11 @@ class ApiClient {
   static Future<String?> getFullName() => _storage.read(key: 'fullName');
   static Future<String?> getEmail() => _storage.read(key: 'email');
 
+  static Future<void> writeData(String key, String value) =>
+      _storage.write(key: key, value: value);
+
+  static Future<String?> readData(String key) => _storage.read(key: key);
+
   static Future<String?> getUserId() async {
     final token = await _storage.read(key: 'token');
     if (token == null) return null;

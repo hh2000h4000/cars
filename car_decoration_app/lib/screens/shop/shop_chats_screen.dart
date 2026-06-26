@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../theme.dart';
 import '../../services/chat_service.dart';
+import '../../services/api_client.dart';
 
 class ShopChatsScreen extends StatefulWidget {
   const ShopChatsScreen({super.key});
@@ -12,6 +13,8 @@ class ShopChatsScreen extends StatefulWidget {
 class _ShopChatsScreenState extends State<ShopChatsScreen> {
   List<ChatRoom> _rooms = [];
   bool _loading = true;
+  String _myRole = '';
+  Map<String, String> _lastRead = {};
 
   @override
   void initState() {
@@ -20,12 +23,44 @@ class _ShopChatsScreenState extends State<ShopChatsScreen> {
   }
 
   Future<void> _load() async {
+    _myRole = await ApiClient.getRole() ?? '';
     try {
       final rooms = await ChatService.getChatRooms();
-      if (mounted) setState(() { _rooms = rooms; _loading = false; });
+      final lastRead = <String, String>{};
+      for (final r in rooms) {
+        final stored = await ApiClient.readData('chat_lastread_${r.id}');
+        if (stored != null) lastRead[r.id] = stored;
+      }
+      if (mounted) {
+        setState(() {
+          _rooms = rooms;
+          _lastRead = lastRead;
+          _loading = false;
+        });
+      }
     } catch (_) {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  bool _hasUnread(ChatRoom room) {
+    if (room.lastMessageAt.isEmpty) return false;
+    if (room.lastSenderRole.isEmpty) return false;
+    if (room.lastSenderRole == _myRole) return false;
+    final lastRead = _lastRead[room.id];
+    if (lastRead == null) return true;
+    try {
+      final msgTime = DateTime.parse(room.lastMessageAt);
+      final readTime = DateTime.parse(lastRead);
+      return msgTime.isAfter(readTime);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  void _openChat(String roomId) {
+    Navigator.pushNamed(context, '/customer/chat', arguments: roomId)
+        .then((_) => _load());
   }
 
   @override
@@ -71,18 +106,22 @@ class _ShopChatsScreenState extends State<ShopChatsScreen> {
                       separatorBuilder: (_, __) => const SizedBox(height: 10),
                       itemBuilder: (_, i) {
                         final room = _rooms[i];
+                        final unread = _hasUnread(room);
                         return GestureDetector(
-                          onTap: () => Navigator.pushNamed(context, '/customer/chat', arguments: room.id),
+                          onTap: () => _openChat(room.id),
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              border: Border.all(color: AppColors.border),
+                              border: Border.all(
+                                color: unread ? AppColors.goldText.withOpacity(0.4) : AppColors.border,
+                                width: unread ? 1.5 : 1,
+                              ),
                               borderRadius: BorderRadius.circular(18),
                             ),
                             child: Row(
                               children: [
-                                // Customer avatar (shop side sees customers)
+                                // Customer avatar
                                 Container(
                                   width: 50, height: 50,
                                   decoration: BoxDecoration(color: AppColors.dark, borderRadius: BorderRadius.circular(15)),
@@ -98,19 +137,49 @@ class _ShopChatsScreenState extends State<ShopChatsScreen> {
                                       Row(
                                         children: [
                                           Text(room.customerName,
-                                            style: const TextStyle(fontFamily: 'Tajawal', fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                            style: TextStyle(
+                                              fontFamily: 'Tajawal',
+                                              fontSize: 14.5,
+                                              fontWeight: unread ? FontWeight.w900 : FontWeight.w800,
+                                              color: AppColors.textPrimary,
+                                            )),
                                           const Spacer(),
                                           if (room.lastMessageTime.isNotEmpty)
                                             Text(room.lastMessageTime,
-                                              style: const TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+                                              style: TextStyle(
+                                                fontFamily: 'Tajawal',
+                                                fontSize: 11.5,
+                                                fontWeight: unread ? FontWeight.w800 : FontWeight.w600,
+                                                color: unread ? AppColors.goldText : AppColors.textMuted,
+                                              )),
                                         ],
                                       ),
                                       const SizedBox(height: 4),
-                                      Text(
-                                        room.lastMessage.isNotEmpty ? room.lastMessage : 'لا توجد رسائل بعد',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              room.lastMessage.isNotEmpty ? room.lastMessage : 'لا توجد رسائل بعد',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontFamily: 'Tajawal',
+                                                fontSize: 12.5,
+                                                fontWeight: unread ? FontWeight.w700 : FontWeight.w500,
+                                                color: unread ? AppColors.textPrimary : AppColors.textSecondary,
+                                              ),
+                                            ),
+                                          ),
+                                          if (unread)
+                                            Container(
+                                              width: 10, height: 10,
+                                              margin: const EdgeInsets.only(right: 6),
+                                              decoration: const BoxDecoration(
+                                                color: AppColors.goldText,
+                                                shape: BoxShape.circle,
+                                              ),
+                                            ),
+                                        ],
                                       ),
                                     ],
                                   ),

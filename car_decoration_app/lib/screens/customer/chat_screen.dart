@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../../models/chat_message.dart';
 import '../../services/chat_service.dart';
+import '../../services/api_client.dart';
 
 class ChatScreen extends StatefulWidget {
   final String chatRoomId;
@@ -12,26 +14,40 @@ class ChatScreen extends StatefulWidget {
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
+  final _focusNode = FocusNode();
 
   ChatRoom? _room;
   List<ChatMessage> _messages = [];
   bool _loading = true;
   bool _sending = false;
   String? _error;
+  String _myRole = '';
+  Timer? _pollTimer;
 
   @override
   void initState() {
     super.initState();
-    _loadRoom();
+    WidgetsBinding.instance.addObserver(this);
+    _init();
+  }
+
+  Future<void> _init() async {
+    _myRole = await ApiClient.getRole() ?? '';
+    await _loadRoom();
+    // Poll every 5 seconds for new messages
+    _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) => _pollMessages());
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _pollTimer?.cancel();
     _controller.dispose();
     _scrollController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -45,6 +61,7 @@ class _ChatScreenState extends State<ChatScreen> {
           _loading = false;
         });
         _scrollToBottom();
+        _markAsRead();
       }
     } catch (e) {
       if (mounted) {
@@ -56,14 +73,37 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _scrollToBottom() {
+  Future<void> _pollMessages() async {
+    if (!mounted || _sending) return;
+    try {
+      final detail = await ChatService.getRoomDetail(widget.chatRoomId);
+      if (mounted && detail.messages.length > _messages.length) {
+        setState(() => _messages = detail.messages);
+        _scrollToBottom();
+        _markAsRead();
+      }
+    } catch (_) {}
+  }
+
+  void _markAsRead() {
+    ApiClient.writeData(
+      'chat_lastread_${widget.chatRoomId}',
+      DateTime.now().toUtc().toIso8601String(),
+    );
+  }
+
+  void _scrollToBottom({bool animated = true}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
+        if (animated) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        } else {
+          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+        }
       }
     });
   }
@@ -71,16 +111,23 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty || _sending) return;
+
     setState(() => _sending = true);
     _controller.clear();
+    _focusNode.requestFocus(); // stay focused after send
+
     try {
       final msg = await ChatService.sendMessage(widget.chatRoomId, text);
       if (mounted) {
-        setState(() => _messages.add(msg));
+        setState(() {
+          _messages.add(msg);
+          _sending = false;
+        });
         _scrollToBottom();
       }
     } catch (_) {
       if (mounted) {
+        setState(() => _sending = false);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('تعذّر إرسال الرسالة', style: TextStyle(fontFamily: 'Tajawal')),
@@ -88,16 +135,19 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         );
       }
-    } finally {
-      if (mounted) setState(() => _sending = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final shopName = _room?.shopName ?? 'المتجر';
-    final shopMono = _room?.shopMono ?? '؟';
-    final requestId = _room?.requestId ?? '';
+    // Shop sees customer name; customer sees shop name
+    final isShop = _myRole == 'ShopOwner';
+    final otherName = isShop
+        ? (_room?.customerName ?? 'العميل')
+        : (_room?.shopName ?? 'المتجر');
+    final otherMono = isShop
+        ? (_room?.customerMono ?? '؟')
+        : (_room?.shopMono ?? '؟');
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -115,26 +165,27 @@ class _ChatScreenState extends State<ChatScreen> {
                 children: [
                   const AppBackButton(),
                   const SizedBox(width: 10),
-                  ShopAvatar(mono: shopMono, size: 40, fontSize: 15),
+                  ShopAvatar(mono: otherMono, size: 40, fontSize: 15),
                   const SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(shopName,
-                        style: const TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                      const SizedBox(height: 2),
-                      Row(
-                        children: [
-                          Container(width: 7, height: 7,
-                            decoration: const BoxDecoration(color: AppColors.green, shape: BoxShape.circle)),
-                          const SizedBox(width: 5),
-                          const Text('متصل الآن',
-                            style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.green)),
-                        ],
-                      ),
-                    ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(otherName,
+                          style: const TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            Container(width: 7, height: 7,
+                              decoration: const BoxDecoration(color: AppColors.green, shape: BoxShape.circle)),
+                            const SizedBox(width: 5),
+                            const Text('متصل الآن',
+                              style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.green)),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                  const Spacer(),
                   Container(
                     width: 38, height: 38,
                     decoration: BoxDecoration(
@@ -154,8 +205,19 @@ class _ChatScreenState extends State<ChatScreen> {
                   ? const Center(child: CircularProgressIndicator(color: AppColors.goldText))
                   : _error != null
                       ? Center(
-                          child: Text(_error!,
-                            style: const TextStyle(fontFamily: 'Tajawal', fontSize: 14, color: AppColors.textMuted)),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(_error!,
+                                style: const TextStyle(fontFamily: 'Tajawal', fontSize: 14, color: AppColors.textMuted)),
+                              const SizedBox(height: 12),
+                              TextButton(
+                                onPressed: _loadRoom,
+                                child: const Text('إعادة المحاولة',
+                                  style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700, color: AppColors.goldText)),
+                              ),
+                            ],
+                          ),
                         )
                       : ListView.builder(
                           controller: _scrollController,
@@ -163,6 +225,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           itemCount: _messages.length + 1,
                           itemBuilder: (_, i) {
                             if (i == 0) {
+                              final requestId = _room?.requestId ?? '';
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 20),
                                 child: Center(
@@ -173,7 +236,9 @@ class _ChatScreenState extends State<ChatScreen> {
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Text(
-                                      requestId.isNotEmpty ? 'المحادثة بخصوص الطلب #$requestId' : 'المحادثة',
+                                      requestId.isNotEmpty
+                                          ? 'المحادثة بخصوص الطلب'
+                                          : 'المحادثة',
                                       style: const TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: Colors.white),
                                     ),
                                   ),
@@ -205,16 +270,19 @@ class _ChatScreenState extends State<ChatScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Container(
-                      height: 40,
+                      constraints: const BoxConstraints(minHeight: 40, maxHeight: 120),
                       decoration: BoxDecoration(
                         color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(999),
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                       child: TextField(
                         controller: _controller,
+                        focusNode: _focusNode,
                         textAlign: TextAlign.right,
                         textDirection: TextDirection.rtl,
+                        textInputAction: TextInputAction.send,
+                        maxLines: null,
                         style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
                         decoration: const InputDecoration(
                           hintText: 'اكتب رسالة...',
@@ -224,7 +292,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           focusedBorder: InputBorder.none,
                           filled: false,
                           isDense: true,
-                          contentPadding: EdgeInsets.symmetric(vertical: 10),
+                          contentPadding: EdgeInsets.symmetric(vertical: 8),
                         ),
                         onSubmitted: (_) => _sendMessage(),
                       ),
@@ -233,7 +301,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   const SizedBox(width: 8),
                   GestureDetector(
                     onTap: _sendMessage,
-                    child: Container(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
                       width: 40, height: 40,
                       decoration: BoxDecoration(
                         gradient: _sending
@@ -269,13 +338,31 @@ class _MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // isMe = true → رسالتي → اليمين (start في RTL)
+    // isMe = false → رسالة الطرف الآخر → اليسار (end في RTL)
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
-        mainAxisAlignment: msg.isMe ? MainAxisAlignment.start : MainAxisAlignment.end,
+        mainAxisAlignment:
+            msg.isMe ? MainAxisAlignment.start : MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
+          // Avatar for other party (shown on far left in RTL = end side)
+          if (!msg.isMe) ...[
+            Container(
+              width: 28, height: 28,
+              margin: const EdgeInsets.only(left: 6),
+              decoration: BoxDecoration(
+                color: AppColors.dark,
+                borderRadius: BorderRadius.circular(9),
+              ),
+              alignment: Alignment.center,
+              child: const Icon(Icons.person, color: AppColors.goldLight, size: 14),
+            ),
+          ],
           Column(
-            crossAxisAlignment: msg.isMe ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+            crossAxisAlignment:
+                msg.isMe ? CrossAxisAlignment.start : CrossAxisAlignment.end,
             children: [
               if (msg.hasImage)
                 Container(
@@ -299,7 +386,7 @@ class _MessageBubble extends StatelessWidget {
                 )
               else
                 Container(
-                  constraints: const BoxConstraints(maxWidth: 240),
+                  constraints: const BoxConstraints(maxWidth: 260),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
                     color: msg.isMe ? AppColors.dark : Colors.white,
@@ -307,12 +394,16 @@ class _MessageBubble extends StatelessWidget {
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(16),
                       topRight: const Radius.circular(16),
+                      // isMe على اليمين → tail في الزاوية اليمنى السفلية
                       bottomLeft: Radius.circular(msg.isMe ? 16 : 4),
                       bottomRight: Radius.circular(msg.isMe ? 4 : 16),
                     ),
+                    boxShadow: msg.isMe ? null : [
+                      BoxShadow(color: Colors.black.withOpacity(.04), blurRadius: 4, offset: const Offset(0, 2))
+                    ],
                   ),
                   child: Text(msg.text,
-                    textAlign: TextAlign.right,
+                    textAlign: msg.isMe ? TextAlign.right : TextAlign.right,
                     style: TextStyle(
                       fontFamily: 'Tajawal',
                       fontSize: 13.5,
@@ -322,10 +413,32 @@ class _MessageBubble extends StatelessWidget {
                     )),
                 ),
               const SizedBox(height: 3),
-              Text(msg.time,
-                style: const TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(msg.time,
+                    style: const TextStyle(fontFamily: 'Tajawal', fontSize: 10.5, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+                  if (msg.isMe) ...[
+                    const SizedBox(width: 4),
+                    const Icon(Icons.done_all_rounded, size: 13, color: AppColors.textMuted),
+                  ],
+                ],
+              ),
             ],
           ),
+          // Avatar for me (shown on far right in RTL = start side)
+          if (msg.isMe) ...[
+            Container(
+              width: 28, height: 28,
+              margin: const EdgeInsets.only(right: 6),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [AppColors.goldLight, AppColors.gold]),
+                borderRadius: BorderRadius.circular(9),
+              ),
+              alignment: Alignment.center,
+              child: const Icon(Icons.person, color: AppColors.dark, size: 14),
+            ),
+          ],
         ],
       ),
     );

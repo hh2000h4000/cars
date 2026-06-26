@@ -10,6 +10,8 @@ class ChatRoom {
   final String customerMono;
   final String lastMessage;
   final String lastMessageTime;
+  final String lastMessageAt;   // raw ISO string for unread comparison
+  final String lastSenderRole;  // "Customer" | "ShopOwner" | ""
 
   const ChatRoom({
     required this.id,
@@ -20,15 +22,28 @@ class ChatRoom {
     required this.customerMono,
     this.lastMessage = '',
     this.lastMessageTime = '',
+    this.lastMessageAt = '',
+    this.lastSenderRole = '',
   });
 
   factory ChatRoom.fromJson(Map<String, dynamic> json) {
     final shopName = json['shopName'] as String? ?? '';
     final customerName = json['customerName'] as String? ?? '';
-    final lastMsg = json['lastMessage'] as String? ?? '';
-    final lastMsgAt = json['lastMessageAt'] as String?;
+
+    // Extract last message from embedded messages list
+    String lastMsg = '';
+    String lastMsgAt = '';
+    String lastSenderRole = '';
+    final messages = json['messages'] as List<dynamic>?;
+    if (messages != null && messages.isNotEmpty) {
+      final last = messages.last as Map<String, dynamic>;
+      lastMsg = last['text'] as String? ?? '';
+      lastMsgAt = last['sentAt'] as String? ?? '';
+      lastSenderRole = last['senderRole'] as String? ?? '';
+    }
+
     String timeLabel = '';
-    if (lastMsgAt != null) {
+    if (lastMsgAt.isNotEmpty) {
       try {
         final dt = DateTime.parse(lastMsgAt).toLocal();
         final now = DateTime.now();
@@ -39,6 +54,7 @@ class ChatRoom {
         }
       } catch (_) {}
     }
+
     return ChatRoom(
       id: json['id'] as String,
       requestId: json['requestId'] as String? ?? '',
@@ -48,6 +64,8 @@ class ChatRoom {
       customerMono: customerName.isNotEmpty ? customerName[0] : '؟',
       lastMessage: lastMsg,
       lastMessageTime: timeLabel,
+      lastMessageAt: lastMsgAt,
+      lastSenderRole: lastSenderRole,
     );
   }
 }
@@ -67,22 +85,32 @@ class ChatService {
 
   static Future<ChatRoomDetail> getRoomDetail(String roomId) async {
     final currentUserId = await ApiClient.getUserId() ?? '';
+    final currentRole = await ApiClient.getRole() ?? '';
     final res = await ApiClient.dio.get('/api/chats/$roomId');
     final data = res.data as Map<String, dynamic>;
     final room = ChatRoom.fromJson(data);
     final rawMessages = data['messages'] as List<dynamic>? ?? [];
     final messages = rawMessages
-        .map((e) => ChatMessage.fromJson(e as Map<String, dynamic>, currentUserId))
+        .map((e) => ChatMessage.fromJson(
+              e as Map<String, dynamic>,
+              currentUserId,
+              currentRole: currentRole,
+            ))
         .toList();
     return ChatRoomDetail(room: room, messages: messages);
   }
 
   static Future<ChatMessage> sendMessage(String roomId, String text) async {
     final currentUserId = await ApiClient.getUserId() ?? '';
+    final currentRole = await ApiClient.getRole() ?? '';
     final res = await ApiClient.dio.post('/api/chats/send', data: {
       'chatRoomId': roomId,
       'text': text,
     });
-    return ChatMessage.fromJson(res.data as Map<String, dynamic>, currentUserId);
+    return ChatMessage.fromJson(
+      res.data as Map<String, dynamic>,
+      currentUserId,
+      currentRole: currentRole,
+    );
   }
 }
