@@ -81,24 +81,35 @@
 
 ---
 
+## قيد التنفيذ — تحسينات احترافية 🔧
+
+### أولوية عالية 🔴
+- [ ] **JWT Refresh Token** — حالياً token واحد ينتهي ويُطرد المستخدم. الحل: Access Token قصير + Refresh Token طويل (يجدد تلقائياً)
+- [ ] **Pagination** — كل endpoints ترجع كل السجلات. الحل: `?page&limit` على كل قائمة
+
+### أولوية متوسطة 🟡
+- [ ] **FCM Push Notifications** — الإشعارات لا تصل عند إغلاق التطبيق. الحل: Firebase Cloud Messaging
+- [ ] **Rate Limiting** — لا حماية من الـ brute force على `/auth/login`. الحل: ASP.NET Rate Limiting middleware
+
+### أولوية لاحقة 🟠
+- [ ] **Cloud Storage** — الصور على Local Disk تضيع عند إعادة النشر. الحل: Azure Blob / AWS S3
+- [ ] **FluentValidation** — الـ validation متفرق يدوياً. الحل: FluentValidation مركزي
+
+---
+
 ## Pending / Not Started ❌
 
 ### Backend
-- [ ] Pagination on all list endpoints (currently returns all rows)
-- [ ] Push notifications (no real-time, no WebSockets, no SignalR)
 - [ ] Admin endpoint: list all users
 - [ ] Admin endpoint: suspend/activate user
 - [ ] Shop owner: edit their own shop profile
 - [ ] Password reset / forgot password flow
 - [ ] Email verification
-- [ ] Cloud file storage (currently local disk — files lost on server restart/redeploy)
-- [ ] Rate limiting / throttling
 - [ ] Input validation (no FluentValidation or DataAnnotations currently)
 
 ### Flutter App
 - [ ] ShopMyStoreScreen — currently a placeholder ("قريباً")
 - [ ] AdminDashboardScreen — stats/metrics (currently placeholder)
-- [ ] Real-time chat (حالياً polling كل 5 ثوانٍ — يمكن ترقيته لـ SignalR/WebSocket لاحقاً)
 - [ ] Push notifications (no FCM integration)
 - [ ] Profile/account settings screen
 - [ ] Logout button visible in UI
@@ -106,7 +117,6 @@
 - [ ] Image upload progress indicator
 - [ ] Offline mode / error retry UI
 - [ ] Quotation detail from shop side (shop can see their sent quotations)
-- [ ] SendQuoteScreen — ✅ تم ربطه بالـ API في جلسة 2026-06-26
 
 ### Infrastructure
 - [ ] Cloud deployment (server, domain, SSL)
