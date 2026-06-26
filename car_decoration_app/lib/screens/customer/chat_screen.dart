@@ -46,14 +46,16 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
 
   void _handleIncomingMessage(Map<String, dynamic> data) {
     final incomingId = data['id']?.toString() ?? '';
-    // Skip if already in list (e.g. our own message returned by REST)
     if (_messages.any((m) => m.id == incomingId)) return;
     final msg = ChatMessage.fromJson(data, '', currentRole: _myRole);
-    if (mounted) {
+    // Yield to the event loop before calling setState to ensure
+    // we're not inside a build/layout phase when SignalR fires the callback
+    Future.microtask(() {
+      if (!mounted) return;
       setState(() => _messages.add(msg));
       _scrollToBottom();
       _markAsRead();
-    }
+    });
   }
 
   @override
