@@ -55,7 +55,7 @@ class _CustomerShellState extends State<CustomerShell> {
   Future<void> _initBadge() async {
     _myRole = await ApiClient.getRole() ?? '';
     await _refreshBadge();
-    _badgeTimer = Timer.periodic(const Duration(seconds: 30), (_) => _refreshBadge());
+    _badgeTimer = Timer.periodic(const Duration(seconds: 8), (_) => _refreshBadge());
   }
 
   Future<void> _refreshBadge() async {
