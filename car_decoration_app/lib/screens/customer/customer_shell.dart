@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../theme.dart';
 import '../../providers/app_provider.dart';
 import '../../services/api_client.dart';
+import '../../services/chat_service.dart';
 import 'home_screen.dart';
 import 'requests_screen.dart';
 import 'vehicles_screen.dart';
@@ -19,17 +21,19 @@ class CustomerShell extends StatefulWidget {
 
 class _CustomerShellState extends State<CustomerShell> {
   int _index = 0;
+  int _unreadCount = 0;
+  String _myRole = '';
+  Timer? _badgeTimer;
+
+  static const _chatTabIndex = 3;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // Auth guard: redirect to login if no token (handles direct URL navigation on web)
       final token = await ApiClient.getToken();
       if (token == null) {
-        if (mounted) {
-          Navigator.pushNamedAndRemoveUntil(context, '/auth/login', (r) => false);
-        }
+        if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/auth/login', (r) => false);
         return;
       }
       await context.read<AppProvider>().initFromApi();
@@ -45,6 +49,36 @@ class _CustomerShellState extends State<CustomerShell> {
         }
       }
     });
+    _initBadge();
+  }
+
+  Future<void> _initBadge() async {
+    _myRole = await ApiClient.getRole() ?? '';
+    await _refreshBadge();
+    _badgeTimer = Timer.periodic(const Duration(seconds: 30), (_) => _refreshBadge());
+  }
+
+  Future<void> _refreshBadge() async {
+    try {
+      final rooms = await ChatService.getChatRooms();
+      int count = 0;
+      for (final room in rooms) {
+        if (room.lastMessageAt.isEmpty) continue;
+        if (room.lastSenderRole == _myRole) continue;
+        final lastRead = await ApiClient.readData('chat_lastread_${room.id}');
+        if (lastRead == null) { count++; continue; }
+        try {
+          if (DateTime.parse(room.lastMessageAt).isAfter(DateTime.parse(lastRead))) count++;
+        } catch (_) {}
+      }
+      if (mounted) setState(() => _unreadCount = count);
+    } catch (_) {}
+  }
+
+  @override
+  void dispose() {
+    _badgeTimer?.cancel();
+    super.dispose();
   }
 
   static const _screens = [
@@ -84,17 +118,51 @@ class _CustomerShellState extends State<CustomerShell> {
               children: List.generate(_items.length, (i) {
                 final (outlinedIcon, filledIcon, label) = _items[i];
                 final active = _index == i;
+                final showBadge = i == _chatTabIndex && _unreadCount > 0;
                 return Expanded(
                   child: GestureDetector(
-                    onTap: () => setState(() => _index = i),
+                    onTap: () {
+                      setState(() => _index = i);
+                      // Refresh badge count after visiting chats tab
+                      if (i == _chatTabIndex) {
+                        Future.delayed(const Duration(seconds: 2), _refreshBadge);
+                      }
+                    },
                     behavior: HitTestBehavior.opaque,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          active ? filledIcon : outlinedIcon,
-                          color: active ? AppColors.dark : AppColors.textMuted,
-                          size: 22,
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Icon(
+                              active ? filledIcon : outlinedIcon,
+                              color: active ? AppColors.dark : AppColors.textMuted,
+                              size: 22,
+                            ),
+                            if (showBadge)
+                              Positioned(
+                                right: -6, top: -4,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.red,
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  constraints: const BoxConstraints(minWidth: 16, minHeight: 14),
+                                  child: Text(
+                                    _unreadCount > 9 ? '9+' : '$_unreadCount',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w900,
+                                      fontFamily: 'Tajawal',
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                         const SizedBox(height: 3),
                         Text(
