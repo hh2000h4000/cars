@@ -87,6 +87,12 @@
 - [x] **JWT Refresh Token** — Access Token 15 دقيقة + Refresh Token 30 يوم مخزن في DB. Dio interceptor يجدد تلقائياً عند 401. Token rotation عند كل تجديد. تم: 2026-06-26
 - [x] **Pagination** — Offset/Page (`?page=1&pageSize=20`, max 50). `PagedResult<T>` DTO. Endpoints: Shops، Requests (customer + shop). AppProvider يدعم `loadMoreRequests/loadMoreShops`. الشاشات: زر "تحميل المزيد" في RequestsScreen، ShopRequestsScreen، ShopSelectScreen. تم: 2026-06-26
 - [x] **Workflow Audit & Fix (2026-06-26)** — RequestDetailScreen يحمّل العروض من API (لا mock). QuotationDetailScreen يستقبل Quotation object كاملاً. قبول العرض يستدعي API الحقيقي ويُرجع chatRoomId. الباكند يُنشئ ChatRoom تلقائياً عند قبول العرض إن لم تكن موجودة. status enum نُظِّف (حُذف draft/offers/shopSelected/scheduled/disputed). AppProvider نُظِّف من الكود الوهمي. تم: 2026-06-26
+- [x] **Request Lifecycle Redesign (2026-06-27)** — إعادة تصميم دورة حياة الطلب بالكامل:
+  - **Backend:** `RequestStatus` أصبح 6 حالات: `Open، ShopSelected، InProgress، Completed، Cancelled، Expired`. `QuotationStatus` أضيف `Withdrawn`. `RequestShopStatus` أضيف `Withdrawn`. إضافة `ViewedAt/RespondedAt/RejectedAt` على `RequestShop`. تغيير `ChatRoom` من 1-to-1 إلى 1-to-many (UNIQUE على `RequestId+ShopId` بدلاً من `RequestId` وحده). إضافة endpoint `PUT /api/requests/{id}/start` و `PUT /api/quotations/{id}/withdraw`. `AcceptRequestAsync` ينشئ ChatRoom مباشرة عند قبول المتجر (لا عند قبول العرض). `StartWorkAsync` → `InProgress`. `CompleteAsync` ← يتطلب `InProgress`.
+  - **Flutter:** `RequestStatus` enum نُظِّف (6 حالات، labels عربية). `ShopRequestShopStatus` أضيف `withdrawn`. `Quotation` أضيف `withdrawn` + `Quotation.empty` sentinel. `ShopRequestDetailScreen` أعيد كتابته — state machine كامل للأزرار. `ReviewService` + `review_screen.dart` كُتبا من صفر بـ API حقيقي. `QuotationService.withdrawQuotation()` + `ShopRequestService.startWork/completeRequest()`.
+  - **Migration:** `20260627000001_RequestLifecycleRedesign` مع data migration (Pending→Open, Active→ShopSelected) + إضافة الأعمدة الجديدة + تغيير الـ index.
+  - **Fix:** إضافة Designer.cs الناقص للـ migration + تحديث AppDbContextModelSnapshot.cs.
+  - **Fix:** إضافة حالة `withdrawn` في `_StatusBadge` switch في `ShopRequestsScreen`.
 
 ### أولوية متوسطة 🟡
 - [ ] **FCM Push Notifications** — الإشعارات لا تصل عند إغلاق التطبيق. الحل: Firebase Cloud Messaging

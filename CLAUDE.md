@@ -69,14 +69,18 @@ Customer → Request (multi-shop) → Shop accepts → ChatRoom opens
 → Job done → Customer reviews → Shop rating updated
 ```
 
-## Current Status (آخر تحديث: 2026-06-26)
+## Current Status (آخر تحديث: 2026-06-27)
 
 - Backend: يعمل على PostgreSQL، جميع endpoints مكتملة ✅
 - Flutter: يعمل على موبايل وChromeWeb، بيانات حقيقية من API ✅
 - شاشات التاجر كاملة ومربوطة بـ API: Dashboard، Requests، Chats، SendQuote ✅
 - شاشة الدردشة: رسائلي يمين (داكن)، رسائل الطرف الثاني يسار (أبيض) — مثل واتساب ✅
-- اشعارات الرسائل غير المقروءة: gold badge في قائمة المحادثات ✅
-- التركيز يبقى على حقل النص بعد الإرسال ✅
+- إرسال الصور في المحادثة: camera + gallery، عرض شبكة واتساب، fullscreen viewer ✅
+- دورة حياة الطلب: 6 حالات (Open→ShopSelected→InProgress→Completed/Cancelled/Expired) ✅
+- المحادثة تفتح عند قبول المتجر للطلب (لا عند قبول العرض) ✅
+- state machine كامل في شاشة تفاصيل طلب المتجر (قبول→بدأ العمل→إنهاء) ✅
+- نظام التقييم مكتمل (ReviewService + review_screen) متصل بـ API ✅
+- سحب عرض السعر (withdraw quotation): backend + service ✅
 - Mock data: محذوف بالكامل
 - Serilog: مفعّل، CORS: يعمل، Sentry: مضبوط
 
@@ -143,5 +147,6 @@ Customer → Request (multi-shop) → Shop accepts → ChatRoom opens
 - `ShopMyStoreScreen` لا تزال placeholder ("قريباً")
 - Badge عدد الرسائل غير المقروءة على تاب المحادثات في bottom nav (مؤجل)
 - Push Notifications عبر FCM (يحتاج Firebase + backend integration)
-- لا يوجد pagination على أي endpoint
 - Cloud storage للملفات المرفوعة (حالياً local disk)
+- Quotation withdrawal UI — زر "سحب العرض" في واجهة المتجر (الـ service موجود)
+- Rate Limiting على `/auth/login` ضد brute force
