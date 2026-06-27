@@ -26,20 +26,30 @@ class PendingShop {
   final String id;
   final String name;
   final String ownerName;
+  final String ownerPhone;
   final String phone;
   final String crNumber;
   final String city;
   final String submittedAt;
+  final String? idNumber;
+  final String? logoUrl;
+  final String? crDocumentUrl;
+  final String? idDocumentUrl;
   AdminShopStatus status;
 
   PendingShop({
     required this.id,
     required this.name,
     required this.ownerName,
+    required this.ownerPhone,
     required this.phone,
     required this.crNumber,
     required this.city,
     required this.submittedAt,
+    this.idNumber,
+    this.logoUrl,
+    this.crDocumentUrl,
+    this.idDocumentUrl,
     this.status = AdminShopStatus.pending,
   });
 
@@ -59,13 +69,18 @@ class PendingShop {
         : '–';
 
     return PendingShop(
-      id: (j['id'] as String? ?? ''),
+      id: j['id'] as String? ?? '',
       name: j['name'] as String? ?? '',
       ownerName: j['ownerName'] as String? ?? '',
+      ownerPhone: j['ownerPhone'] as String? ?? '',
       phone: j['phone'] as String? ?? '',
       crNumber: j['crNumber'] as String? ?? '',
       city: j['city'] as String? ?? '',
       submittedAt: submittedAt,
+      idNumber: j['idNumber'] as String?,
+      logoUrl: j['logoUrl'] as String?,
+      crDocumentUrl: j['crDocumentUrl'] as String?,
+      idDocumentUrl: j['idDocumentUrl'] as String?,
       status: parseStatus(j['status'] as String? ?? ''),
     );
   }

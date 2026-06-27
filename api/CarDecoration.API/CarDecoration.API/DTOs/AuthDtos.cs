@@ -31,5 +31,9 @@ public record ShopRegisterRequest(
     string ShopName,
     string CrNumber,
     string City,
-    string ShopPhone
+    string ShopPhone,
+    string IdNumber,
+    string CrDocumentUrl,
+    string IdDocumentUrl,
+    string? LogoUrl
 );

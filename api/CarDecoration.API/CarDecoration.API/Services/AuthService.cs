@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using CarDecoration.API.Data;
 using CarDecoration.API.DTOs;
 using CarDecoration.API.Helpers;
@@ -74,21 +75,44 @@ public class AuthService
 
     public async Task<AuthResponse> RegisterShopAsync(ShopRegisterRequest req)
     {
-        if (await _db.Users.AnyAsync(u => u.Email == req.Email))
+        // ── Format validation ────────────────────────────────────────────────
+        if (!Regex.IsMatch(req.Phone.Trim(), @"^0[15]\d{8}$"))
+            throw new Exception("رقم جوال المالك يجب أن يبدأ بـ 05 أو 01 ويتكون من 10 أرقام إنجليزية");
+
+        if (!Regex.IsMatch(req.ShopPhone.Trim(), @"^0[15]\d{8}$"))
+            throw new Exception("رقم جوال المتجر يجب أن يبدأ بـ 05 أو 01 ويتكون من 10 أرقام إنجليزية");
+
+        try { _ = new System.Net.Mail.MailAddress(req.Email); }
+        catch { throw new Exception("صيغة البريد الإلكتروني غير صحيحة"); }
+
+        if (!Regex.IsMatch(req.CrNumber.Trim(), @"^\d{10}$"))
+            throw new Exception("رقم السجل التجاري يجب أن يتكون من 10 أرقام");
+
+        if (string.IsNullOrWhiteSpace(req.IdNumber))
+            throw new Exception("يرجى إدخال رقم الهوية");
+
+        if (string.IsNullOrWhiteSpace(req.CrDocumentUrl))
+            throw new Exception("يرجى رفع صورة السجل التجاري");
+
+        if (string.IsNullOrWhiteSpace(req.IdDocumentUrl))
+            throw new Exception("يرجى رفع صورة الهوية");
+
+        // ── Uniqueness checks ────────────────────────────────────────────────
+        if (await _db.Users.AnyAsync(u => u.Email == req.Email.ToLower().Trim()))
             throw new Exception("البريد الإلكتروني مستخدم مسبقاً");
 
-        if (await _db.Users.AnyAsync(u => u.Phone == req.Phone))
+        if (await _db.Users.AnyAsync(u => u.Phone == req.Phone.Trim()))
             throw new Exception("رقم الجوال مستخدم مسبقاً");
 
-        if (await _db.Shops.AnyAsync(s => s.CrNumber == req.CrNumber))
+        if (await _db.Shops.AnyAsync(s => s.CrNumber == req.CrNumber.Trim()))
             throw new Exception("رقم السجل التجاري مستخدم مسبقاً");
 
         await using var tx = await _db.Database.BeginTransactionAsync();
 
         var user = new User
         {
-            FullName = req.FullName,
-            Phone = req.Phone,
+            FullName = req.FullName.Trim(),
+            Phone = req.Phone.Trim(),
             Email = req.Email.ToLower().Trim(),
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password),
             Role = UserRole.ShopOwner
@@ -100,10 +124,14 @@ public class AuthService
         var shop = new Shop
         {
             OwnerId = user.Id,
-            Name = req.ShopName,
-            CrNumber = req.CrNumber,
-            City = req.City,
-            Phone = req.ShopPhone,
+            Name = req.ShopName.Trim(),
+            CrNumber = req.CrNumber.Trim(),
+            City = req.City.Trim(),
+            Phone = req.ShopPhone.Trim(),
+            LogoUrl = req.LogoUrl,
+            IdNumber = req.IdNumber.Trim(),
+            CrDocumentUrl = req.CrDocumentUrl,
+            IdDocumentUrl = req.IdDocumentUrl,
             Status = ShopStatus.Pending
         };
 

@@ -494,6 +494,15 @@ namespace CarDecoration.API.Migrations
                     b.Property<string>("LogoUrl")
                         .HasColumnType("text");
 
+                    b.Property<string>("CrDocumentUrl")
+                        .HasColumnType("text");
+
+                    b.Property<string>("IdDocumentUrl")
+                        .HasColumnType("text");
+
+                    b.Property<string>("IdNumber")
+                        .HasColumnType("text");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");

@@ -84,8 +84,9 @@ public class ShopService
             .Where(s => s.Status == ShopStatus.Pending || s.Status == ShopStatus.Rejected || s.Status == ShopStatus.DocsRequested)
             .OrderByDescending(s => s.CreatedAt)
             .Select(s => new PendingShopResponse(
-                s.Id, s.Name, s.Owner.FullName, s.City, s.Phone,
-                s.CrNumber, s.LogoUrl, s.Status.ToString(), s.CreatedAt))
+                s.Id, s.Name, s.Owner.FullName, s.Owner.Phone, s.City, s.Phone,
+                s.CrNumber, s.IdNumber, s.LogoUrl, s.CrDocumentUrl, s.IdDocumentUrl,
+                s.Status.ToString(), s.CreatedAt))
             .ToPagedAsync(pagination);
     }
 

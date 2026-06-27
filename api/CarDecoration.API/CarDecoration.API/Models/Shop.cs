@@ -10,6 +10,9 @@ public class Shop : BaseEntity
     public string City { get; set; } = string.Empty;
     public string Phone { get; set; } = string.Empty;
     public string? LogoUrl { get; set; }
+    public string? IdNumber { get; set; }
+    public string? CrDocumentUrl { get; set; }
+    public string? IdDocumentUrl { get; set; }
     public ShopStatus Status { get; set; } = ShopStatus.Pending;
     public float Rating { get; set; } = 0;
     public int TotalJobs { get; set; } = 0;

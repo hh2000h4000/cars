@@ -16,10 +16,14 @@ public record PendingShopResponse(
     Guid Id,
     string Name,
     string OwnerName,
+    string OwnerPhone,
     string City,
     string Phone,
     string CrNumber,
+    string? IdNumber,
     string? LogoUrl,
+    string? CrDocumentUrl,
+    string? IdDocumentUrl,
     string Status,
     DateTime CreatedAt
 );

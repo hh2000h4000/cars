@@ -52,6 +52,43 @@ public class UploadController : ControllerBase
         return Ok(new { url = fileUrl });
     }
 
+    // ── رفع وثيقة مجهول (للتسجيل قبل إنشاء الحساب) ──────────────────────────
+    [HttpPost("document")]
+    [AllowAnonymous]
+    [RequestSizeLimit(10 * 1024 * 1024)]
+    public async Task<IActionResult> UploadDocument(IFormFile file)
+    {
+        if (file == null || file.Length == 0)
+            return BadRequest(new { message = "لم يتم اختيار ملف" });
+
+        var allowedTypes = new[]
+        {
+            "image/jpeg", "image/jpg", "image/png",
+            "application/pdf"
+        };
+        if (!allowedTypes.Contains(file.ContentType.ToLower()))
+            return BadRequest(new { message = "يسمح فقط بـ JPG و PNG و PDF" });
+
+        if (file.Length > 10 * 1024 * 1024)
+            return BadRequest(new { message = "حجم الملف يجب أن يكون أقل من 10MB" });
+
+        var extension = Path.GetExtension(file.FileName).ToLower();
+        var fileName = $"{Guid.NewGuid()}{extension}";
+
+        var uploadsPath = Path.Combine(_env.ContentRootPath, "uploads");
+        if (!Directory.Exists(uploadsPath))
+            Directory.CreateDirectory(uploadsPath);
+
+        var filePath = Path.Combine(uploadsPath, fileName);
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+
+        var fileUrl = $"{Request.Scheme}://{Request.Host}/uploads/{fileName}";
+        return Ok(new { url = fileUrl });
+    }
+
     [HttpPost("multiple")]
     public async Task<IActionResult> UploadMultiple(List<IFormFile> files)
     {

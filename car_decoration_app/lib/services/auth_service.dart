@@ -54,6 +54,10 @@ class AuthService {
     required String crNumber,
     required String city,
     required String shopPhone,
+    required String idNumber,
+    required String crDocumentUrl,
+    required String idDocumentUrl,
+    String? logoUrl,
   }) async {
     final res = await ApiClient.dio.post('/api/auth/shop/register', data: {
       'fullName': fullName,
@@ -64,6 +68,10 @@ class AuthService {
       'crNumber': crNumber,
       'city': city,
       'shopPhone': shopPhone,
+      'idNumber': idNumber,
+      'crDocumentUrl': crDocumentUrl,
+      'idDocumentUrl': idDocumentUrl,
+      if (logoUrl != null) 'logoUrl': logoUrl,
     });
     final data = res.data as Map<String, dynamic>;
     await ApiClient.saveUserData(
