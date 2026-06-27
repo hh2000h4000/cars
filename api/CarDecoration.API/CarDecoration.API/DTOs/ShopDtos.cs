@@ -8,6 +8,7 @@ public record ShopResponse(
     string? LogoUrl,
     float Rating,
     int TotalJobs,
+    int ReviewCount,
     string Status
 );
 

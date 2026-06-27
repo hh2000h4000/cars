@@ -309,12 +309,22 @@ class HomeScreen extends StatelessWidget {
                                         mainAxisAlignment: MainAxisAlignment.start,
                                         children: [
                                           Row(children: [
-                                            Text(shop.rating.toString(), style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                            Text(
+                                              shop.rating > 0 ? shop.rating.toStringAsFixed(1) : '—',
+                                              style: const TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                                            ),
                                             const SizedBox(width: 3),
                                             const Icon(Icons.star, color: AppColors.star, size: 14),
+                                            if (shop.reviewCount > 0) ...[
+                                              const SizedBox(width: 3),
+                                              Text(
+                                                '(${shop.reviewCount})',
+                                                style: const TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textMuted),
+                                              ),
+                                            ],
                                           ]),
                                           const SizedBox(width: 12),
-                                          Text('${shop.completedJobs} عملية مكتملة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+                                          Text('${shop.completedJobs} عملية', style: const TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
                                         ],
                                       ),
                                       const SizedBox(height: 10),

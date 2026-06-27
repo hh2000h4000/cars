@@ -7,8 +7,10 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../theme.dart';
 import '../../services/shop_profile_service.dart';
+import '../../services/review_service.dart';
 import '../../services/upload_service.dart';
 import '../../services/api_client.dart';
+import '../../models/paged_result.dart';
 import '../../app_navigator.dart';
 
 class ShopMyStoreScreen extends StatefulWidget {
@@ -23,6 +25,10 @@ class _ShopMyStoreScreenState extends State<ShopMyStoreScreen> {
   bool _loading = true;
   String? _error;
 
+  PagedResult<ReviewItem>? _reviewsResult;
+  bool _reviewsLoading = true;
+  bool _loadingMoreReviews = false;
+
   @override
   void initState() {
     super.initState();
@@ -33,9 +39,46 @@ class _ShopMyStoreScreenState extends State<ShopMyStoreScreen> {
     setState(() { _loading = true; _error = null; });
     try {
       final shop = await ShopProfileService.getMyShop();
-      if (mounted) setState(() { _shop = shop; _loading = false; });
+      if (mounted) {
+        setState(() { _shop = shop; _loading = false; });
+        _loadReviews();
+      }
     } catch (e) {
       if (mounted) setState(() { _error = 'تعذر تحميل بيانات المتجر'; _loading = false; });
+    }
+  }
+
+  Future<void> _loadReviews({bool loadMore = false}) async {
+    if (loadMore && (_reviewsResult?.hasNextPage != true || _loadingMoreReviews)) return;
+
+    if (loadMore) {
+      setState(() => _loadingMoreReviews = true);
+    } else {
+      setState(() => _reviewsLoading = true);
+    }
+
+    try {
+      final nextPage = loadMore ? (_reviewsResult?.page ?? 0) + 1 : 1;
+      final result = await ReviewService.getMyShopReviews(page: nextPage);
+      if (!mounted) return;
+      setState(() {
+        if (loadMore && _reviewsResult != null) {
+          _reviewsResult = PagedResult(
+            items: [..._reviewsResult!.items, ...result.items],
+            totalCount: result.totalCount,
+            page: result.page,
+            pageSize: result.pageSize,
+            totalPages: result.totalPages,
+            hasNextPage: result.hasNextPage,
+          );
+        } else {
+          _reviewsResult = result;
+        }
+        _reviewsLoading = false;
+        _loadingMoreReviews = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() { _reviewsLoading = false; _loadingMoreReviews = false; });
     }
   }
 
@@ -164,8 +207,15 @@ class _ShopMyStoreScreenState extends State<ShopMyStoreScreen> {
                                 ),
                                 const SizedBox(width: 10),
                                 _StatBox(
+                                  value: (_reviewsResult?.totalCount ?? 0).toString(),
+                                  label: 'تقييمات',
+                                  icon: Icons.reviews_outlined,
+                                  iconColor: AppColors.goldText,
+                                ),
+                                const SizedBox(width: 10),
+                                _StatBox(
                                   value: shop.totalJobs.toString(),
-                                  label: 'أعمال منجزة',
+                                  label: 'أعمال',
                                   icon: Icons.check_circle_outline_rounded,
                                   iconColor: AppColors.green,
                                 ),
@@ -212,6 +262,16 @@ class _ShopMyStoreScreenState extends State<ShopMyStoreScreen> {
                           ),
                         ],
                       ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // ── Reviews section ──
+                    _ReviewsSection(
+                      reviewsResult: _reviewsResult,
+                      loading: _reviewsLoading,
+                      loadingMore: _loadingMoreReviews,
+                      onLoadMore: () => _loadReviews(loadMore: true),
                     ),
 
                     const SizedBox(height: 24),
@@ -705,6 +765,218 @@ class _Field extends StatelessWidget {
     ],
   );
 }
+
+// ── Reviews Section ───────────────────────────────────────────────────────────
+
+class _ReviewsSection extends StatelessWidget {
+  final PagedResult<ReviewItem>? reviewsResult;
+  final bool loading;
+  final bool loadingMore;
+  final VoidCallback onLoadMore;
+
+  const _ReviewsSection({
+    required this.reviewsResult,
+    required this.loading,
+    required this.loadingMore,
+    required this.onLoadMore,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final reviews = reviewsResult?.items ?? [];
+    final totalCount = reviewsResult?.totalCount ?? 0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section title
+        Row(
+          children: [
+            const Text('تقييمات عملائي',
+              style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+            const SizedBox(width: 8),
+            if (totalCount > 0)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(999)),
+                child: Text('$totalCount',
+                  style: const TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.goldText)),
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        if (loading)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: CircularProgressIndicator(color: AppColors.goldText, strokeWidth: 2),
+            ),
+          )
+        else if (reviews.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: AppColors.border),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Column(
+              children: [
+                Icon(Icons.star_border_rounded, color: AppColors.border, size: 32),
+                SizedBox(height: 8),
+                Text('لا توجد تقييمات بعد',
+                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+                SizedBox(height: 4),
+                Text('ستظهر تقييمات العملاء هنا بعد إتمام الطلبات',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textMuted)),
+              ],
+            ),
+          )
+        else ...[
+          ...reviews.map((r) => Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: _ShopReviewCard(review: r),
+          )),
+          if (reviewsResult?.hasNextPage == true)
+            GestureDetector(
+              onTap: onLoadMore,
+              child: Container(
+                height: 44,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: AppColors.border),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                alignment: Alignment.center,
+                child: loadingMore
+                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.goldText))
+                    : const Text('عرض المزيد',
+                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.goldText)),
+              ),
+            ),
+        ],
+      ],
+    );
+  }
+}
+
+class _ShopReviewCard extends StatelessWidget {
+  final ReviewItem review;
+  const _ShopReviewCard({required this.review});
+
+  @override
+  Widget build(BuildContext context) {
+    final firstName = review.customerName.split(' ').first;
+    final mono = firstName.isNotEmpty ? firstName[0] : 'ع';
+    final avg = review.averageRating;
+    final dateStr = _formatDate(review.createdAt);
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 34, height: 34,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(colors: [AppColors.goldLight, AppColors.gold]),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                alignment: Alignment.center,
+                child: Text(mono, style: const TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.dark)),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(firstName, style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        ...List.generate(5, (i) => Icon(
+                          i < avg.floor() ? Icons.star_rounded
+                              : (i < avg ? Icons.star_half_rounded : Icons.star_border_rounded),
+                          color: AppColors.star, size: 13,
+                        )),
+                        const SizedBox(width: 4),
+                        Text(avg.toStringAsFixed(1),
+                          style: const TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Text(dateStr, style: const TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+            ],
+          ),
+          if (review.comment != null && review.comment!.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(review.comment!,
+              textAlign: TextAlign.right,
+              style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary, height: 1.6)),
+          ],
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              _MiniStat(label: 'الجودة', value: review.qualityRating),
+              const SizedBox(width: 6),
+              _MiniStat(label: 'التواصل', value: review.communicationRating),
+              const SizedBox(width: 6),
+              _MiniStat(label: 'الالتزام', value: review.commitmentRating),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(DateTime dt) {
+    final now = DateTime.now();
+    final diff = now.difference(dt);
+    if (diff.inDays == 0) return 'اليوم';
+    if (diff.inDays == 1) return 'أمس';
+    if (diff.inDays < 7) return 'منذ ${diff.inDays} أيام';
+    if (diff.inDays < 30) return 'منذ ${(diff.inDays / 7).floor()} أسابيع';
+    return '${dt.year}/${dt.month}/${dt.day}';
+  }
+}
+
+class _MiniStat extends StatelessWidget {
+  final String label;
+  final int value;
+  const _MiniStat({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    decoration: BoxDecoration(
+      color: AppColors.goldBg,
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.star_rounded, size: 11, color: AppColors.star),
+        const SizedBox(width: 3),
+        Text('$value', style: const TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.goldText)),
+        const SizedBox(width: 4),
+        Text(label, style: const TextStyle(fontFamily: 'Tajawal', fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+      ],
+    ),
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _LinesPainter extends CustomPainter {
   @override

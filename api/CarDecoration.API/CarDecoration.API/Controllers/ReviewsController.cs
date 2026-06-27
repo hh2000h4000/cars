@@ -45,4 +45,32 @@ public class ReviewsController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    [HttpGet("my-shop")]
+    public async Task<IActionResult> GetMyShopReviews([FromQuery] PaginationRequest pagination)
+    {
+        try
+        {
+            var result = await _service.GetMyShopReviewsAsync(pagination);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpGet("request/{requestId}")]
+    public async Task<IActionResult> HasReviewed(Guid requestId)
+    {
+        try
+        {
+            var result = await _service.HasReviewedAsync(requestId);
+            return Ok(new HasReviewedResponse(result));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }

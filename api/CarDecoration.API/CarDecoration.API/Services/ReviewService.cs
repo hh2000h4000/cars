@@ -62,8 +62,14 @@ public class ReviewService
 
         var avg = ratings.Average();
 
+        var customer = await _db.Users.AsNoTracking()
+            .Where(u => u.Id == userId)
+            .Select(u => u.FullName)
+            .FirstOrDefaultAsync() ?? "";
+
         return new ReviewResponse2(
             review.Id, review.RequestId, request.SelectedShop!.Name,
+            customer,
             review.QualityRating, review.CommunicationRating,
             review.CommitmentRating, review.GeneralRating,
             avg, review.Comment, review.CreatedAt);
@@ -94,11 +100,43 @@ public class ReviewService
             .Where(r => r.ShopId == shopId)
             .OrderByDescending(r => r.CreatedAt)
             .Select(r => new ReviewResponse2(
-                r.Id, r.RequestId, r.Request.SelectedShop!.Name,
+                r.Id, r.RequestId, r.Shop.Name,
+                r.Request.Customer.FullName,
                 r.QualityRating, r.CommunicationRating,
                 r.CommitmentRating, r.GeneralRating,
                 (r.QualityRating + r.CommunicationRating +
                  r.CommitmentRating + r.GeneralRating) / 4.0,
                 r.Comment, r.CreatedAt))
             .ToPagedAsync(pagination);
+
+    public async Task<PagedResult<ReviewResponse2>> GetMyShopReviewsAsync(PaginationRequest pagination)
+    {
+        var userId = _currentUser.UserId ?? throw new Exception("غير مصرح");
+        var shopId = await _db.Shops
+            .Where(s => s.OwnerId == userId)
+            .Select(s => s.Id)
+            .FirstOrDefaultAsync();
+        if (shopId == Guid.Empty)
+            throw new Exception("المتجر غير موجود");
+
+        return await _db.Reviews
+            .Where(r => r.ShopId == shopId)
+            .OrderByDescending(r => r.CreatedAt)
+            .Select(r => new ReviewResponse2(
+                r.Id, r.RequestId, r.Shop.Name,
+                r.Request.Customer.FullName,
+                r.QualityRating, r.CommunicationRating,
+                r.CommitmentRating, r.GeneralRating,
+                (r.QualityRating + r.CommunicationRating +
+                 r.CommitmentRating + r.GeneralRating) / 4.0,
+                r.Comment, r.CreatedAt))
+            .ToPagedAsync(pagination);
+    }
+
+    public async Task<bool> HasReviewedAsync(Guid requestId)
+    {
+        var userId = _currentUser.UserId ?? throw new Exception("غير مصرح");
+        return await _db.Reviews
+            .AnyAsync(r => r.RequestId == requestId && r.Request.CustomerId == userId);
+    }
 }

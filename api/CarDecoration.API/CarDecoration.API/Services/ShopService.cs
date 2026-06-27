@@ -51,7 +51,9 @@ public class ShopService
             .OrderByDescending(s => s.Rating)
             .Select(s => new ShopResponse(
                 s.Id, s.Name, s.City, s.Phone,
-                s.LogoUrl, s.Rating, s.TotalJobs, s.Status.ToString()))
+                s.LogoUrl, s.Rating, s.TotalJobs,
+                s.Reviews.Count,
+                s.Status.ToString()))
             .ToPagedAsync(pagination);
 
     public async Task<ShopDetailsResponse> GetShopDetailsAsync(Guid id)

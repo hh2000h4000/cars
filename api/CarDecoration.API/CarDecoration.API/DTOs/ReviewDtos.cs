@@ -13,6 +13,7 @@ public record ReviewResponse2(
     Guid Id,
     Guid RequestId,
     string ShopName,
+    string CustomerName,
     int QualityRating,
     int CommunicationRating,
     int CommitmentRating,
@@ -21,3 +22,5 @@ public record ReviewResponse2(
     string? Comment,
     DateTime CreatedAt
 );
+
+public record HasReviewedResponse(bool HasReviewed);
