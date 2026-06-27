@@ -39,8 +39,19 @@ public record MyShopResponse(
     Guid Id,
     string Name,
     string City,
+    string Phone,
+    string? LogoUrl,
+    string Status,
+    string CrNumber,
     float Rating,
     int TotalJobs
+);
+
+public record UpdateMyShopRequest(
+    string Name,
+    string Phone,
+    string City,
+    string? LogoUrl
 );
 
 public record ReviewResponse(

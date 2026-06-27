@@ -31,6 +31,21 @@ public class ShopsController : ControllerBase
         }
     }
 
+    [HttpPut("my")]
+    [Authorize]
+    public async Task<IActionResult> UpdateMyShop([FromBody] UpdateMyShopRequest req)
+    {
+        try
+        {
+            var result = await _service.UpdateMyShopAsync(req);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetShops([FromQuery] PaginationRequest pagination)
     {

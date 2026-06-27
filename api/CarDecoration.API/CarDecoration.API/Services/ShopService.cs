@@ -21,9 +21,28 @@ public class ShopService
     {
         var userId = _currentUser.UserId ?? throw new Exception("غير مصرح");
         var shop = await _db.Shops
-            .FirstOrDefaultAsync(s => s.OwnerId == userId && s.Status == ShopStatus.Approved)
-            ?? throw new Exception("المتجر غير موجود أو غير معتمد");
-        return new MyShopResponse(shop.Id, shop.Name, shop.City, shop.Rating, shop.TotalJobs);
+            .FirstOrDefaultAsync(s => s.OwnerId == userId)
+            ?? throw new Exception("المتجر غير موجود");
+        return new MyShopResponse(shop.Id, shop.Name, shop.City, shop.Phone,
+            shop.LogoUrl, shop.Status.ToString(), shop.CrNumber, shop.Rating, shop.TotalJobs);
+    }
+
+    public async Task<MyShopResponse> UpdateMyShopAsync(UpdateMyShopRequest req)
+    {
+        var userId = _currentUser.UserId ?? throw new Exception("غير مصرح");
+        var shop = await _db.Shops
+            .FirstOrDefaultAsync(s => s.OwnerId == userId)
+            ?? throw new Exception("المتجر غير موجود");
+
+        shop.Name = req.Name.Trim();
+        shop.Phone = req.Phone.Trim();
+        shop.City = req.City.Trim();
+        if (req.LogoUrl != null) shop.LogoUrl = req.LogoUrl;
+
+        await _db.SaveChangesAsync();
+
+        return new MyShopResponse(shop.Id, shop.Name, shop.City, shop.Phone,
+            shop.LogoUrl, shop.Status.ToString(), shop.CrNumber, shop.Rating, shop.TotalJobs);
     }
 
     public Task<PagedResult<ShopResponse>> GetApprovedShopsAsync(PaginationRequest pagination)
