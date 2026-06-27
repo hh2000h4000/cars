@@ -156,6 +156,20 @@ class ApiClient {
 
   static Future<String?> readData(String key) => _storage.read(key: key);
 
+  /// استخراج رسالة خطأ نظيفة من أي نوع exception (DioException أو Exception عادية)
+  static String extractError(Object e) {
+    if (e is DioException) {
+      final data = e.response?.data;
+      if (data is Map) {
+        final msg = data['message'] as String?;
+        if (msg != null && msg.isNotEmpty) return msg;
+      }
+      if (data is String && data.isNotEmpty) return data;
+      return e.message ?? 'خطأ في الاتصال بالسيرفر';
+    }
+    return e.toString().replaceAll('Exception: ', '');
+  }
+
   static Future<String?> getUserId() async {
     final token = await _storage.read(key: 'token');
     if (token == null) return null;

@@ -6,6 +6,8 @@ import '../../providers/app_provider.dart';
 import '../../models/service_request.dart';
 import '../../models/quotation.dart';
 import '../../services/quotation_service.dart';
+import '../../services/review_service.dart';
+import '../../services/api_client.dart';
 import 'review_screen.dart';
 
 class RequestDetailScreen extends StatefulWidget {
@@ -22,11 +24,20 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
   String? _acceptedQuoteId;
   String? _acceptedChatRoomId;
   bool _accepting = false;
+  bool _hasReviewed = false;
 
   @override
   void initState() {
     super.initState();
     _loadQuotations();
+    _checkHasReviewed();
+  }
+
+  Future<void> _checkHasReviewed() async {
+    try {
+      final result = await ReviewService.hasReviewed(widget.requestId);
+      if (mounted) setState(() => _hasReviewed = result);
+    } catch (_) {}
   }
 
   Future<void> _loadQuotations() async {
@@ -263,20 +274,39 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                       ),
 
                     if (request.status == RequestStatus.completed)
-                      DarkButton(
-                        label: 'تقييم الخدمة',
-                        onTap: () {
-                          final accepted = _quotations.firstWhere(
-                            (q) => q.status == QuotationStatus.accepted,
-                            orElse: () => _quotations.isNotEmpty ? _quotations.first : Quotation.empty,
-                          );
-                          Navigator.pushNamed(context, '/customer/review',
-                            arguments: ReviewArgs(
-                              requestId: widget.requestId,
-                              shopName: accepted.shopName,
-                            ));
-                        },
-                      ),
+                      _hasReviewed
+                          ? Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              decoration: BoxDecoration(
+                                color: AppColors.greenLight,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: AppColors.green.withOpacity(.3)),
+                              ),
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.check_circle_rounded, color: AppColors.green, size: 20),
+                                  SizedBox(width: 8),
+                                  Text('تم تقييم الخدمة',
+                                    style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.green)),
+                                ],
+                              ),
+                            )
+                          : DarkButton(
+                              label: 'تقييم الخدمة',
+                              onTap: () {
+                                final accepted = _quotations.firstWhere(
+                                  (q) => q.status == QuotationStatus.accepted,
+                                  orElse: () => _quotations.isNotEmpty ? _quotations.first : Quotation.empty,
+                                );
+                                Navigator.pushNamed(context, '/customer/review',
+                                  arguments: ReviewArgs(
+                                    requestId: widget.requestId,
+                                    shopName: accepted.shopName,
+                                  )).then((_) => _checkHasReviewed());
+                              },
+                            ),
                   ],
                 ),
               ),

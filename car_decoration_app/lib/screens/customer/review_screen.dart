@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../../services/review_service.dart';
+import '../../services/api_client.dart';
 
 class ReviewArgs {
   final String requestId;
@@ -52,7 +53,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
       if (mounted) {
         setState(() => _submitting = false);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(e.toString().replaceAll('Exception: ', ''),
+          content: Text(ApiClient.extractError(e),
             style: const TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
           backgroundColor: AppColors.red,
         ));
