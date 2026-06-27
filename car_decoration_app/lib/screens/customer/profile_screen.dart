@@ -7,7 +7,8 @@ import '../../services/user_service.dart';
 import 'edit_profile_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final void Function(int tabIndex)? onSwitchTab;
+  const ProfileScreen({super.key, this.onSwitchTab});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -74,6 +75,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _phone = updated.phone;
       });
     }
+  }
+
+  void _showComingSoon(String feature) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('$feature — قريباً',
+        style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700)),
+      backgroundColor: AppColors.dark,
+      duration: const Duration(seconds: 2),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      margin: const EdgeInsets.fromLTRB(22, 0, 22, 16),
+    ));
   }
 
   Future<void> _logout() async {
@@ -216,17 +229,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _MenuItem(
                     icon: Icons.directions_car_outlined,
                     label: 'سياراتي',
-                    onTap: () => Navigator.pushNamed(context, '/customer/vehicles'),
+                    onTap: () => widget.onSwitchTab?.call(2),
                   ),
                   _MenuItem(
                     icon: Icons.list_alt_outlined,
                     label: 'طلباتي وسجل الطلبات',
-                    onTap: () => Navigator.pushNamed(context, '/customer/requests'),
+                    onTap: () => widget.onSwitchTab?.call(1),
                   ),
                   _MenuItem(
                     icon: Icons.star_outline_rounded,
                     label: 'تقييماتي',
                     badge: _reviewCount > 0 ? '$_reviewCount' : null,
+                    onTap: () => _showComingSoon('تقييماتي'),
                   ),
                   _MenuItem(
                     icon: Icons.chat_bubble_outline,
@@ -236,6 +250,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _MenuItem(
                     icon: Icons.location_on_outlined,
                     label: 'العناوين المحفوظة',
+                    onTap: () => _showComingSoon('العناوين المحفوظة'),
                     isLast: true,
                   ),
                 ],
@@ -328,39 +343,35 @@ class _MenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enabled = onTap != null;
     return Column(
       children: [
         GestureDetector(
           onTap: onTap,
-          child: Opacity(
-            opacity: enabled ? 1.0 : 0.45,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-              child: Row(
-                children: [
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+            child: Row(
+              children: [
+                Container(
+                  width: 36, height: 36,
+                  decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(10)),
+                  child: Icon(icon, color: AppColors.goldText, size: 18),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(label,
+                    style: const TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                ),
+                if (badge != null) ...[
                   Container(
-                    width: 36, height: 36,
-                    decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(10)),
-                    child: Icon(icon, color: AppColors.goldText, size: 18),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(999)),
+                    child: Text(badge!,
+                      style: const TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.goldText)),
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Text(label,
-                      style: const TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                  ),
-                  if (badge != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(999)),
-                      child: Text(badge!,
-                        style: const TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.goldText)),
-                    ),
                   const SizedBox(width: 4),
-                  Icon(enabled ? Icons.chevron_left : Icons.lock_outline,
-                    color: enabled ? AppColors.textMuted : AppColors.border, size: enabled ? 20 : 16),
                 ],
-              ),
+                const Icon(Icons.chevron_left, color: AppColors.textMuted, size: 20),
+              ],
             ),
           ),
         ),

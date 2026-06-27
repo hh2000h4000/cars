@@ -25,12 +25,20 @@ class _CustomerShellState extends State<CustomerShell>
   int _index = 0;
   int _unreadCount = 0;
   StreamSubscription<String>? _notifSub;
+  late final List<Widget> _screens;
 
   static const _chatTabIndex = 3;
 
   @override
   void initState() {
     super.initState();
+    _screens = [
+      const HomeScreen(),
+      const RequestsScreen(),
+      const VehiclesScreen(),
+      const ChatsScreen(),
+      ProfileScreen(onSwitchTab: (i) => setState(() => _index = i)),
+    ];
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final token = await ApiClient.getToken();
@@ -88,13 +96,6 @@ class _CustomerShellState extends State<CustomerShell>
     super.dispose();
   }
 
-  static const _screens = [
-    HomeScreen(),
-    RequestsScreen(),
-    VehiclesScreen(),
-    ChatsScreen(),
-    ProfileScreen(),
-  ];
 
   static const _items = [
     (Icons.home_outlined, Icons.home_rounded, 'الرئيسية'),
