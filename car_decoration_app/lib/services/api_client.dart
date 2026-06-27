@@ -117,12 +117,14 @@ class ApiClient {
     required String token,
     required String refreshToken,
     required String fullName,
+    required String phone,
     required String email,
     required String role,
   }) async {
     await _storage.write(key: 'token', value: token);
     await _storage.write(key: 'refreshToken', value: refreshToken);
     await _storage.write(key: 'fullName', value: fullName);
+    await _storage.write(key: 'phone', value: phone);
     await _storage.write(key: 'email', value: email);
     await _storage.write(key: 'role', value: role);
   }
@@ -131,6 +133,7 @@ class ApiClient {
     await _storage.delete(key: 'token');
     await _storage.delete(key: 'refreshToken');
     await _storage.delete(key: 'fullName');
+    await _storage.delete(key: 'phone');
     await _storage.delete(key: 'email');
     await _storage.delete(key: 'role');
     // Reset singleton so next login gets a fresh Dio instance
@@ -140,7 +143,13 @@ class ApiClient {
   static Future<String?> getToken() => _storage.read(key: 'token');
   static Future<String?> getRole() => _storage.read(key: 'role');
   static Future<String?> getFullName() => _storage.read(key: 'fullName');
+  static Future<String?> getPhone() => _storage.read(key: 'phone');
   static Future<String?> getEmail() => _storage.read(key: 'email');
+
+  static Future<void> updateCachedProfile({required String fullName, required String phone}) async {
+    await _storage.write(key: 'fullName', value: fullName);
+    await _storage.write(key: 'phone', value: phone);
+  }
 
   static Future<void> writeData(String key, String value) =>
       _storage.write(key: key, value: value);

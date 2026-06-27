@@ -14,6 +14,7 @@ class AuthService {
       token: data['token'] as String,
       refreshToken: data['refreshToken'] as String,
       fullName: data['fullName'] as String,
+      phone: data['phone'] as String? ?? '',
       email: data['email'] as String,
       role: data['role'] as String,
     );
@@ -37,6 +38,7 @@ class AuthService {
       token: data['token'] as String,
       refreshToken: data['refreshToken'] as String,
       fullName: data['fullName'] as String,
+      phone: data['phone'] as String? ?? phone,
       email: data['email'] as String,
       role: data['role'] as String,
     );
@@ -68,6 +70,7 @@ class AuthService {
       token: data['token'] as String,
       refreshToken: data['refreshToken'] as String,
       fullName: data['fullName'] as String,
+      phone: data['phone'] as String? ?? phone,
       email: data['email'] as String,
       role: data['role'] as String,
     );

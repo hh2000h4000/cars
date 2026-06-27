@@ -16,6 +16,7 @@ public record AuthResponse(
     string Token,
     string RefreshToken,
     string FullName,
+    string Phone,
     string Email,
     string Role
 );

@@ -33,7 +33,7 @@ public class AuthService
             ExpiresAt = DateTime.UtcNow.AddDays(_settings.RefreshTokenExpiryDays),
         });
         await _db.SaveChangesAsync();
-        return new AuthResponse(_jwt.Generate(user), raw, user.FullName, user.Email, user.Role.ToString());
+        return new AuthResponse(_jwt.Generate(user), raw, user.FullName, user.Phone, user.Email, user.Role.ToString());
     }
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest req)

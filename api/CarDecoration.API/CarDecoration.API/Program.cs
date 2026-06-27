@@ -45,6 +45,7 @@ builder.Services.AddScoped<QuotationService>();
 builder.Services.AddScoped<ChatService>();
 builder.Services.AddScoped<DisputeService>();
 builder.Services.AddScoped<ReviewService>();
+builder.Services.AddScoped<UserService>();
 
 // SignalR — real-time chat
 builder.Services.AddSignalR().AddJsonProtocol(options =>
