@@ -331,6 +331,7 @@ class _StatusBadge extends StatelessWidget {
       ShopRequestShopStatus.pending => ('جديد', AppColors.goldBg, AppColors.goldText),
       ShopRequestShopStatus.accepted => ('مقبول', const Color(0xFFE8F5E9), AppColors.green),
       ShopRequestShopStatus.rejected => ('مرفوض', const Color(0xFFFFEBEE), AppColors.red),
+      ShopRequestShopStatus.withdrawn => ('مسحوب', AppColors.surface, AppColors.textMuted),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
