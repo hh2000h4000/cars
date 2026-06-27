@@ -63,19 +63,32 @@ class _ShopRequestsScreenState extends State<ShopRequestsScreen> {
       _all.where((r) =>
           r.status == 'ShopSelected' || r.status == 'InProgress').toList();
 
+  List<ShopRequest> get _completed =>
+      _all.where((r) => r.status == 'Completed').toList();
+
   @override
   Widget build(BuildContext context) {
     final newCount = _new.length;
     final waitingCount = _waiting.length;
     final activeCount = _active.length;
+    final completedCount = _completed.length;
 
     final tabs = [
+      'الكل (${_all.length})',
       'جديدة ($newCount)',
       'بانتظار العميل ($waitingCount)',
       'قيد التنفيذ ($activeCount)',
+      'مكتمل ($completedCount)',
     ];
 
-    final currentList = _tab == 0 ? _new : _tab == 1 ? _waiting : _active;
+    final currentList = switch (_tab) {
+      0 => _all,
+      1 => _new,
+      2 => _waiting,
+      3 => _active,
+      4 => _completed,
+      _ => _all,
+    };
 
     return Scaffold(
       backgroundColor: AppColors.surface,
