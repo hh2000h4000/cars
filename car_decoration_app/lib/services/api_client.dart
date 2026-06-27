@@ -70,7 +70,9 @@ class ApiClient {
               try {
                 final retried = await dio.fetch(error.requestOptions);
                 return handler.resolve(retried);
-              } catch (_) {}
+              } catch (_) {
+                // retry failed after refresh — fall through to reject
+              }
             }
 
             await clearUserData();
@@ -78,9 +80,11 @@ class ApiClient {
               '/auth/login',
               (route) => false,
             );
+            // reject silently — screen is gone, user is on login page
+            return handler.reject(error);
           }
         }
-        handler.next(error);
+        return handler.next(error);
       },
     ));
 
