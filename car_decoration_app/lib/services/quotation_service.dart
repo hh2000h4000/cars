@@ -13,6 +13,10 @@ class QuotationService {
     return res.data['chatRoomId'] as String;
   }
 
+  static Future<void> withdrawQuotation(String quotationId) async {
+    await ApiClient.dio.put('/api/quotations/$quotationId/withdraw');
+  }
+
   static Future<void> sendQuote({
     required String requestId,
     required double finalPrice,

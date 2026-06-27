@@ -1,6 +1,6 @@
 ﻿namespace CarDecoration.API.Models;
 
-public enum RequestStatus { Pending, Active, Completed, Cancelled }
+public enum RequestStatus { Open, ShopSelected, InProgress, Completed, Cancelled, Expired }
 
 public class Request : BaseEntity
 {
@@ -9,7 +9,7 @@ public class Request : BaseEntity
     public string Description { get; set; } = string.Empty;
     public string Location { get; set; } = string.Empty;
     public DateTime? AppointmentDate { get; set; }
-    public RequestStatus Status { get; set; } = RequestStatus.Pending;
+    public RequestStatus Status { get; set; } = RequestStatus.Open;
     public Guid? SelectedShopId { get; set; }
 
     public User Customer { get; set; } = null!;
@@ -17,7 +17,7 @@ public class Request : BaseEntity
     public Shop? SelectedShop { get; set; }
     public List<RequestShop> RequestShops { get; set; } = [];
     public List<Quotation> Quotations { get; set; } = [];
-    public ChatRoom? ChatRoom { get; set; }
+    public List<ChatRoom> ChatRooms { get; set; } = [];
     public Dispute? Dispute { get; set; }
     public Review? Review { get; set; }
     public List<RequestImage> RequestImages { get; set; } = [];

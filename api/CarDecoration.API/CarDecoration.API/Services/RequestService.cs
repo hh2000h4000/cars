@@ -1,4 +1,4 @@
-﻿using CarDecoration.API.Data;
+using CarDecoration.API.Data;
 using CarDecoration.API.DTOs;
 using CarDecoration.API.Helpers;
 using CarDecoration.API.Models;
@@ -17,7 +17,6 @@ public class RequestService
         _currentUser = currentUser;
     }
 
-    // العميل ينشئ طلب ويحدد المتاجر
     public async Task<RequestResponse> CreateAsync(CreateRequestRequest req)
     {
         var userId = _currentUser.UserId
@@ -49,7 +48,7 @@ public class RequestService
             AppointmentDate = req.PreferredDate,
             Notes = req.Notes,
             RequestNumber = requestNumber,
-            Status = RequestStatus.Pending
+            Status = RequestStatus.Open
         };
 
         _db.Requests.Add(request);
@@ -84,7 +83,7 @@ public class RequestService
             req.ImageUrls ?? [],
             request.CreatedAt);
     }
-    // العميل يعرض طلباته
+
     public Task<PagedResult<RequestResponse>> GetMyRequestsAsync(PaginationRequest pagination)
     {
         var userId = _currentUser.UserId ?? throw new Exception("غير مصرح");
@@ -104,7 +103,6 @@ public class RequestService
             .ToPagedAsync(pagination);
     }
 
-    // المتجر يعرض الطلبات الموجهة له
     public async Task<PagedResult<ShopRequestResponse>> GetShopRequestsAsync(PaginationRequest pagination)
     {
         var userId = _currentUser.UserId ?? throw new Exception("غير مصرح");
@@ -128,7 +126,10 @@ public class RequestService
                 rs.Request.AppointmentDate,
                 rs.Request.Status.ToString(),
                 rs.Status.ToString(),
-                rs.Request.ChatRoom != null ? (Guid?)rs.Request.ChatRoom.Id : null,
+                rs.Request.ChatRooms
+                    .Where(c => c.ShopId == shop.Id)
+                    .Select(c => (Guid?)c.Id)
+                    .FirstOrDefault(),
                 rs.Request.CreatedAt))
             .ToPagedAsync(pagination);
     }
@@ -144,16 +145,19 @@ public class RequestService
             ?? throw new Exception("المتجر غير موجود");
 
         var requestShop = await _db.RequestShops
+            .Include(rs => rs.Request)
             .FirstOrDefaultAsync(rs => rs.RequestId == requestId && rs.ShopId == shop.Id)
             ?? throw new Exception("الطلب غير موجود");
 
         if (requestShop.Status != RequestShopStatus.Pending)
             throw new Exception("تم معالجة هذا الطلب مسبقاً");
 
-        // قبول الطلب
-        requestShop.Status = RequestShopStatus.Accepted;
+        if (requestShop.Request.Status != RequestStatus.Open)
+            throw new Exception("هذا الطلب لم يعد مفتوحاً");
 
-        // إنشاء المحادثة تلقائياً
+        requestShop.Status = RequestShopStatus.Accepted;
+        requestShop.RespondedAt = DateTime.UtcNow;
+
         var chatRoom = new ChatRoom
         {
             RequestId = requestId,
@@ -166,7 +170,6 @@ public class RequestService
         return chatRoom.Id;
     }
 
-    // تعديل طلب من قِبل العميل (يُسمح فقط عند الحالة Pending)
     public async Task<RequestResponse> UpdateRequestAsync(Guid id, UpdateRequestRequest req)
     {
         var userId = _currentUser.UserId
@@ -179,7 +182,7 @@ public class RequestService
             .FirstOrDefaultAsync(r => r.Id == id && r.CustomerId == userId && !r.IsDeleted)
             ?? throw new Exception("الطلب غير موجود");
 
-        if (request.Status != RequestStatus.Pending)
+        if (request.Status != RequestStatus.Open)
             throw new Exception("لا يمكن تعديل الطلب في هذه المرحلة");
 
         request.Description = req.Description;
@@ -210,6 +213,27 @@ public class RequestService
             request.CreatedAt);
     }
 
+    // المتجر يبدأ العمل فعلياً
+    public async Task StartWorkAsync(Guid requestId)
+    {
+        var userId = _currentUser.UserId
+            ?? throw new Exception("غير مصرح");
+
+        var shop = await _db.Shops
+            .FirstOrDefaultAsync(s => s.OwnerId == userId && s.Status == ShopStatus.Approved)
+            ?? throw new Exception("المتجر غير موجود");
+
+        var request = await _db.Requests
+            .FirstOrDefaultAsync(r => r.Id == requestId && r.SelectedShopId == shop.Id && !r.IsDeleted)
+            ?? throw new Exception("الطلب غير موجود أو غير مرتبط بمتجرك");
+
+        if (request.Status != RequestStatus.ShopSelected)
+            throw new Exception("لا يمكن بدء العمل في هذه المرحلة");
+
+        request.Status = RequestStatus.InProgress;
+        await _db.SaveChangesAsync();
+    }
+
     // المتجر يُنهي الطلب بعد اكتمال العمل
     public async Task CompleteAsync(Guid requestId)
     {
@@ -224,14 +248,13 @@ public class RequestService
             .FirstOrDefaultAsync(r => r.Id == requestId && r.SelectedShopId == shop.Id && !r.IsDeleted)
             ?? throw new Exception("الطلب غير موجود أو غير مرتبط بمتجرك");
 
-        if (request.Status != RequestStatus.Active)
-            throw new Exception("لا يمكن إنهاء الطلب في حالته الحالية");
+        if (request.Status != RequestStatus.InProgress)
+            throw new Exception("لا يمكن إنهاء الطلب قبل بدء العمل");
 
         request.Status = RequestStatus.Completed;
         await _db.SaveChangesAsync();
     }
 
-    // إلغاء طلب من قِبل العميل
     public async Task CancelAsync(Guid id)
     {
         var userId = _currentUser.UserId
@@ -243,6 +266,9 @@ public class RequestService
 
         if (request.Status == RequestStatus.Completed)
             throw new Exception("لا يمكن إلغاء طلب مكتمل");
+
+        if (request.Status == RequestStatus.InProgress)
+            throw new Exception("لا يمكن إلغاء طلب قيد التنفيذ — تواصل مع المتجر أولاً");
 
         request.Status = RequestStatus.Cancelled;
         await _db.SaveChangesAsync();

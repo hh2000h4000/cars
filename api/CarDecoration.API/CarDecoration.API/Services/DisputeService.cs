@@ -29,7 +29,9 @@ public class DisputeService
             .FirstOrDefaultAsync(r => r.Id == req.RequestId && r.CustomerId == userId)
             ?? throw new Exception("الطلب غير موجود");
 
-        if (request.Status != RequestStatus.Active && request.Status != RequestStatus.Completed)
+        if (request.Status != RequestStatus.ShopSelected &&
+            request.Status != RequestStatus.InProgress &&
+            request.Status != RequestStatus.Completed)
             throw new Exception("لا يمكن رفع نزاع لهذا الطلب");
 
         if (request.SelectedShopId == null)

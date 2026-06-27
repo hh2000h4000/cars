@@ -57,10 +57,11 @@ class _ShopRequestsScreenState extends State<ShopRequestsScreen> {
   List<ShopRequest> get _waiting =>
       _all.where((r) =>
           r.shopStatus == ShopRequestShopStatus.accepted &&
-          r.status != 'Active').toList();
+          r.status == 'Open').toList();
 
   List<ShopRequest> get _active =>
-      _all.where((r) => r.status == 'Active').toList();
+      _all.where((r) =>
+          r.status == 'ShopSelected' || r.status == 'InProgress').toList();
 
   @override
   Widget build(BuildContext context) {

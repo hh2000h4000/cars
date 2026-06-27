@@ -1,4 +1,4 @@
-enum ShopRequestShopStatus { pending, accepted, rejected }
+enum ShopRequestShopStatus { pending, accepted, rejected, withdrawn }
 
 class ShopRequest {
   final String id;
@@ -56,7 +56,9 @@ class ShopRequest {
         ? ShopRequestShopStatus.accepted
         : shopStatusStr == 'Rejected'
             ? ShopRequestShopStatus.rejected
-            : ShopRequestShopStatus.pending;
+            : shopStatusStr == 'Withdrawn'
+                ? ShopRequestShopStatus.withdrawn
+                : ShopRequestShopStatus.pending;
 
     return ShopRequest(
       id: (json['id'] as String?) ?? '',

@@ -1,20 +1,24 @@
-enum RequestStatus { pending, inProgress, completed, cancelled }
+enum RequestStatus { open, shopSelected, inProgress, completed, cancelled, expired }
 
 extension RequestStatusLabel on RequestStatus {
   String get label {
     switch (this) {
-      case RequestStatus.pending:    return 'بانتظار رد المتاجر';
-      case RequestStatus.inProgress: return 'قيد التنفيذ';
-      case RequestStatus.completed:  return 'مكتمل';
-      case RequestStatus.cancelled:  return 'ملغي';
+      case RequestStatus.open:         return 'مفتوح — بانتظار العروض';
+      case RequestStatus.shopSelected: return 'تم اختيار المتجر';
+      case RequestStatus.inProgress:   return 'قيد التنفيذ';
+      case RequestStatus.completed:    return 'مكتمل';
+      case RequestStatus.cancelled:    return 'ملغي';
+      case RequestStatus.expired:      return 'منتهي الصلاحية';
     }
   }
 
   String get colorType {
     switch (this) {
-      case RequestStatus.completed:  return 'green';
-      case RequestStatus.cancelled:  return 'red';
-      default:                       return 'gold';
+      case RequestStatus.completed:    return 'green';
+      case RequestStatus.cancelled:
+      case RequestStatus.expired:      return 'red';
+      case RequestStatus.inProgress:   return 'blue';
+      default:                         return 'gold';
     }
   }
 }
@@ -38,13 +42,15 @@ class ServiceRequest {
   final List<String> imageUrls;
 
   factory ServiceRequest.fromJson(Map<String, dynamic> json) {
-    final statusStr = (json['status'] as String?)?.toLowerCase() ?? 'pending';
+    final statusStr = (json['status'] as String?)?.toLowerCase() ?? 'open';
     final RequestStatus status;
     switch (statusStr) {
-      case 'active':     status = RequestStatus.inProgress; break;
-      case 'completed':  status = RequestStatus.completed; break;
-      case 'cancelled':  status = RequestStatus.cancelled; break;
-      default:           status = RequestStatus.pending;
+      case 'shopselected': status = RequestStatus.shopSelected; break;
+      case 'inprogress':   status = RequestStatus.inProgress;   break;
+      case 'completed':    status = RequestStatus.completed;     break;
+      case 'cancelled':    status = RequestStatus.cancelled;     break;
+      case 'expired':      status = RequestStatus.expired;       break;
+      default:             status = RequestStatus.open;
     }
     final createdAt = json['createdAt'] as String?;
     String dateLabel = '';

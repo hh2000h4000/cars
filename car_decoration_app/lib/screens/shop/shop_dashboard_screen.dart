@@ -58,10 +58,11 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
   int get _waitingCount =>
       _requests.where((r) =>
           r.shopStatus == ShopRequestShopStatus.accepted &&
-          r.status != 'Active').length;
+          r.status == 'Open').length;
 
   int get _activeCount =>
-      _requests.where((r) => r.status == 'Active').length;
+      _requests.where((r) =>
+          r.status == 'ShopSelected' || r.status == 'InProgress').length;
 
   int get _completedThisMonth {
     final now = DateTime.now();

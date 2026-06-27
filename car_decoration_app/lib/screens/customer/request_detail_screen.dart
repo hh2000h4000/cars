@@ -214,7 +214,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
 
                     const SizedBox(height: 16),
 
-                    if (request.status == RequestStatus.pending)
+                    if (request.status == RequestStatus.open)
                       OutlinedDarkButton(
                         label: 'تعديل الطلب',
                         onTap: () => Navigator.pushNamed(context, '/customer/requests/edit', arguments: request),
@@ -222,7 +222,8 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                         borderColor: AppColors.border,
                       ),
 
-                    if (request.status == RequestStatus.inProgress)
+                    if (request.status == RequestStatus.shopSelected ||
+                        request.status == RequestStatus.inProgress)
                       OutlinedDarkButton(
                         label: 'تقديم شكوى',
                         onTap: () => Navigator.pushNamed(context, '/customer/complaint', arguments: widget.requestId),

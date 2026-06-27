@@ -94,6 +94,21 @@ public class RequestsController : ControllerBase
         }
     }
 
+    [HttpPut("{id}/start")]
+    public async Task<IActionResult> StartWork(Guid id)
+    {
+        try
+        {
+            await _service.StartWorkAsync(id);
+            return Ok(new { message = "تم بدء العمل بنجاح" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "StartWork failed for {RequestId}", id);
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpPut("{id}/complete")]
     public async Task<IActionResult> Complete(Guid id)
     {

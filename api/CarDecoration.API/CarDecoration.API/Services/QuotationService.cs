@@ -1,4 +1,4 @@
-﻿using CarDecoration.API.Data;
+using CarDecoration.API.Data;
 using CarDecoration.API.DTOs;
 using CarDecoration.API.Helpers;
 using CarDecoration.API.Models;
@@ -17,7 +17,7 @@ public class QuotationService
         _currentUser = currentUser;
     }
 
-    // المتجر يرسل عرض سعر
+    // المتجر يرسل عرض سعر — يجب أن يكون قد قبل الطلب أولاً
     public async Task<QuotationResponse> CreateAsync(CreateQuotationRequest req)
     {
         var userId = _currentUser.UserId
@@ -28,12 +28,23 @@ public class QuotationService
             ?? throw new Exception("المتجر غير موجود أو غير معتمد");
 
         var request = await _db.Requests
-            .FirstOrDefaultAsync(r => r.Id == req.RequestId && r.Status == RequestStatus.Pending)
-            ?? throw new Exception("الطلب غير موجود");
+            .FirstOrDefaultAsync(r => r.Id == req.RequestId && r.Status == RequestStatus.Open)
+            ?? throw new Exception("الطلب غير موجود أو لم يعد مفتوحاً");
 
-        // تأكد أن المتجر لم يرسل عرض مسبقاً
+        // التحقق أن المتجر قبل الطلب (لديه محادثة مفتوحة)
+        var requestShop = await _db.RequestShops
+            .FirstOrDefaultAsync(rs => rs.RequestId == req.RequestId && rs.ShopId == shop.Id)
+            ?? throw new Exception("لم تقم بقبول هذا الطلب بعد");
+
+        if (requestShop.Status == RequestShopStatus.Rejected)
+            throw new Exception("تم اختيار متجر آخر لهذا الطلب");
+
+        if (requestShop.Status != RequestShopStatus.Accepted)
+            throw new Exception("يجب قبول الطلب أولاً قبل إرسال عرض السعر");
+
         var exists = await _db.Quotations
-            .AnyAsync(q => q.RequestId == req.RequestId && q.ShopId == shop.Id);
+            .AnyAsync(q => q.RequestId == req.RequestId && q.ShopId == shop.Id
+                        && q.Status != QuotationStatus.Withdrawn);
         if (exists)
             throw new Exception("لقد أرسلت عرض سعر لهذا الطلب مسبقاً");
 
@@ -66,7 +77,6 @@ public class QuotationService
         var userId = _currentUser.UserId
             ?? throw new Exception("غير مصرح");
 
-        // تأكد أن الطلب يخص العميل
         var request = await _db.Requests
             .FirstOrDefaultAsync(r => r.Id == requestId && r.CustomerId == userId)
             ?? throw new Exception("الطلب غير موجود");
@@ -79,11 +89,14 @@ public class QuotationService
                 q.ServiceDetails, q.Parts, q.Warranty,
                 q.VisitFee, q.Duration, q.FinalPrice,
                 q.Status.ToString(), q.CreatedAt,
-                q.Request.ChatRoom != null ? q.Request.ChatRoom.Id : (Guid?)null))
+                q.Request.ChatRooms
+                    .Where(c => c.ShopId == q.ShopId)
+                    .Select(c => (Guid?)c.Id)
+                    .FirstOrDefault()))
             .ToListAsync();
     }
 
-    // العميل يقبل عرض سعر — يُرجع chatRoomId للانتقال الفوري للمحادثة
+    // العميل يقبل عرض سعر
     public async Task<Guid> AcceptAsync(Guid quotationId)
     {
         var userId = _currentUser.UserId
@@ -97,22 +110,39 @@ public class QuotationService
         if (quotation.Request.CustomerId != userId)
             throw new Exception("غير مصرح");
 
-        if (quotation.Request.Status != RequestStatus.Pending)
-            throw new Exception("لا يمكن قبول عرض لطلب غير معلق");
+        if (quotation.Request.Status != RequestStatus.Open)
+            throw new Exception("لا يمكن قبول عرض لطلب غير مفتوح");
 
+        if (quotation.Status != QuotationStatus.Pending)
+            throw new Exception("هذا العرض لم يعد متاحاً");
+
+        // قبول العرض المختار
         quotation.Status = QuotationStatus.Accepted;
 
+        // رفض كل العروض الأخرى
         var otherQuotations = await _db.Quotations
-            .Where(q => q.RequestId == quotation.RequestId && q.Id != quotationId)
+            .Where(q => q.RequestId == quotation.RequestId && q.Id != quotationId
+                     && q.Status == QuotationStatus.Pending)
             .ToListAsync();
         otherQuotations.ForEach(q => q.Status = QuotationStatus.Rejected);
 
-        quotation.Request.Status = RequestStatus.Active;
+        // رفض كل RequestShops الأخرى
+        var otherRequestShops = await _db.RequestShops
+            .Where(rs => rs.RequestId == quotation.RequestId && rs.ShopId != quotation.ShopId)
+            .ToListAsync();
+        foreach (var rs in otherRequestShops)
+        {
+            rs.Status = RequestShopStatus.Rejected;
+            rs.RejectedAt = DateTime.UtcNow;
+        }
+
+        // تحديث حالة الطلب
+        quotation.Request.Status = RequestStatus.ShopSelected;
         quotation.Request.SelectedShopId = quotation.ShopId;
 
         await _db.SaveChangesAsync();
 
-        // إيجاد المحادثة أو إنشاؤها إذا لم تكن موجودة بعد
+        // الحصول على المحادثة (يجب أن تكون موجودة بعد قبول المتجر للطلب)
         var chatRoom = await _db.ChatRooms
             .FirstOrDefaultAsync(c => c.RequestId == quotation.RequestId && c.ShopId == quotation.ShopId);
 
@@ -124,5 +154,26 @@ public class QuotationService
         }
 
         return chatRoom.Id;
+    }
+
+    // المتجر يسحب عرضه
+    public async Task WithdrawAsync(Guid quotationId)
+    {
+        var userId = _currentUser.UserId
+            ?? throw new Exception("غير مصرح");
+
+        var shop = await _db.Shops
+            .FirstOrDefaultAsync(s => s.OwnerId == userId && s.Status == ShopStatus.Approved)
+            ?? throw new Exception("المتجر غير موجود");
+
+        var quotation = await _db.Quotations
+            .FirstOrDefaultAsync(q => q.Id == quotationId && q.ShopId == shop.Id)
+            ?? throw new Exception("العرض غير موجود");
+
+        if (quotation.Status != QuotationStatus.Pending)
+            throw new Exception("لا يمكن سحب هذا العرض — تم البت فيه مسبقاً");
+
+        quotation.Status = QuotationStatus.Withdrawn;
+        await _db.SaveChangesAsync();
     }
 }

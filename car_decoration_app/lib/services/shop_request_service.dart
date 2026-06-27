@@ -20,6 +20,10 @@ class ShopRequestService {
     return data['chatRoomId'] as String? ?? '';
   }
 
+  static Future<void> startWork(String requestId) async {
+    await ApiClient.dio.put('/api/requests/$requestId/start');
+  }
+
   static Future<void> completeRequest(String requestId) async {
     await ApiClient.dio.put('/api/requests/$requestId/complete');
   }

@@ -119,6 +119,11 @@ public class AppDbContext : DbContext
             e.Property(rs => rs.Status).HasConversion<string>();
         });
 
+        // ── ChatRoom ──
+        b.Entity<ChatRoom>(e => {
+            e.HasIndex(c => new { c.RequestId, c.ShopId }).IsUnique();
+        });
+
         // ── Quotation ──
         b.Entity<Quotation>(e => {
             e.Property(q => q.Status).HasConversion<string>();

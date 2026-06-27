@@ -14,6 +14,7 @@ class ShopRequestDetailScreen extends StatefulWidget {
 
 class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
   bool _accepting = false;
+  bool _starting = false;
   bool _completing = false;
   late ShopRequestShopStatus _shopStatus;
   late String _requestStatus;
@@ -25,33 +26,6 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
     _shopStatus = widget.request.shopStatus;
     _requestStatus = widget.request.status;
     _chatRoomId = widget.request.chatRoomId;
-  }
-
-  Future<void> _complete() async {
-    setState(() => _completing = true);
-    try {
-      await ShopRequestService.completeRequest(widget.request.id);
-      if (mounted) {
-        setState(() {
-          _requestStatus = 'Completed';
-          _completing = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('تم إنهاء الطلب بنجاح — سيتلقى العميل إشعاراً للتقييم',
-            style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
-          backgroundColor: AppColors.green,
-        ));
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _completing = false);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(e.toString().replaceAll('Exception: ', ''),
-            style: const TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
-          backgroundColor: AppColors.red,
-        ));
-      }
-    }
   }
 
   Future<void> _accept() async {
@@ -73,22 +47,61 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _accepting = false);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('فشل قبول الطلب',
-            style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
-          backgroundColor: AppColors.red,
-        ));
+        _showError(e.toString());
       }
     }
+  }
+
+  Future<void> _startWork() async {
+    setState(() => _starting = true);
+    try {
+      await ShopRequestService.startWork(widget.request.id);
+      if (mounted) {
+        setState(() { _requestStatus = 'InProgress'; _starting = false; });
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('تم تسجيل بدء العمل بنجاح',
+            style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
+          backgroundColor: AppColors.green,
+        ));
+      }
+    } catch (e) {
+      if (mounted) { setState(() => _starting = false); _showError(e.toString()); }
+    }
+  }
+
+  Future<void> _complete() async {
+    setState(() => _completing = true);
+    try {
+      await ShopRequestService.completeRequest(widget.request.id);
+      if (mounted) {
+        setState(() { _requestStatus = 'Completed'; _completing = false; });
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('تم إنهاء الطلب — سيتلقى العميل إشعاراً للتقييم',
+            style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
+          backgroundColor: AppColors.green,
+        ));
+      }
+    } catch (e) {
+      if (mounted) { setState(() => _completing = false); _showError(e.toString()); }
+    }
+  }
+
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(msg.replaceAll('Exception: ', ''),
+        style: const TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
+      backgroundColor: AppColors.red,
+    ));
   }
 
   @override
   Widget build(BuildContext context) {
     final r = widget.request;
-    final isPending = _shopStatus == ShopRequestShopStatus.pending;
-    final isAccepted = _shopStatus == ShopRequestShopStatus.accepted;
-    final isActive = _requestStatus == 'Active';
-    final isCompleted = _requestStatus == 'Completed';
+    final isPending     = _shopStatus == ShopRequestShopStatus.pending;
+    final isRejected    = _shopStatus == ShopRequestShopStatus.rejected;
+    final isShopSelected = _requestStatus == 'ShopSelected';
+    final isInProgress  = _requestStatus == 'InProgress';
+    final isCompleted   = _requestStatus == 'Completed';
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -114,6 +127,8 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
                       ],
                     ),
                   ),
+                  // Status badge
+                  _StatusBadge(requestStatus: _requestStatus, shopStatus: _shopStatus),
                 ],
               ),
             ),
@@ -149,7 +164,6 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
                               children: [
                                 Text(r.customerName,
                                   style: const TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                                const SizedBox(height: 3),
                                 const Text('عميل',
                                   style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                               ],
@@ -184,8 +198,7 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
                           const Text('الخدمة المطلوبة',
                             style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.goldText)),
                           const SizedBox(height: 8),
-                          Text(r.description,
-                            textAlign: TextAlign.right,
+                          Text(r.description, textAlign: TextAlign.right,
                             style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w600, color: AppColors.textPrimary, height: 1.6)),
                         ],
                       ),
@@ -235,7 +248,7 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
                     ),
                     const SizedBox(height: 12),
 
-                    // ── Location card ──
+                    // ── Location ──
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
@@ -247,33 +260,39 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
                         children: [
                           const Icon(Icons.location_on_outlined, color: AppColors.goldText, size: 20),
                           const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(r.location,
-                              style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                          ),
+                          Expanded(child: Text(r.location,
+                            style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary))),
                         ],
                       ),
                     ),
 
-                    if (isAccepted && _chatRoomId == null) ...[
+                    // ── Rejected banner ──
+                    if (isRejected) ...[
                       const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: AppColors.green.withOpacity(.07),
-                          border: Border.all(color: AppColors.green.withOpacity(.3)),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(Icons.check_circle, color: AppColors.green, size: 18),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: Text('تم قبول الطلب — يمكنك الآن إرسال عرض سعر',
-                                style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.green)),
-                            ),
-                          ],
-                        ),
+                      _InfoBanner(
+                        icon: Icons.info_outline_rounded,
+                        message: 'تم اختيار متجر آخر من قِبل العميل',
+                        color: AppColors.red,
+                      ),
+                    ],
+
+                    // ── ShopSelected banner ──
+                    if (isShopSelected && _chatRoomId != null) ...[
+                      const SizedBox(height: 16),
+                      _InfoBanner(
+                        icon: Icons.check_circle_outline_rounded,
+                        message: 'تم قبول عرضك — اضغط "بدأ العمل" عند الوصول للعميل',
+                        color: AppColors.green,
+                      ),
+                    ],
+
+                    // ── Completed banner ──
+                    if (isCompleted) ...[
+                      const SizedBox(height: 16),
+                      _InfoBanner(
+                        icon: Icons.check_circle_rounded,
+                        message: 'تم إنهاء الطلب بنجاح',
+                        color: AppColors.green,
                       ),
                     ],
                   ],
@@ -291,77 +310,175 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
           color: Colors.white,
           border: Border(top: BorderSide(color: AppColors.border)),
         ),
-        child: isCompleted
-            ? Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: AppColors.green.withOpacity(.08),
-                  border: Border.all(color: AppColors.green.withOpacity(.3)),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.check_circle_rounded, color: AppColors.green, size: 20),
-                    SizedBox(width: 8),
-                    Text('تم إنهاء الطلب بنجاح',
-                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.green)),
-                  ],
-                ),
-              )
-            : isPending
-                ? DarkButton(
-                    label: _accepting ? 'جاري القبول...' : 'قبول الطلب وفتح المحادثة',
-                    onTap: _accepting ? null : _accept,
-                    height: 50,
-                  )
-                : isActive && _chatRoomId != null
-                    ? Row(
-                        children: [
-                          Expanded(
-                            child: DarkButton(
-                              label: _completing ? 'جاري الإنهاء...' : 'إنهاء الطلب',
-                              onTap: _completing ? null : _complete,
-                              height: 50,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: OutlinedDarkButton(
-                              label: 'المحادثة',
-                              onTap: () => Navigator.pushNamed(context, '/customer/chat', arguments: _chatRoomId),
-                              height: 50,
-                            ),
-                          ),
-                        ],
-                      )
-                    : _chatRoomId != null
-                        ? Row(
-                            children: [
-                              Expanded(
-                                flex: 2,
-                                child: DarkButton(
-                                  label: 'إرسال عرض سعر',
-                                  onTap: () => Navigator.pushNamed(context, '/shop/send-quote', arguments: widget.request),
-                                  height: 50,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: OutlinedDarkButton(
-                                  label: 'المحادثة',
-                                  onTap: () => Navigator.pushNamed(context, '/customer/chat', arguments: _chatRoomId),
-                                  height: 50,
-                                ),
-                              ),
-                            ],
-                          )
-                        : DarkButton(
-                            label: 'إرسال عرض سعر',
-                            onTap: () => Navigator.pushNamed(context, '/shop/send-quote', arguments: widget.request),
-                            height: 50,
-                          ),
+        child: _buildBottomAction(isPending, isRejected, isShopSelected, isInProgress, isCompleted),
       ),
+    );
+  }
+
+  Widget _buildBottomAction(
+    bool isPending, bool isRejected,
+    bool isShopSelected, bool isInProgress, bool isCompleted,
+  ) {
+    if (isCompleted) {
+      return const SizedBox(
+        height: 50,
+        child: Center(
+          child: Text('✓ تم الانتهاء من الطلب',
+            style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.green)),
+        ),
+      );
+    }
+
+    if (isRejected) {
+      return const SizedBox(
+        height: 50,
+        child: Center(
+          child: Text('تم اختيار متجر آخر',
+            style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+        ),
+      );
+    }
+
+    if (isPending) {
+      return DarkButton(
+        label: _accepting ? 'جاري القبول...' : 'قبول الطلب وفتح المحادثة',
+        onTap: _accepting ? null : _accept,
+        height: 50,
+      );
+    }
+
+    if (isShopSelected && _chatRoomId != null) {
+      return Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: DarkButton(
+              label: _starting ? 'جاري...' : 'بدأ العمل',
+              onTap: _starting ? null : _startWork,
+              height: 50,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: OutlinedDarkButton(
+              label: 'المحادثة',
+              onTap: () => Navigator.pushNamed(context, '/customer/chat', arguments: _chatRoomId),
+              height: 50,
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (isInProgress && _chatRoomId != null) {
+      return Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: DarkButton(
+              label: _completing ? 'جاري...' : 'إنهاء الطلب',
+              onTap: _completing ? null : _complete,
+              height: 50,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: OutlinedDarkButton(
+              label: 'المحادثة',
+              onTap: () => Navigator.pushNamed(context, '/customer/chat', arguments: _chatRoomId),
+              height: 50,
+            ),
+          ),
+        ],
+      );
+    }
+
+    // Accepted but not yet ShopSelected (waiting for customer to pick)
+    if (_chatRoomId != null) {
+      return Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: DarkButton(
+              label: 'إرسال عرض سعر',
+              onTap: () => Navigator.pushNamed(context, '/shop/send-quote', arguments: widget.request),
+              height: 50,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: OutlinedDarkButton(
+              label: 'المحادثة',
+              onTap: () => Navigator.pushNamed(context, '/customer/chat', arguments: _chatRoomId),
+              height: 50,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return DarkButton(
+      label: 'إرسال عرض سعر',
+      onTap: () => Navigator.pushNamed(context, '/shop/send-quote', arguments: widget.request),
+      height: 50,
+    );
+  }
+}
+
+class _InfoBanner extends StatelessWidget {
+  final IconData icon;
+  final String message;
+  final Color color;
+  const _InfoBanner({required this.icon, required this.message, required this.color});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(14),
+    decoration: BoxDecoration(
+      color: color.withOpacity(.07),
+      border: Border.all(color: color.withOpacity(.3)),
+      borderRadius: BorderRadius.circular(14),
+    ),
+    child: Row(
+      children: [
+        Icon(icon, color: color, size: 18),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(message,
+            style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: color)),
+        ),
+      ],
+    ),
+  );
+}
+
+class _StatusBadge extends StatelessWidget {
+  final String requestStatus;
+  final ShopRequestShopStatus shopStatus;
+  const _StatusBadge({required this.requestStatus, required this.shopStatus});
+
+  @override
+  Widget build(BuildContext context) {
+    String label;
+    Color bg;
+    Color fg;
+
+    if (shopStatus == ShopRequestShopStatus.rejected) {
+      label = 'غير مختار'; bg = AppColors.red.withOpacity(.1); fg = AppColors.red;
+    } else {
+      switch (requestStatus) {
+        case 'ShopSelected': label = 'تم الاختيار'; bg = AppColors.green.withOpacity(.1); fg = AppColors.green; break;
+        case 'InProgress':   label = 'قيد التنفيذ'; bg = Colors.blue.withOpacity(.1); fg = Colors.blue; break;
+        case 'Completed':    label = 'مكتمل'; bg = AppColors.green.withOpacity(.1); fg = AppColors.green; break;
+        case 'Cancelled':    label = 'ملغي'; bg = AppColors.red.withOpacity(.1); fg = AppColors.red; break;
+        default:             label = 'مفتوح'; bg = AppColors.goldBg; fg = AppColors.goldText;
+      }
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(999)),
+      child: Text(label, style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w800, color: fg)),
     );
   }
 }

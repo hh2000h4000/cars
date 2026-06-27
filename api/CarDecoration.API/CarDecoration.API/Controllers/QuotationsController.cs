@@ -58,4 +58,18 @@ public class QuotationsController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    [HttpPut("{id}/withdraw")]
+    public async Task<IActionResult> Withdraw(Guid id)
+    {
+        try
+        {
+            await _service.WithdrawAsync(id);
+            return Ok(new { message = "تم سحب العرض بنجاح" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }

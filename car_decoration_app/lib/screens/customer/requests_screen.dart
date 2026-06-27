@@ -168,7 +168,7 @@ class _RequestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasQuotes  = request.quotationCount > 0;
-    final showBottom = hasQuotes || request.status == RequestStatus.pending;
+    final showBottom = hasQuotes || request.status == RequestStatus.open;
 
     return GestureDetector(
       onTap: () => Navigator.pushNamed(context, '/customer/request-detail', arguments: request.id),

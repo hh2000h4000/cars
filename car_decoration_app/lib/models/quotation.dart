@@ -1,4 +1,4 @@
-enum QuotationStatus { pending, accepted, rejected }
+enum QuotationStatus { pending, accepted, rejected, withdrawn }
 
 class Quotation {
   final String id;
@@ -44,9 +44,10 @@ class Quotation {
     final statusStr = (json['status'] as String?)?.toLowerCase() ?? 'pending';
     final QuotationStatus status;
     switch (statusStr) {
-      case 'accepted': status = QuotationStatus.accepted; break;
-      case 'rejected': status = QuotationStatus.rejected; break;
-      default: status = QuotationStatus.pending;
+      case 'accepted':  status = QuotationStatus.accepted;  break;
+      case 'rejected':  status = QuotationStatus.rejected;  break;
+      case 'withdrawn': status = QuotationStatus.withdrawn; break;
+      default:          status = QuotationStatus.pending;
     }
     final visitFeeVal = (json['visitFee'] as num?)?.toDouble() ?? 0;
     final partsRaw = json['parts'] as String? ?? '';
