@@ -20,6 +20,7 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
 
   String _shopName = '';
   String _shopStatus = 'Pending';
+  String? _rejectionReason;
   double _rating = 0;
   int _totalJobs = 0;
 
@@ -43,6 +44,7 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
         setState(() {
           _shopName = shopData['name'] as String? ?? '';
           _shopStatus = shopData['status'] as String? ?? 'Pending';
+          _rejectionReason = shopData['rejectionReason'] as String?;
           _rating = (shopData['rating'] as num?)?.toDouble() ?? 0.0;
           _totalJobs = shopData['totalJobs'] as int? ?? 0;
           _requests = requestsResult.items;
@@ -117,7 +119,7 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                                           Text(_shopName.isNotEmpty ? _shopName : 'متجري',
                                             style: const TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
                                           const SizedBox(height: 4),
-                                          _StatusBadge(status: _shopStatus, isOpen: _isOpen),
+                                          _StatusBadge(status: _shopStatus, isOpen: _isOpen, rejectionReason: _rejectionReason),
                                         ],
                                       ),
                                       const Spacer(),
@@ -271,7 +273,8 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
 class _StatusBadge extends StatelessWidget {
   final String status;
   final bool isOpen;
-  const _StatusBadge({required this.status, required this.isOpen});
+  final String? rejectionReason;
+  const _StatusBadge({required this.status, required this.isOpen, this.rejectionReason});
 
   @override
   Widget build(BuildContext context) {
@@ -291,13 +294,33 @@ class _StatusBadge extends StatelessWidget {
           ],
         );
       case 'Rejected':
+        return Column(
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(Icons.cancel_rounded, color: AppColors.red, size: 13),
+                SizedBox(width: 4),
+                Text('تم رفض طلب التسجيل',
+                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.red)),
+              ],
+            ),
+            if (rejectionReason != null) ...[
+              const SizedBox(height: 3),
+              Text(rejectionReason!,
+                style: const TextStyle(fontFamily: 'Tajawal', fontSize: 10, fontWeight: FontWeight.w600, color: Colors.white38),
+                textAlign: TextAlign.center),
+            ],
+          ],
+        );
+      case 'Suspended':
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: const [
-            Icon(Icons.cancel_rounded, color: AppColors.red, size: 13),
+            Icon(Icons.block_rounded, color: Color(0xFFCE93D8), size: 13),
             SizedBox(width: 4),
-            Text('تم رفض طلب التسجيل',
-              style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.red)),
+            Text('المتجر موقوف من الإدارة',
+              style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFFCE93D8))),
           ],
         );
       case 'DocsRequested':

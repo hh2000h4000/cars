@@ -24,7 +24,7 @@ public class ShopService
             .FirstOrDefaultAsync(s => s.OwnerId == userId)
             ?? throw new Exception("المتجر غير موجود");
         return new MyShopResponse(shop.Id, shop.Name, shop.City, shop.Phone,
-            shop.LogoUrl, shop.Status.ToString(), shop.CrNumber, shop.Rating, shop.TotalJobs);
+            shop.LogoUrl, shop.Status.ToString(), shop.CrNumber, shop.Rating, shop.TotalJobs, shop.RejectionReason);
     }
 
     public async Task<MyShopResponse> UpdateMyShopAsync(UpdateMyShopRequest req)
@@ -42,7 +42,7 @@ public class ShopService
         await _db.SaveChangesAsync();
 
         return new MyShopResponse(shop.Id, shop.Name, shop.City, shop.Phone,
-            shop.LogoUrl, shop.Status.ToString(), shop.CrNumber, shop.Rating, shop.TotalJobs);
+            shop.LogoUrl, shop.Status.ToString(), shop.CrNumber, shop.Rating, shop.TotalJobs, shop.RejectionReason);
     }
 
     public Task<PagedResult<ShopResponse>> GetApprovedShopsAsync(PaginationRequest pagination)
@@ -74,49 +74,61 @@ public class ShopService
             shop.Status.ToString(), reviews);
     }
 
-    // ── للإدارة: عرض المتاجر بانتظار الاعتماد ──
-    public Task<PagedResult<PendingShopResponse>> GetPendingShopsAsync(PaginationRequest pagination)
+    // ── للإدارة: عرض جميع المتاجر مع فلترة اختيارية ──
+    public Task<PagedResult<PendingShopResponse>> GetAllShopsAdminAsync(string? status, string? search, PaginationRequest pagination)
     {
         var role = _currentUser.UserRole ?? throw new Exception("غير مصرح");
         if (role != "Admin") throw new Exception("غير مصرح");
 
-        return _db.Shops
-            .Where(s => s.Status == ShopStatus.Pending || s.Status == ShopStatus.Rejected || s.Status == ShopStatus.DocsRequested)
+        var query = _db.Shops.Include(s => s.Owner).AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse<ShopStatus>(status, out var shopStatus))
+            query = query.Where(s => s.Status == shopStatus);
+
+        if (!string.IsNullOrWhiteSpace(search))
+            query = query.Where(s => s.Name.Contains(search) || s.Owner.FullName.Contains(search) || s.CrNumber.Contains(search));
+
+        return query
             .OrderByDescending(s => s.CreatedAt)
             .Select(s => new PendingShopResponse(
                 s.Id, s.Name, s.Owner.FullName, s.Owner.Phone, s.City, s.Phone,
                 s.CrNumber, s.IdNumber, s.LogoUrl, s.CrDocumentUrl, s.IdDocumentUrl,
-                s.Status.ToString(), s.CreatedAt))
+                s.Status.ToString(), s.CreatedAt, s.RejectionReason))
             .ToPagedAsync(pagination);
     }
 
     public async Task ApproveShopAsync(Guid id)
     {
-        var role = _currentUser.UserRole
-            ?? throw new Exception("غير مصرح");
+        var role = _currentUser.UserRole ?? throw new Exception("غير مصرح");
+        if (role != "Admin") throw new Exception("غير مصرح");
 
-        if (role != "Admin")
-            throw new Exception("غير مصرح");
-
-        var shop = await _db.Shops.FindAsync(id)
-            ?? throw new Exception("المتجر غير موجود");
-
+        var shop = await _db.Shops.FindAsync(id) ?? throw new Exception("المتجر غير موجود");
         shop.Status = ShopStatus.Approved;
+        shop.RejectionReason = null;
         await _db.SaveChangesAsync();
     }
 
-    public async Task RejectShopAsync(Guid id)
+    public async Task RejectShopAsync(Guid id, string reason)
     {
-        var role = _currentUser.UserRole
-            ?? throw new Exception("غير مصرح");
+        var role = _currentUser.UserRole ?? throw new Exception("غير مصرح");
+        if (role != "Admin") throw new Exception("غير مصرح");
 
-        if (role != "Admin")
-            throw new Exception("غير مصرح");
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new Exception("يجب إدخال سبب الرفض");
 
-        var shop = await _db.Shops.FindAsync(id)
-            ?? throw new Exception("المتجر غير موجود");
-
+        var shop = await _db.Shops.FindAsync(id) ?? throw new Exception("المتجر غير موجود");
         shop.Status = ShopStatus.Rejected;
+        shop.RejectionReason = reason.Trim();
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task SuspendShopAsync(Guid id)
+    {
+        var role = _currentUser.UserRole ?? throw new Exception("غير مصرح");
+        if (role != "Admin") throw new Exception("غير مصرح");
+
+        var shop = await _db.Shops.FindAsync(id) ?? throw new Exception("المتجر غير موجود");
+        shop.Status = ShopStatus.Suspended;
         await _db.SaveChangesAsync();
     }
 }

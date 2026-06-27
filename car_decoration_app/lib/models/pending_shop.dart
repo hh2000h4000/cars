@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum AdminShopStatus { pending, approved, rejected, docsRequested }
+enum AdminShopStatus { pending, approved, rejected, docsRequested, suspended }
 
 extension AdminShopStatusInfo on AdminShopStatus {
   String get label {
@@ -9,6 +9,7 @@ extension AdminShopStatusInfo on AdminShopStatus {
       case AdminShopStatus.approved: return 'معتمد';
       case AdminShopStatus.rejected: return 'مرفوض';
       case AdminShopStatus.docsRequested: return 'طلب مستندات';
+      case AdminShopStatus.suspended: return 'موقوف';
     }
   }
 
@@ -18,6 +19,7 @@ extension AdminShopStatusInfo on AdminShopStatus {
       case AdminShopStatus.approved: return const Color(0xFF4CAF50);
       case AdminShopStatus.rejected: return const Color(0xFFF44336);
       case AdminShopStatus.docsRequested: return const Color(0xFF2196F3);
+      case AdminShopStatus.suspended: return const Color(0xFF9C27B0);
     }
   }
 }
@@ -35,6 +37,7 @@ class PendingShop {
   final String? logoUrl;
   final String? crDocumentUrl;
   final String? idDocumentUrl;
+  final String? rejectionReason;
   AdminShopStatus status;
 
   PendingShop({
@@ -50,6 +53,7 @@ class PendingShop {
     this.logoUrl,
     this.crDocumentUrl,
     this.idDocumentUrl,
+    this.rejectionReason,
     this.status = AdminShopStatus.pending,
   });
 
@@ -59,6 +63,7 @@ class PendingShop {
         case 'Approved': return AdminShopStatus.approved;
         case 'Rejected': return AdminShopStatus.rejected;
         case 'DocsRequested': return AdminShopStatus.docsRequested;
+        case 'Suspended': return AdminShopStatus.suspended;
         default: return AdminShopStatus.pending;
       }
     }
@@ -81,6 +86,7 @@ class PendingShop {
       logoUrl: j['logoUrl'] as String?,
       crDocumentUrl: j['crDocumentUrl'] as String?,
       idDocumentUrl: j['idDocumentUrl'] as String?,
+      rejectionReason: j['rejectionReason'] as String?,
       status: parseStatus(j['status'] as String? ?? ''),
     );
   }

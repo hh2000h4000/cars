@@ -74,13 +74,16 @@ public class ShopsController : ControllerBase
         }
     }
 
-    [HttpGet("pending")]
-    [Authorize]
-    public async Task<IActionResult> GetPendingShops([FromQuery] PaginationRequest pagination)
+    [HttpGet("admin/all")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetAllShopsAdmin(
+        [FromQuery] string? status,
+        [FromQuery] string? search,
+        [FromQuery] PaginationRequest pagination)
     {
         try
         {
-            var result = await _service.GetPendingShopsAsync(pagination);
+            var result = await _service.GetAllShopsAdminAsync(status, search, pagination);
             return Ok(result);
         }
         catch (Exception ex)
@@ -90,7 +93,7 @@ public class ShopsController : ControllerBase
     }
 
     [HttpPut("{id}/approve")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Approve(Guid id)
     {
         try
@@ -105,13 +108,28 @@ public class ShopsController : ControllerBase
     }
 
     [HttpPut("{id}/reject")]
-    [Authorize]
-    public async Task<IActionResult> Reject(Guid id)
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Reject(Guid id, [FromBody] RejectShopRequest req)
     {
         try
         {
-            await _service.RejectShopAsync(id);
+            await _service.RejectShopAsync(id, req.Reason);
             return Ok(new { message = "تم رفض المتجر" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpPut("{id}/suspend")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Suspend(Guid id)
+    {
+        try
+        {
+            await _service.SuspendShopAsync(id);
+            return Ok(new { message = "تم إيقاف المتجر" });
         }
         catch (Exception ex)
         {

@@ -1,6 +1,6 @@
 ﻿namespace CarDecoration.API.Models;
 
-public enum ShopStatus { Pending, Approved, Rejected, DocsRequested }
+public enum ShopStatus { Pending, Approved, Rejected, DocsRequested, Suspended }
 
 public class Shop : BaseEntity
 {
@@ -13,6 +13,7 @@ public class Shop : BaseEntity
     public string? IdNumber { get; set; }
     public string? CrDocumentUrl { get; set; }
     public string? IdDocumentUrl { get; set; }
+    public string? RejectionReason { get; set; }
     public ShopStatus Status { get; set; } = ShopStatus.Pending;
     public float Rating { get; set; } = 0;
     public int TotalJobs { get; set; } = 0;

@@ -25,8 +25,11 @@ public record PendingShopResponse(
     string? CrDocumentUrl,
     string? IdDocumentUrl,
     string Status,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    string? RejectionReason
 );
+
+public record RejectShopRequest(string Reason);
 
 public record ShopDetailsResponse(
     Guid Id,
@@ -49,7 +52,8 @@ public record MyShopResponse(
     string Status,
     string CrNumber,
     float Rating,
-    int TotalJobs
+    int TotalJobs,
+    string? RejectionReason
 );
 
 public record UpdateMyShopRequest(
