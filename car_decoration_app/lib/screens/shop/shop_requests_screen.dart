@@ -253,7 +253,7 @@ class _RequestCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  _StatusBadge(request.shopStatus),
+                  _StatusBadge(request.shopStatus, requestStatus: request.status),
                 ],
               ),
               const SizedBox(height: 10),
@@ -336,15 +336,22 @@ class _RequestCard extends StatelessWidget {
 
 class _StatusBadge extends StatelessWidget {
   final ShopRequestShopStatus status;
-  const _StatusBadge(this.status);
+  final String? requestStatus;
+  const _StatusBadge(this.status, {this.requestStatus});
 
   @override
   Widget build(BuildContext context) {
-    final (label, bg, fg) = switch (status) {
-      ShopRequestShopStatus.pending => ('جديد', AppColors.goldBg, AppColors.goldText),
-      ShopRequestShopStatus.accepted => ('مقبول', const Color(0xFFE8F5E9), AppColors.green),
-      ShopRequestShopStatus.rejected => ('مرفوض', const Color(0xFFFFEBEE), AppColors.red),
-      ShopRequestShopStatus.withdrawn => ('مسحوب', AppColors.surface, AppColors.textMuted),
+    final (label, bg, fg) = switch (requestStatus) {
+      'Completed' => ('مكتمل', const Color(0xFFE8F5E9), AppColors.green),
+      'InProgress' => ('قيد التنفيذ', const Color(0xFFE3F2FD), const Color(0xFF1565C0)),
+      'ShopSelected' => ('تم الاختيار', const Color(0xFFF3E5F5), const Color(0xFF6A1B9A)),
+      'Cancelled' => ('ملغي', const Color(0xFFFFEBEE), AppColors.red),
+      _ => switch (status) {
+        ShopRequestShopStatus.pending => ('جديد', AppColors.goldBg, AppColors.goldText),
+        ShopRequestShopStatus.accepted => ('مقبول', const Color(0xFFE8F5E9), AppColors.green),
+        ShopRequestShopStatus.rejected => ('مرفوض', const Color(0xFFFFEBEE), AppColors.red),
+        ShopRequestShopStatus.withdrawn => ('مسحوب', AppColors.surface, AppColors.textMuted),
+      },
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
