@@ -19,6 +19,7 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
   bool _loading = true;
 
   String _shopName = '';
+  String _shopStatus = 'Pending';
   double _rating = 0;
   int _totalJobs = 0;
 
@@ -41,6 +42,7 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
       if (mounted) {
         setState(() {
           _shopName = shopData['name'] as String? ?? '';
+          _shopStatus = shopData['status'] as String? ?? 'Pending';
           _rating = (shopData['rating'] as num?)?.toDouble() ?? 0.0;
           _totalJobs = shopData['totalJobs'] as int? ?? 0;
           _requests = requestsResult.items;
@@ -115,31 +117,24 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                                           Text(_shopName.isNotEmpty ? _shopName : 'متجري',
                                             style: const TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
                                           const SizedBox(height: 4),
-                                          Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Icon(Icons.verified_rounded, color: AppColors.green, size: 13),
-                                              const SizedBox(width: 4),
-                                              Text(
-                                                _isOpen ? 'متجر معتمد · متاح للطلبات' : 'متجر معتمد · مغلق حالياً',
-                                                style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700,
-                                                  color: _isOpen ? AppColors.green : Colors.white54)),
-                                            ],
-                                          ),
+                                          _StatusBadge(status: _shopStatus, isOpen: _isOpen),
                                         ],
                                       ),
                                       const Spacer(),
-                                      Transform.scale(
-                                        scale: 0.85,
-                                        child: Switch(
-                                          value: _isOpen,
-                                          onChanged: (v) => setState(() => _isOpen = v),
-                                          activeColor: Colors.white,
-                                          activeTrackColor: AppColors.green,
-                                          inactiveThumbColor: Colors.white54,
-                                          inactiveTrackColor: Colors.white24,
-                                        ),
-                                      ),
+                                      if (_shopStatus == 'Approved')
+                                        Transform.scale(
+                                          scale: 0.85,
+                                          child: Switch(
+                                            value: _isOpen,
+                                            onChanged: (v) => setState(() => _isOpen = v),
+                                            activeColor: Colors.white,
+                                            activeTrackColor: AppColors.green,
+                                            inactiveThumbColor: Colors.white54,
+                                            inactiveTrackColor: Colors.white24,
+                                          ),
+                                        )
+                                      else
+                                        const SizedBox(width: 52),
                                     ],
                                   ),
                                   const SizedBox(height: 20),
@@ -270,6 +265,62 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
               ),
             ),
     );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  final String status;
+  final bool isOpen;
+  const _StatusBadge({required this.status, required this.isOpen});
+
+  @override
+  Widget build(BuildContext context) {
+    switch (status) {
+      case 'Approved':
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.verified_rounded, color: AppColors.green, size: 13),
+            const SizedBox(width: 4),
+            Text(
+              isOpen ? 'متجر معتمد · متاح للطلبات' : 'متجر معتمد · مغلق حالياً',
+              style: TextStyle(
+                fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700,
+                color: isOpen ? AppColors.green : Colors.white54),
+            ),
+          ],
+        );
+      case 'Rejected':
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Icon(Icons.cancel_rounded, color: AppColors.red, size: 13),
+            SizedBox(width: 4),
+            Text('تم رفض طلب التسجيل',
+              style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.red)),
+          ],
+        );
+      case 'DocsRequested':
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Icon(Icons.folder_open_rounded, color: Color(0xFF64B5F6), size: 13),
+            SizedBox(width: 4),
+            Text('مطلوب منك رفع مستندات',
+              style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF64B5F6))),
+          ],
+        );
+      default: // Pending
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Icon(Icons.hourglass_top_rounded, color: Color(0xFFFFB74D), size: 13),
+            SizedBox(width: 4),
+            Text('قيد المراجعة من الإدارة',
+              style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFFFFB74D))),
+          ],
+        );
+    }
   }
 }
 
