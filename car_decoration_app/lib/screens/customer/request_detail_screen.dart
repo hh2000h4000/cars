@@ -20,6 +20,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
   List<Quotation> _quotations = [];
   bool _loadingQuotations = false;
   String? _acceptedQuoteId;
+  String? _acceptedChatRoomId;
   bool _accepting = false;
 
   @override
@@ -55,13 +56,15 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
       if (!mounted) return;
       setState(() {
         _acceptedQuoteId = quotationId;
+        _acceptedChatRoomId = chatRoomId;
         _accepting = false;
         for (final q in _quotations) {
           q.status = q.id == quotationId ? QuotationStatus.accepted : QuotationStatus.rejected;
         }
       });
       context.read<AppProvider>().reloadRequests();
-      Navigator.pushNamed(context, '/customer/chat', arguments: chatRoomId);
+      Navigator.pushNamed(context, '/customer/chat', arguments: chatRoomId)
+          .then((_) { if (mounted) _loadQuotations(); });
     } catch (e) {
       if (!mounted) return;
       setState(() => _accepting = false);
@@ -81,6 +84,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
       (r) => r.id == widget.requestId,
       orElse: () => provider.requests.first,
     );
+    final hasAccepted = _acceptedQuoteId != null;
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -141,7 +145,14 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 14),
+
+                    // 5-stage progress stepper
+                    _RequestStepper(
+                      status: request.status,
+                      hasQuotations: _quotations.isNotEmpty || request.quotationCount > 0,
+                    ),
+                    const SizedBox(height: 14),
 
                     // Notes
                     if (request.notes != null) ...[
@@ -164,7 +175,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 14),
                     ],
 
                     // Quotations section
@@ -176,9 +187,16 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                           const Spacer(),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(999)),
-                            child: Text('${_quotations.length} عروض وصلت',
-                              style: const TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.goldText)),
+                            decoration: BoxDecoration(
+                              color: hasAccepted ? AppColors.greenLight : AppColors.goldBg,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              hasAccepted ? 'تم الاختيار' : '${_quotations.length} عروض وصلت',
+                              style: TextStyle(
+                                fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800,
+                                color: hasAccepted ? AppColors.green : AppColors.goldText,
+                              )),
                           ),
                         ],
                       ),
@@ -191,6 +209,11 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                         onView: () => Navigator.pushNamed(
                           context, '/customer/quotation-detail', arguments: q,
                         ).then((_) => _loadQuotations()),
+                        onOpenChat: (_acceptedQuoteId == q.id && _acceptedChatRoomId != null)
+                            ? () => Navigator.pushNamed(context, '/customer/chat', arguments: _acceptedChatRoomId)
+                            : q.chatRoomId != null
+                                ? () => Navigator.pushNamed(context, '/customer/chat', arguments: q.chatRoomId)
+                                : null,
                       )),
                     ] else if (!_loadingQuotations) ...[
                       Container(
@@ -231,7 +254,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                         borderColor: AppColors.red.withOpacity(.4),
                       ),
 
-                    if (request.status == RequestStatus.completed) ...[
+                    if (request.status == RequestStatus.completed)
                       DarkButton(
                         label: 'تقييم الخدمة',
                         onTap: () {
@@ -246,7 +269,6 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                             ));
                         },
                       ),
-                    ],
                   ],
                 ),
               ),
@@ -258,12 +280,132 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
   }
 }
 
+// ── 5-stage progress tracker ──────────────────────────────────────────────────
+
+class _RequestStepper extends StatelessWidget {
+  final RequestStatus status;
+  final bool hasQuotations;
+
+  const _RequestStepper({required this.status, required this.hasQuotations});
+
+  int get _activeStage {
+    switch (status) {
+      case RequestStatus.open:
+        return hasQuotations ? 1 : 0;
+      case RequestStatus.shopSelected:
+        return 2;
+      case RequestStatus.inProgress:
+        return 3;
+      case RequestStatus.completed:
+        return 5; // all stages done
+      default:
+        return 0;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const labels = ['نُشر الطلب', 'عروض مستلمة', 'تم الاختيار', 'قيد التنفيذ', 'مكتمل'];
+    const icons = [
+      Icons.article_outlined,
+      Icons.inbox_outlined,
+      Icons.handshake_outlined,
+      Icons.engineering_outlined,
+      Icons.verified_outlined,
+    ];
+    final active = _activeStage;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        children: List.generate(labels.length, (i) {
+          final isDone = i < active;
+          final isActive = i == active;
+          final isLast = i == labels.length - 1;
+
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Timeline indicator
+              Column(
+                children: [
+                  Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isDone
+                          ? AppColors.goldText
+                          : isActive
+                              ? AppColors.dark
+                              : Colors.transparent,
+                      border: Border.all(
+                        color: isDone
+                            ? AppColors.goldText
+                            : isActive
+                                ? AppColors.dark
+                                : AppColors.border,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Icon(
+                      isDone ? Icons.check : icons[i],
+                      size: 15,
+                      color: isDone || isActive ? Colors.white : AppColors.textMuted,
+                    ),
+                  ),
+                  if (!isLast)
+                    Container(
+                      width: 2,
+                      height: 26,
+                      margin: const EdgeInsets.symmetric(vertical: 3),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(1),
+                        color: isDone ? AppColors.goldText.withOpacity(.35) : AppColors.border,
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(width: 14),
+              // Label
+              Padding(
+                padding: EdgeInsets.only(top: 6, bottom: isLast ? 0 : 32),
+                child: Text(
+                  labels[i],
+                  style: TextStyle(
+                    fontFamily: 'Tajawal',
+                    fontSize: 13.5,
+                    fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+                    color: isDone
+                        ? AppColors.goldText
+                        : isActive
+                            ? AppColors.textPrimary
+                            : AppColors.textMuted,
+                  ),
+                ),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
+}
+
+// ── Quotation card ────────────────────────────────────────────────────────────
+
 class _QuotationCard extends StatelessWidget {
   final Quotation quotation;
   final bool isAccepted;
   final bool isAccepting;
   final VoidCallback onAccept;
   final VoidCallback onView;
+  final VoidCallback? onOpenChat;
 
   const _QuotationCard({
     required this.quotation,
@@ -271,72 +413,101 @@ class _QuotationCard extends StatelessWidget {
     required this.isAccepting,
     required this.onAccept,
     required this.onView,
+    this.onOpenChat,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onView,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(
-            color: isAccepted ? AppColors.green : (quotation.isBestValue ? AppColors.goldLight : AppColors.border),
-            width: isAccepted || quotation.isBestValue ? 1.5 : 1,
+    final isRejected = quotation.status == QuotationStatus.rejected ||
+        quotation.status == QuotationStatus.withdrawn;
+    final isPending = quotation.status == QuotationStatus.pending;
+
+    return Opacity(
+      opacity: isRejected ? 0.5 : 1.0,
+      child: GestureDetector(
+        onTap: onView,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(
+              color: isAccepted
+                  ? AppColors.green
+                  : (quotation.isBestValue && isPending ? AppColors.goldLight : AppColors.border),
+              width: isAccepted ? 1.5 : 1,
+            ),
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [BoxShadow(color: AppColors.dark.withOpacity(.04), blurRadius: 14, offset: const Offset(0, 4))],
           ),
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [BoxShadow(color: AppColors.dark.withOpacity(.04), blurRadius: 14, offset: const Offset(0, 4))],
-        ),
-        child: Column(
-          children: [
-            if (quotation.isBestValue && !isAccepted)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 7),
-                decoration: const BoxDecoration(
-                  color: AppColors.goldBg,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(17)),
-                ),
-                child: const Text('الأفضل قيمة', textAlign: TextAlign.center,
-                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.goldText)),
-              ),
-            if (isAccepted)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 7),
-                decoration: BoxDecoration(
-                  color: AppColors.green.withOpacity(.1),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(17)),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.check_circle, color: AppColors.green, size: 14),
-                    SizedBox(width: 5),
-                    Text('تم القبول',
-                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.green)),
-                  ],
-                ),
-              ),
-            Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                children: [
-                  Row(
+          child: Column(
+            children: [
+              // Top banner
+              if (isAccepted)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.green.withOpacity(.1),
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(17)),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Row(
-                        children: [
-                          ShopAvatar(mono: quotation.shopMono, size: 40, fontSize: 16),
-                          const SizedBox(width: 10),
-                          Column(
+                      Icon(Icons.check_circle, color: AppColors.green, size: 14),
+                      SizedBox(width: 6),
+                      Text('تم قبول هذا العرض',
+                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.green)),
+                    ],
+                  ),
+                )
+              else if (isRejected)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 7),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(17)),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.cancel_outlined, color: AppColors.textMuted, size: 13),
+                      SizedBox(width: 5),
+                      Text('تم رفض هذا العرض تلقائياً',
+                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+                    ],
+                  ),
+                )
+              else if (quotation.isBestValue)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 7),
+                  decoration: const BoxDecoration(
+                    color: AppColors.goldBg,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(17)),
+                  ),
+                  child: const Text('الأفضل قيمة', textAlign: TextAlign.center,
+                    style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.goldText)),
+                ),
+
+              Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  children: [
+                    // Shop + Price row
+                    Row(
+                      children: [
+                        ShopAvatar(mono: quotation.shopMono, size: 40, fontSize: 16),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(quotation.shopName,
                                 style: const TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                               Row(
                                 children: [
-                                  Text(quotation.shopRating.toString(),
+                                  Text(quotation.shopRating.toStringAsFixed(1),
                                     style: const TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
                                   const SizedBox(width: 3),
                                   const Icon(Icons.star, color: AppColors.star, size: 12),
@@ -344,75 +515,101 @@ class _QuotationCard extends StatelessWidget {
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                      const Spacer(),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('${quotation.finalPrice.toStringAsFixed(0)} ريال',
-                            style: const TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
-                          Text('+ ${quotation.visitFee} رسوم زيارة',
-                            style: const TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      _InfoChip(Icons.schedule_outlined, quotation.duration),
-                      const SizedBox(width: 8),
-                      _InfoChip(Icons.verified_outlined, quotation.warranty),
-                    ],
-                  ),
-                  if (!isAccepted && quotation.status == QuotationStatus.pending) ...[
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: onView,
-                            child: Container(
-                              height: 40,
-                              decoration: BoxDecoration(
-                                border: Border.all(color: AppColors.borderStrong),
-                                borderRadius: BorderRadius.circular(11),
-                              ),
-                              alignment: Alignment.center,
-                              child: const Text('عرض التفاصيل',
-                                style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                            ),
-                          ),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: isAccepting ? null : onAccept,
-                            child: Container(
-                              height: 40,
-                              decoration: BoxDecoration(
-                                gradient: isAccepting ? null
-                                    : const LinearGradient(colors: [AppColors.goldLight, AppColors.gold]),
-                                color: isAccepting ? AppColors.border : null,
-                                borderRadius: BorderRadius.circular(11),
-                              ),
-                              alignment: Alignment.center,
-                              child: isAccepting
-                                  ? const SizedBox(width: 18, height: 18,
-                                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.goldText))
-                                  : const Text('قبول العرض',
-                                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.dark)),
-                            ),
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text('${quotation.finalPrice.toStringAsFixed(0)} ريال',
+                              style: const TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                            Text('+ ${quotation.visitFee} رسوم زيارة',
+                              style: const TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+                          ],
                         ),
                       ],
                     ),
+                    const SizedBox(height: 10),
+
+                    // Info chips
+                    Row(
+                      children: [
+                        _InfoChip(Icons.schedule_outlined, quotation.duration),
+                        const SizedBox(width: 8),
+                        _InfoChip(Icons.verified_outlined, quotation.warranty),
+                      ],
+                    ),
+
+                    // Action buttons
+                    if (isPending) ...[
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: onView,
+                              child: Container(
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: AppColors.borderStrong),
+                                  borderRadius: BorderRadius.circular(11),
+                                ),
+                                alignment: Alignment.center,
+                                child: const Text('عرض التفاصيل',
+                                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: isAccepting ? null : onAccept,
+                              child: Container(
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  gradient: isAccepting ? null
+                                      : const LinearGradient(colors: [AppColors.goldLight, AppColors.gold]),
+                                  color: isAccepting ? AppColors.border : null,
+                                  borderRadius: BorderRadius.circular(11),
+                                ),
+                                alignment: Alignment.center,
+                                child: isAccepting
+                                    ? const SizedBox(width: 18, height: 18,
+                                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.goldText))
+                                    : const Text('قبول العرض',
+                                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.dark)),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ] else if (isAccepted && onOpenChat != null) ...[
+                      const SizedBox(height: 12),
+                      GestureDetector(
+                        onTap: onOpenChat,
+                        child: Container(
+                          width: double.infinity,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: AppColors.dark,
+                            borderRadius: BorderRadius.circular(11),
+                          ),
+                          alignment: Alignment.center,
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.chat_bubble_outline, color: Colors.white, size: 14),
+                              SizedBox(width: 7),
+                              Text('فتح المحادثة',
+                                style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w800, color: Colors.white)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
