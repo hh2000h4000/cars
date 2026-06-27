@@ -23,7 +23,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   Future<void> _loadCounts() async {
     try {
-      final shops = await ShopAdminService.getPendingShops();
+      final shops = await ShopAdminService.getAllShops(status: 'Pending');
       final disputes = await DisputeAdminService.getAllDisputes();
       if (mounted) setState(() {
         _pendingCount = shops.where((s) => s.status == AdminShopStatus.pending).length;
