@@ -1,7 +1,9 @@
 ﻿using CarDecoration.API.Data;
 using CarDecoration.API.DTOs;
 using CarDecoration.API.Helpers;
+using CarDecoration.API.Hubs;
 using CarDecoration.API.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarDecoration.API.Services;
@@ -10,11 +12,13 @@ public class ShopService
 {
     private readonly AppDbContext _db;
     private readonly ICurrentUserService _currentUser;
+    private readonly IHubContext<ChatHub> _hub;
 
-    public ShopService(AppDbContext db, ICurrentUserService currentUser)
+    public ShopService(AppDbContext db, ICurrentUserService currentUser, IHubContext<ChatHub> hub)
     {
         _db = db;
         _currentUser = currentUser;
+        _hub = hub;
     }
 
     public async Task<MyShopResponse> GetMyShopAsync()
@@ -155,6 +159,8 @@ public class ShopService
         shop.Status = ShopStatus.Approved;
         shop.RejectionReason = null;
         await _db.SaveChangesAsync();
+        await _hub.Clients.User(shop.OwnerId.ToString())
+            .SendAsync("ShopStatusChanged", new { status = "Approved", reason = (string?)null });
     }
 
     public async Task RejectShopAsync(Guid id, string reason)
@@ -169,6 +175,8 @@ public class ShopService
         shop.Status = ShopStatus.Rejected;
         shop.RejectionReason = reason.Trim();
         await _db.SaveChangesAsync();
+        await _hub.Clients.User(shop.OwnerId.ToString())
+            .SendAsync("ShopStatusChanged", new { status = "Rejected", reason = shop.RejectionReason });
     }
 
     public async Task SuspendShopAsync(Guid id)
@@ -179,5 +187,7 @@ public class ShopService
         var shop = await _db.Shops.FindAsync(id) ?? throw new Exception("المتجر غير موجود");
         shop.Status = ShopStatus.Suspended;
         await _db.SaveChangesAsync();
+        await _hub.Clients.User(shop.OwnerId.ToString())
+            .SendAsync("ShopStatusChanged", new { status = "Suspended", reason = (string?)null });
     }
 }

@@ -21,6 +21,7 @@ class _ShopShellState extends State<ShopShell> with WidgetsBindingObserver {
   int _index = 0;
   int _unreadCount = 0;
   StreamSubscription<String>? _notifSub;
+  StreamSubscription<Map<String, dynamic>>? _shopStatusSub;
 
   static const _chatTabIndex = 2;
 
@@ -43,6 +44,117 @@ class _ShopShellState extends State<ShopShell> with WidgetsBindingObserver {
     _notifSub = SignalRService.instance.onNotification.listen((_) {
       _refreshBadge();
     });
+    _shopStatusSub = SignalRService.instance.onShopStatusChanged.listen(_onShopStatusChanged);
+  }
+
+  void _onShopStatusChanged(Map<String, dynamic> data) {
+    if (!mounted) return;
+    final status = data['status'] as String? ?? '';
+    final reason = data['reason'] as String?;
+    if (status == 'Suspended' || status == 'Rejected' || status == 'DocsRequested') {
+      setState(() => _index = 3);
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _showStatusDialog(status, reason);
+    });
+  }
+
+  void _showStatusDialog(String status, String? reason) {
+    IconData icon;
+    Color color;
+    String title;
+    String body;
+    String buttonLabel;
+
+    switch (status) {
+      case 'Approved':
+        icon = Icons.verified_rounded;
+        color = const Color(0xFF4CAF50);
+        title = 'تهانينا! تم اعتماد متجرك';
+        body = 'يمكنك الآن استقبال طلبات العملاء وتقديم عروض الأسعار.';
+        buttonLabel = 'رائع!';
+        break;
+      case 'Rejected':
+        icon = Icons.cancel_rounded;
+        color = const Color(0xFFE53935);
+        title = 'تم رفض طلب الاعتماد';
+        body = (reason != null && reason.isNotEmpty)
+            ? 'السبب: $reason\n\nيمكنك تصحيح البيانات وإعادة التقديم من تبويب "متجري".'
+            : 'يمكنك تصحيح البيانات وإعادة التقديم من تبويب "متجري".';
+        buttonLabel = 'تصحيح البيانات';
+        break;
+      case 'Suspended':
+        icon = Icons.block_rounded;
+        color = const Color(0xFF9C27B0);
+        title = 'تم إيقاف متجرك من قبل الإدارة';
+        body = 'تواصل مع الإدارة لمعرفة المزيد من التفاصيل.';
+        buttonLabel = 'حسناً';
+        break;
+      case 'DocsRequested':
+        icon = Icons.folder_open_rounded;
+        color = const Color(0xFF0288D1);
+        title = 'مطلوب مستندات إضافية';
+        body = 'طلب المشرف تحديث الوثائق المرفقة. راجع تبويب "متجري" لرفعها.';
+        buttonLabel = 'رفع المستندات';
+        break;
+      default:
+        return;
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 70, height: 70,
+                decoration: BoxDecoration(color: color.withOpacity(.12), shape: BoxShape.circle),
+                child: Icon(icon, color: color, size: 34),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: 'Tajawal', fontSize: 16,
+                  fontWeight: FontWeight.w900, color: Color(0xFF1C1917),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                body,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: 'Tajawal', fontSize: 13,
+                  fontWeight: FontWeight.w500, color: Color(0xFF6B6B6B), height: 1.6,
+                ),
+              ),
+              const SizedBox(height: 22),
+              GestureDetector(
+                onTap: () => Navigator.of(ctx).pop(),
+                child: Container(
+                  width: double.infinity, height: 48,
+                  decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(14)),
+                  alignment: Alignment.center,
+                  child: Text(
+                    buttonLabel,
+                    style: const TextStyle(
+                      fontFamily: 'Tajawal', fontSize: 14,
+                      fontWeight: FontWeight.w800, color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -65,6 +177,7 @@ class _ShopShellState extends State<ShopShell> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _notifSub?.cancel();
+    _shopStatusSub?.cancel();
     super.dispose();
   }
 

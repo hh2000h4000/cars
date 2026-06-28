@@ -13,12 +13,16 @@ class SignalRService {
 
   final _messageCtrl = StreamController<Map<String, dynamic>>.broadcast();
   final _notifCtrl = StreamController<String>.broadcast();
+  final _shopStatusCtrl = StreamController<Map<String, dynamic>>.broadcast();
 
   /// Incoming messages — used by ChatScreen to display new messages instantly
   Stream<Map<String, dynamic>> get onMessage => _messageCtrl.stream;
 
   /// Incoming notification (chatRoomId) — used by shell to refresh badge count
   Stream<String> get onNotification => _notifCtrl.stream;
+
+  /// Shop status change pushed by admin — used by ShopShell and ShopMyStoreScreen
+  Stream<Map<String, dynamic>> get onShopStatusChanged => _shopStatusCtrl.stream;
 
   bool get isConnected =>
       _connection?.state == HubConnectionState.Connected;
@@ -50,6 +54,14 @@ class SignalRService {
     _connection!.on('NewMessageNotification', (args) {
       if (args == null || args.isEmpty) return;
       _notifCtrl.add(args[0].toString());
+    });
+
+    _connection!.on('ShopStatusChanged', (args) {
+      if (args == null || args.isEmpty) return;
+      final raw = args[0];
+      if (raw is Map<String, dynamic>) {
+        _shopStatusCtrl.add(raw);
+      }
     });
 
     try {

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -14,6 +15,7 @@ import '../../services/upload_service.dart';
 import '../../services/api_client.dart';
 import '../../models/paged_result.dart';
 import '../../app_navigator.dart';
+import '../../services/signalr_service.dart';
 import 'location_picker_screen.dart';
 import 'shop_resubmit_screen.dart';
 
@@ -24,10 +26,11 @@ class ShopMyStoreScreen extends StatefulWidget {
   State<ShopMyStoreScreen> createState() => _ShopMyStoreScreenState();
 }
 
-class _ShopMyStoreScreenState extends State<ShopMyStoreScreen> {
+class _ShopMyStoreScreenState extends State<ShopMyStoreScreen> with WidgetsBindingObserver {
   ShopProfile? _shop;
   bool _loading = true;
   String? _error;
+  StreamSubscription<Map<String, dynamic>>? _shopStatusSub;
 
   PagedResult<ReviewItem>? _reviewsResult;
   bool _reviewsLoading = true;
@@ -36,7 +39,21 @@ class _ShopMyStoreScreenState extends State<ShopMyStoreScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _shopStatusSub = SignalRService.instance.onShopStatusChanged.listen((_) => _load());
     _load();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _load();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _shopStatusSub?.cancel();
+    super.dispose();
   }
 
   Future<void> _load() async {
