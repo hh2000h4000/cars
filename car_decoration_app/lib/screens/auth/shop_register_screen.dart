@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../theme.dart';
@@ -138,15 +138,13 @@ class _ShopRegisterScreenState extends State<ShopRegisterScreen> {
   // ── Document pickers ──────────────────────────────────────────────────────
 
   Future<void> _pickCrDoc() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
-      withData: true,
+    const typeGroup = XTypeGroup(
+      label: 'documents',
+      extensions: ['pdf', 'jpg', 'jpeg', 'png'],
     );
-    if (result == null || result.files.isEmpty) return;
-    final file = result.files.first;
-    final bytes = file.bytes;
-    if (bytes == null) return;
+    final file = await openFile(acceptedTypeGroups: [typeGroup]);
+    if (file == null) return;
+    final bytes = await file.readAsBytes();
     setState(() { _crDocName = file.name; _crDocBytes = bytes; _crDocUploading = true; _error = null; });
     try {
       final url = await UploadService.uploadDocument(bytes, file.name);
@@ -160,15 +158,13 @@ class _ShopRegisterScreenState extends State<ShopRegisterScreen> {
   }
 
   Future<void> _pickIdDoc() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
-      withData: true,
+    const typeGroup = XTypeGroup(
+      label: 'documents',
+      extensions: ['pdf', 'jpg', 'jpeg', 'png'],
     );
-    if (result == null || result.files.isEmpty) return;
-    final file = result.files.first;
-    final bytes = file.bytes;
-    if (bytes == null) return;
+    final file = await openFile(acceptedTypeGroups: [typeGroup]);
+    if (file == null) return;
+    final bytes = await file.readAsBytes();
     setState(() { _idDocName = file.name; _idDocBytes = bytes; _idDocUploading = true; _error = null; });
     try {
       final url = await UploadService.uploadDocument(bytes, file.name);
