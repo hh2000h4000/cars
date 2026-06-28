@@ -1547,7 +1547,7 @@ class _ResubmitSheetContentState extends State<_ResubmitSheetContent> {
               _Field(label: 'رقم السجل التجاري *', controller: _crNumber, icon: Icons.article_outlined, keyboardType: TextInputType.number),
               const SizedBox(height: 12),
               _Field(label: 'رقم الهوية الوطنية', controller: _idNumber, icon: Icons.badge_outlined, keyboardType: TextInputType.number),
-              const SizedBox(height: 20);
+              const SizedBox(height: 20),
 
               // Documents section
               const Text('الوثائق المطلوبة',
