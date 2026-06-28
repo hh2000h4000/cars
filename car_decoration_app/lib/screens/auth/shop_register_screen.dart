@@ -138,7 +138,7 @@ class _ShopRegisterScreenState extends State<ShopRegisterScreen> {
   // ── Document pickers ──────────────────────────────────────────────────────
 
   Future<void> _pickCrDoc() async {
-    final result = await FilePicker.pickFiles(
+    final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
       withData: true,
@@ -160,7 +160,7 @@ class _ShopRegisterScreenState extends State<ShopRegisterScreen> {
   }
 
   Future<void> _pickIdDoc() async {
-    final result = await FilePicker.pickFiles(
+    final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
       withData: true,
