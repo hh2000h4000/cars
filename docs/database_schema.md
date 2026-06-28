@@ -11,10 +11,10 @@ Soft delete: all tables filtered by `IsDeleted = false` globally
 ```csharp
 UserRole          : Customer, ShopOwner, Admin
 UserStatus        : Active, Suspended
-ShopStatus        : Pending, Approved, Rejected, DocsRequested
-RequestStatus     : Pending, Active, Completed, Cancelled
-RequestShopStatus : Pending, Accepted, Rejected
-QuotationStatus   : Pending, Accepted, Rejected
+ShopStatus        : Pending, Approved, Rejected, DocsRequested, Suspended   // stored as text — new values need no migration
+RequestStatus     : Open, ShopSelected, InProgress, Completed, Cancelled, Expired
+RequestShopStatus : Pending, Accepted, Rejected, Withdrawn
+QuotationStatus   : Pending, Accepted, Rejected, Withdrawn
 DisputeReason     : ServiceQuality, Pricing, Delay, Other
 DisputeStatus     : UnderReview, WaitingShop, Resolved
 ```
@@ -45,10 +45,14 @@ DisputeStatus     : UnderReview, WaitingShop, Resolved
 | Id | uuid PK | |
 | OwnerId | uuid FK → Users | UNIQUE (one shop per user) |
 | Name | text | |
-| CrNumber | text | UNIQUE (commercial registration) |
+| CrNumber | text | UNIQUE (commercial registration, 10 digits) |
 | City | text | |
-| Phone | text | |
+| Phone | text | Saudi format: 05XXXXXXXX |
 | LogoUrl | text? | |
+| IdNumber | text? | National ID number of shop owner |
+| CrDocumentUrl | text? | URL to uploaded CR document scan |
+| IdDocumentUrl | text? | URL to uploaded ID document scan |
+| RejectionReason | text? | Filled by admin when rejecting (added in migration 20260627000003) |
 | Status | text | ShopStatus enum |
 | Rating | float | default 0, auto-updated after review |
 | TotalJobs | int | default 0, auto-updated after review |
@@ -104,6 +108,9 @@ DisputeStatus     : UnderReview, WaitingShop, Resolved
 | RequestId | uuid FK → Requests | UNIQUE together with ShopId |
 | ShopId | uuid FK → Shops | UNIQUE together with RequestId |
 | Status | text | RequestShopStatus enum |
+| ViewedAt | timestamp? | when shop first viewed the request |
+| RespondedAt | timestamp? | when shop accepted or rejected |
+| RejectedAt | timestamp? | when shop explicitly rejected |
 | + BaseEntity columns | | |
 
 ### Quotations
@@ -125,8 +132,10 @@ DisputeStatus     : UnderReview, WaitingShop, Resolved
 | Column | Type | Notes |
 |--------|------|-------|
 | Id | uuid PK | |
-| RequestId | uuid FK → Requests | 1:1 (one chat per request-shop pair) |
+| RequestId | uuid FK → Requests | UNIQUE together with ShopId (one chat per request-shop pair) |
 | ShopId | uuid FK → Shops | |
+| LastReadCustomerAt | timestamp? | Customer's last read timestamp (for unread tracking) |
+| LastReadShopOwnerAt | timestamp? | Shop owner's last read timestamp |
 | + BaseEntity columns | | |
 
 ### Messages
@@ -176,7 +185,7 @@ User (1) ──── (0..1) Shop     (as ShopOwner)
 Request (1) ── (many) RequestShop ── (many) Shop   [M:M with status]
 Request (1) ── (many) RequestImage
 Request (1) ── (many) Quotation
-Request (1) ── (0..1) ChatRoom
+Request (1) ── (many) ChatRoom   [one per request-shop pair, UNIQUE on RequestId+ShopId]
 Request (1) ── (0..1) Dispute
 Request (1) ── (0..1) Review
 
@@ -194,5 +203,8 @@ ChatRoom (1) ── (many) Message
 | `20260622070949_InitialCreate` | Full initial schema |
 | `20260623103329_AddNotesAndRequestNumber` | Added `Notes` and `RequestNumber` to Requests; converted timestamps to `timestamp without time zone` |
 | `20260625000001_AddColorToVehicles` | Added `Color` column to Vehicles (was missing from initial migration despite being in model) |
+| `20260627000001_RequestLifecycleRedesign` | RequestStatus redesign (6 states), ChatRoom UNIQUE index changed to (RequestId+ShopId), added ViewedAt/RespondedAt/RejectedAt to RequestShop, LastReadCustomerAt/LastReadShopOwnerAt to ChatRoom, QuotationStatus.Withdrawn, data migration (Pending→Open, Active→ShopSelected) |
+| `20260627000002_AddShopDocumentFields` | Added `IdNumber`, `CrDocumentUrl`, `IdDocumentUrl` to Shops (also created missing `.Designer.cs` file) |
+| `20260627000003_AddShopRejectionReason` | Added `RejectionReason` (nullable text) to Shops |
 
 Apply: `dotnet ef database update`

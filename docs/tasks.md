@@ -88,6 +88,18 @@
 - [x] **Pagination** — Offset/Page (`?page=1&pageSize=20`, max 50). `PagedResult<T>` DTO. Endpoints: Shops، Requests (customer + shop). AppProvider يدعم `loadMoreRequests/loadMoreShops`. الشاشات: زر "تحميل المزيد" في RequestsScreen، ShopRequestsScreen، ShopSelectScreen. تم: 2026-06-26
 - [x] **Workflow Audit & Fix (2026-06-26)** — RequestDetailScreen يحمّل العروض من API (لا mock). QuotationDetailScreen يستقبل Quotation object كاملاً. قبول العرض يستدعي API الحقيقي ويُرجع chatRoomId. الباكند يُنشئ ChatRoom تلقائياً عند قبول العرض إن لم تكن موجودة. status enum نُظِّف (حُذف draft/offers/shopSelected/scheduled/disputed). AppProvider نُظِّف من الكود الوهمي. تم: 2026-06-26
 - [x] **Request Lifecycle Redesign (2026-06-27)** — إعادة تصميم دورة حياة الطلب بالكامل:
+- [x] **Shop Registration System Overhaul (2026-06-27)** — نظام تسجيل المتاجر المحترف:
+  - **Backend:** إضافة حقول `IdNumber`, `CrDocumentUrl`, `IdDocumentUrl` على نموذج `Shop`. تحقق من رقم الجوال السعودي (05XXXXXXXX) ورقم السجل التجاري (10 أرقام). Migration `20260627000002_AddShopDocumentFields` + Designer.cs.
+  - **Flutter:** تحديث `ShopRegisterScreen` بـ `file_picker` — يفتح الملفات، يرفعها عبر `/api/upload/document` (anonymous)، ويخزّن URL في نموذج التسجيل. حقول: صورة الهوية الوطنية + السجل التجاري إلزامية.
+  - **Backend Upload:** Endpoint جديد `POST /api/upload/document` بدون مصادقة (لأن المتجر لم يُسجَّل بعد).
+- [x] **Admin Shop Approval System (2026-06-27)** — نظام اعتماد المتاجر الكامل:
+  - **Backend:** إضافة `Suspended` لـ `ShopStatus` enum (كقيمة نصية في PostgreSQL — لا migration مطلوب). إضافة حقل `RejectionReason` (nullable text) مع migration `20260627000003_AddShopRejectionReason`. إضافة endpoint `GET /api/shops/admin/all` (يدعم `?status=&search=`). تحديث `PUT /{id}/reject` ليقبل body `{ reason }`. إضافة `PUT /{id}/suspend`.
+  - **Flutter:** إعادة كتابة `AdminPendingScreen` بالكامل: 5 تبويبات (الكل/بانتظار/معتمد/مرفوض/موقوف) مع عداد حي لكل حالة. شريط بحث مع clear button. Bottom sheet لتحديد سبب الرفض (4 أسباب جاهزة + نص حر). `_ActionBar` widget يتكيف حسب الحالة (اعتماد/رفض/تعليق/استعادة). عرض سبب الرفض في صندوق أحمر.
+  - **Flutter Dashboard:** `ShopDashboardScreen` يقرأ `status` و`rejectionReason` من API. `_StatusBadge` widget يعرض 5 حالات مختلفة: Approved (أخضر) / Rejected (أحمر + سبب) / Suspended (بنفسجي) / DocsRequested (أزرق) / Pending (برتقالي). زر الفتح/الإغلاق مخفي إذا لم يكن المتجر Approved.
+- [x] **Bug Fix: Shop Dashboard Status Badge (2026-06-27)** — كان السطر 124 في `shop_dashboard_screen.dart` يعرض نص ثابت "متجر معتمد · متاح للطلبات" لجميع المتاجر بغض النظر عن الحالة الحقيقية. تم الإصلاح بربطه بـ `shopData['status']` من API.
+- [x] **Bug Fix: Admin Dashboard Compile Error (2026-06-27)** — `admin_dashboard_screen.dart` كان يستدعي `ShopAdminService.getPendingShops()` بعد إعادة تسمية الدالة. تم الإصلاح إلى `getAllShops(status: 'Pending')`.
+- [x] **Migration Fixes (2026-06-27)** — إنشاء `20260627000002_AddShopDocumentFields.Designer.cs` الناقص (كان سبب عدم اكتشاف EF Core للـ migration). إنشاء migration + Designer كاملَين لـ `20260627000003_AddShopRejectionReason`. تحديث `AppDbContextModelSnapshot.cs` بحقل `RejectionReason`.
+- [x] **Request Lifecycle Redesign (2026-06-27)** — إعادة تصميم دورة حياة الطلب بالكامل:
   - **Backend:** `RequestStatus` أصبح 6 حالات: `Open، ShopSelected، InProgress، Completed، Cancelled، Expired`. `QuotationStatus` أضيف `Withdrawn`. `RequestShopStatus` أضيف `Withdrawn`. إضافة `ViewedAt/RespondedAt/RejectedAt` على `RequestShop`. تغيير `ChatRoom` من 1-to-1 إلى 1-to-many (UNIQUE على `RequestId+ShopId` بدلاً من `RequestId` وحده). إضافة endpoint `PUT /api/requests/{id}/start` و `PUT /api/quotations/{id}/withdraw`. `AcceptRequestAsync` ينشئ ChatRoom مباشرة عند قبول المتجر (لا عند قبول العرض). `StartWorkAsync` → `InProgress`. `CompleteAsync` ← يتطلب `InProgress`.
   - **Flutter:** `RequestStatus` enum نُظِّف (6 حالات، labels عربية). `ShopRequestShopStatus` أضيف `withdrawn`. `Quotation` أضيف `withdrawn` + `Quotation.empty` sentinel. `ShopRequestDetailScreen` أعيد كتابته — state machine كامل للأزرار. `ReviewService` + `review_screen.dart` كُتبا من صفر بـ API حقيقي. `QuotationService.withdrawQuotation()` + `ShopRequestService.startWork/completeRequest()`.
   - **Migration:** `20260627000001_RequestLifecycleRedesign` مع data migration (Pending→Open, Active→ShopSelected) + إضافة الأعمدة الجديدة + تغيير الـ index.
@@ -109,14 +121,14 @@
 ### Backend
 - [ ] Admin endpoint: list all users
 - [ ] Admin endpoint: suspend/activate user
-- [ ] Shop owner: edit their own shop profile
 - [ ] Password reset / forgot password flow
 - [ ] Email verification
 - [ ] Input validation (no FluentValidation or DataAnnotations currently)
 
 ### Flutter App
 - [ ] ShopMyStoreScreen — currently a placeholder ("قريباً")
-- [ ] AdminDashboardScreen — stats/metrics (currently placeholder)
+- [ ] Quotation withdrawal UI — زر "سحب العرض" في واجهة المتجر (الـ service `withdrawQuotation()` موجود لكن UI غير مكتمل)
+- [ ] Badge عدد الرسائل غير المقروءة على تاب المحادثات في bottom nav (مؤجل)
 - [ ] Push notifications (no FCM integration)
 - [ ] Profile/account settings screen
 - [ ] Logout button visible in UI
@@ -146,3 +158,6 @@
 | 5 | ~~Quotation acceptance called local-only AppProvider method (hardcoded request ID '1042')~~ | ✅ Fixed 2026-06-26 |
 | 6 | ~~Chat navigation after acceptance used hardcoded chatRoomId 'sh1'~~ | ✅ Fixed 2026-06-26 |
 | 7 | ~~RequestDetailScreen loaded quotations from mock data only (hardcoded requestId '1042')~~ | ✅ Fixed 2026-06-26 |
+| 8 | ~~Shop dashboard showed "متجر معتمد" badge for ALL shops regardless of actual status~~ | ✅ Fixed 2026-06-27 |
+| 9 | ~~EF Core couldn't discover migration 20260627000002 (missing .Designer.cs file)~~ | ✅ Fixed 2026-06-27 |
+| 10 | ~~admin_dashboard_screen.dart compile error: `getPendingShops` renamed to `getAllShops`~~ | ✅ Fixed 2026-06-27 |

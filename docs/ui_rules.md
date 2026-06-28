@@ -46,13 +46,16 @@
 ### Status Colors
 | Name | Hex | Usage |
 |------|-----|-------|
-| `green` | #2E7D5B | Success, Completed status |
+| `green` | #2E7D5B | Success, Completed status, Approved shop |
 | `greenLight` | #EAF5EF | Green chip background |
 | `greenBorder` | #CDE7DA | Green chip border |
-| `red` | #C0432F | Error, Cancelled status |
+| `red` | #C0432F | Error, Cancelled status, Rejected shop |
 | `redLight` | #FBEDEA | Red chip background |
 | `redBorder` | #F2D4CE | Red chip border |
 | `star` | #E4B53C | Star/rating color |
+| *(inline)* | #9C27B0 | Suspended shop status (purple, inline only — not in AppColors) |
+| *(inline)* | #0288D1 | DocsRequested shop status (blue, inline only) |
+| *(inline)* | #E65100 | Pending shop badge on admin cards (deep orange, inline only) |
 
 ---
 
@@ -127,17 +130,17 @@
 ### Shop
 | Route | Screen | Status |
 |-------|--------|--------|
-| `/shop/dashboard` | ShopDashboardScreen | ✅ Stats overview |
-| `/shop/request-detail` | ShopRequestDetailScreen | ✅ View request |
-| `/shop/send-quote` | SendQuoteScreen | ⚠️ Form exists, API call not wired |
-| Chats tab | ShopChatsScreen | ✅ Chat rooms list |
+| `/shop/dashboard` | ShopDashboardScreen | ✅ Stats + live status badge (Approved/Rejected/Suspended/DocsRequested/Pending) |
+| `/shop/request-detail` | ShopRequestDetailScreen | ✅ Full state machine (accept→start work→complete) |
+| `/shop/send-quote` | SendQuoteScreen | ✅ Form + API call wired |
+| Chats tab | ShopChatsScreen | ✅ Chat rooms list with unread badge |
 | My Store tab | ShopMyStoreScreen | ❌ Placeholder "قريباً" |
 
 ### Admin
 | Route | Screen | Status |
 |-------|--------|--------|
-| `/admin/dashboard` | AdminDashboardScreen | ⚠️ Placeholder stats |
-| `/admin/pending` | AdminPendingScreen | ✅ Approve/reject shops |
+| `/admin/dashboard` | AdminDashboardScreen | ⚠️ Some stats live (pending count, dispute count), totals still hardcoded |
+| `/admin/pending` | AdminPendingScreen | ✅ Full shop management: 5-tab filter, search, approve/reject/suspend/restore |
 | `/admin/disputes` | AdminDisputesScreen | ✅ View/resolve disputes |
 
 ---
@@ -146,10 +149,22 @@
 
 | API Status | Flutter Enum | Arabic Label | Color |
 |-----------|-------------|-------------|-------|
-| `Pending` | `pending` | معلق | gold |
-| `Active` | `inProgress` | جارٍ | green |
+| `Open` | `open` | مفتوح | gold |
+| `ShopSelected` | `shopSelected` | بانتظار التأكيد | gold |
+| `InProgress` | `inProgress` | جارٍ | green |
 | `Completed` | `completed` | مكتمل | green |
 | `Cancelled` | `cancelled` | ملغى | red |
+| `Expired` | `expired` | منتهي | grey |
+
+## Shop Status Display (Dashboard Badge)
+
+| API Status | Arabic Label | Icon | Color |
+|-----------|-------------|------|-------|
+| `Approved` | متجر معتمد | verified | green |
+| `Rejected` | مرفوض + سبب الرفض | cancel | red |
+| `Suspended` | المتجر موقوف من الإدارة | block | #9C27B0 (purple) |
+| `DocsRequested` | مطلوب مستندات إضافية | folder_open | #0288D1 (blue) |
+| `Pending` | قيد المراجعة | hourglass_empty | orange |
 
 ---
 

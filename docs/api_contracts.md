@@ -56,13 +56,16 @@ No auth required.
 Request:
 {
   "fullName": "string",
-  "phone": "string",
+  "phone": "string",           // Saudi format: 05XXXXXXXX
   "email": "string",
   "password": "string",
   "shopName": "string",
-  "crNumber": "string",
+  "crNumber": "string",        // 10-digit commercial registration number
   "city": "string",
-  "shopPhone": "string"
+  "shopPhone": "string",
+  "idNumber": "string|null",
+  "crDocumentUrl": "string|null",   // URL from POST /api/upload/document
+  "idDocumentUrl": "string|null"    // URL from POST /api/upload/document
 }
 
 Response 200: AuthResponse (same as register)
@@ -165,20 +168,74 @@ Response 200:
 }
 ```
 
-### GET `/api/shops/pending` 🔒 (Admin)
-Returns shops with Status=Pending.
+### GET `/api/shops/my` 🔒 (ShopOwner)
+Returns the authenticated shop owner's shop info.
 ```json
-Response 200: [ShopResponse]
+Response 200:
+{
+  "id": "uuid",
+  "name": "string",
+  "city": "string",
+  "phone": "string",
+  "logoUrl": "string|null",
+  "status": "Pending|Approved|Rejected|DocsRequested|Suspended",
+  "crNumber": "string",
+  "rating": 4.5,
+  "totalJobs": 12,
+  "rejectionReason": "string|null"
+}
+```
+
+### GET `/api/shops/admin/all` 🔒 (Admin)
+Returns all shops with optional status filter and search. Replaces the old `/api/shops/pending`.
+```
+Query params:
+  status  = Pending|Approved|Rejected|DocsRequested|Suspended  (optional — omit for all)
+  search  = string  (searches name, owner name, CR number)
+  page    = int (default 1)
+  pageSize = int (default 20, max 200)
+
+Response 200: PagedResult<PendingShopResponse>
+{
+  "items": [
+    {
+      "id": "uuid",
+      "name": "string",
+      "ownerName": "string",
+      "ownerPhone": "string",
+      "city": "string",
+      "phone": "string",
+      "crNumber": "string",
+      "idNumber": "string|null",
+      "logoUrl": "string|null",
+      "crDocumentUrl": "string|null",
+      "idDocumentUrl": "string|null",
+      "status": "string",
+      "createdAt": "ISO8601",
+      "rejectionReason": "string|null"
+    }
+  ],
+  "total": 42,
+  "page": 1,
+  "pageSize": 200
+}
 ```
 
 ### PUT `/api/shops/{id}/approve` 🔒 (Admin)
 ```json
 Response 200: { "message": "تم اعتماد المتجر" }
+Note: Also clears any previous rejectionReason
 ```
 
 ### PUT `/api/shops/{id}/reject` 🔒 (Admin)
 ```json
+Request: { "reason": "string" }   // mandatory, cannot be empty
 Response 200: { "message": "تم رفض المتجر" }
+```
+
+### PUT `/api/shops/{id}/suspend` 🔒 (Admin)
+```json
+Response 200: { "message": "تم تعليق المتجر" }
 ```
 
 ---
@@ -212,7 +269,7 @@ Response 200:
   "location": "string",
   "appointmentDate": "ISO8601|null",
   "notes": "string|null",
-  "status": "Pending",
+  "status": "Open|ShopSelected|InProgress|Completed|Cancelled|Expired",
   "shopNames": ["string"],
   "imageUrls": ["string"],
   "createdAt": "ISO8601"
@@ -469,4 +526,11 @@ Multiple file upload.
 ```
 Form field: "files" (multiple IFormFile)
 Response 200: { "urls": ["/uploads/file1.ext", "/uploads/file2.ext"] }
+```
+
+### POST `/api/upload/document`
+**No auth required** — used during shop registration before the account is created.
+```
+Form field: "file" (IFormFile)
+Response 200: { "url": "/uploads/filename.ext" }
 ```

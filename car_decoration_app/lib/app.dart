@@ -29,6 +29,8 @@ import 'models/quotation.dart';
 import 'screens/admin/admin_shell.dart';
 import 'screens/admin/admin_pending_screen.dart';
 import 'screens/admin/admin_disputes_screen.dart';
+import 'screens/admin/admin_shop_review_screen.dart';
+import 'models/pending_shop.dart';
 
 class CarDecorationApp extends StatelessWidget {
   final String initialRoute;
@@ -145,6 +147,9 @@ class CarDecorationApp extends StatelessWidget {
         break;
       case '/admin/pending':
         page = const AdminPendingScreen();
+        break;
+      case '/admin/shop-review':
+        page = AdminShopReviewScreen(shop: args as PendingShop);
         break;
       case '/admin/disputes':
         page = const AdminDisputesScreen();

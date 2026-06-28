@@ -392,11 +392,17 @@ class _AdminPendingScreenState extends State<AdminPendingScreen> {
                               padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
                               itemCount: _all.length,
                               separatorBuilder: (_, __) => const SizedBox(height: 12),
-                              itemBuilder: (_, i) => _ShopCard(
-                                shop: _all[i],
-                                onApprove: () => _showApproveConfirm(_all[i]),
-                                onReject: () => _showRejectDialog(_all[i]),
-                                onSuspend: () => _showSuspendConfirm(_all[i]),
+                              itemBuilder: (_, i) => GestureDetector(
+                                onTap: () => Navigator.pushNamed(
+                                  context, '/admin/shop-review',
+                                  arguments: _all[i],
+                                ).then((_) => setState(() {})),
+                                child: _ShopCard(
+                                  shop: _all[i],
+                                  onApprove: () => _showApproveConfirm(_all[i]),
+                                  onReject: () => _showRejectDialog(_all[i]),
+                                  onSuspend: () => _showSuspendConfirm(_all[i]),
+                                ),
                               ),
                             ),
             ),

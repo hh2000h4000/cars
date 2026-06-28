@@ -83,6 +83,10 @@ Customer → Request (multi-shop) → Shop accepts → ChatRoom opens
 - سحب عرض السعر (withdraw quotation): backend + service ✅
 - Mock data: محذوف بالكامل
 - Serilog: مفعّل، CORS: يعمل، Sentry: مضبوط
+- **تسجيل المتاجر:** حقول IdNumber + CrDocumentUrl + IdDocumentUrl + تحقق رقم الجوال/السجل التجاري ✅
+- **نظام اعتماد المتاجر (Admin):** 5 حالات كاملة (Pending/Approved/Rejected/DocsRequested/Suspended)، شاشة إدارة مع بحث وتصفية، رفض بسبب إلزامي، تعليق/استعادة ✅
+- **شاشة لوحة التحكم للمتجر:** تعرض الحالة الصحيحة من API (لا نص ثابت) مع 5 badges مختلفة ✅
+- **Migrations:** 20260627000001 (lifecycle) + 20260627000002 (docs) + 20260627000003 (rejectionReason) ✅
 
 ## Ports & URLs
 
@@ -145,8 +149,9 @@ Customer → Request (multi-shop) → Shop accepts → ChatRoom opens
 ## What's Left (الأهم)
 
 - `ShopMyStoreScreen` لا تزال placeholder ("قريباً")
+- Quotation withdrawal UI — زر "سحب العرض" في واجهة المتجر (`withdrawQuotation()` service موجود، UI ناقص)
 - Badge عدد الرسائل غير المقروءة على تاب المحادثات في bottom nav (مؤجل)
 - Push Notifications عبر FCM (يحتاج Firebase + backend integration)
 - Cloud storage للملفات المرفوعة (حالياً local disk)
-- Quotation withdrawal UI — زر "سحب العرض" في واجهة المتجر (الـ service موجود)
 - Rate Limiting على `/auth/login` ضد brute force
+- تشغيل `dotnet ef database update` على الخادم لتطبيق migration 20260627000003 (RejectionReason)

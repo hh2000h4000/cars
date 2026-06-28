@@ -120,3 +120,23 @@ Technical decisions made during development, with rationale.
 ### Manual migration for Color column
 **Decision:** Created migration `20260625000001_AddColorToVehicles` manually rather than via `dotnet ef migrations add`.
 **Why:** The `Color` property existed in the EF model and `AppDbContextModelSnapshot` but was never added to the migration files. The database was missing the column, causing `column v.Color does not exist` errors. A manual migration was the safest fix without dropping/recreating the database.
+
+### ShopStatus stored as string — new enum values need no DB migration
+**Decision:** EF Core stores `ShopStatus` as a `text` column (via `HasConversion<string>()`). Adding a new enum value (e.g. `Suspended`) requires only a C# code change, not a database migration.
+**Why:** PostgreSQL text column accepts any string. If the column were stored as a PostgreSQL `enum` type, ALTER TYPE would be required. This trade-off was intentional.
+**Impact:** If storing as int (the EF Core default for enums), adding new values changes existing int mappings — always use string storage for enums with growing value sets.
+
+### Anonymous document upload endpoint
+**Decision:** `POST /api/upload/document` is accessible without authentication.
+**Why:** During shop registration, the owner must upload CR and ID documents as part of the registration form — but they don't have an account yet, so they have no JWT token. A separate anonymous endpoint solves the chicken-and-egg problem.
+**Trade-off:** Anonymous upload endpoints can be abused for storage spam. Mitigations (rate limiting, file size cap, file type validation) should be added before production.
+
+### Admin shop management endpoint redesign
+**Decision:** Replaced `GET /api/shops/pending` (returned only Pending/Rejected shops) with `GET /api/shops/admin/all` supporting `?status=` and `?search=` filters.
+**Why:** The admin needs to see all shops (Pending, Approved, Rejected, DocsRequested, Suspended) in one place and search by name/owner/CR. The old endpoint only covered the initial approval flow, making it impossible to manage approved shops or search.
+**Flutter impact:** `ShopAdminService.getAllShops({String? status, String? search})` replaces `getPendingShops()`. The API response is `PagedResult<T>` — Flutter must read `res.data['items']`, not `res.data as List`.
+
+### Shop registration validation rules
+**Decision:** Backend validates Saudi phone format (starts with 05, 10 digits) and CR number (exactly 10 digits). Flutter also validates client-side before submission.
+**Why:** Saudi-specific business rules. Without validation, garbage data enters the database and causes issues with admin review (can't verify documents against CRN).
+**Future:** Add server-side validation via FluentValidation for all inputs (currently manual string checks).
