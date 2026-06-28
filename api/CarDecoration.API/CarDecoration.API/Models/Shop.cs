@@ -8,6 +8,13 @@ public class Shop : BaseEntity
     public string Name { get; set; } = string.Empty;
     public string CrNumber { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
+    public string Street { get; set; } = string.Empty;
+    public string District { get; set; } = string.Empty;
+    public string? BuildingNumber { get; set; }
+    public string PostalCode { get; set; } = string.Empty;
+    public string? AdditionalNumber { get; set; }
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
     public string Phone { get; set; } = string.Empty;
     public string? LogoUrl { get; set; }
     public string? IdNumber { get; set; }

@@ -23,8 +23,7 @@ public class ShopService
         var shop = await _db.Shops
             .FirstOrDefaultAsync(s => s.OwnerId == userId)
             ?? throw new Exception("المتجر غير موجود");
-        return new MyShopResponse(shop.Id, shop.Name, shop.City, shop.Phone,
-            shop.LogoUrl, shop.Status.ToString(), shop.CrNumber, shop.IdNumber, shop.Rating, shop.TotalJobs, shop.RejectionReason);
+        return ToMyShopResponse(shop);
     }
 
     public async Task<MyShopResponse> UpdateMyShopAsync(UpdateMyShopRequest req)
@@ -37,12 +36,17 @@ public class ShopService
         shop.Name = req.Name.Trim();
         shop.Phone = req.Phone.Trim();
         shop.City = req.City.Trim();
+        shop.Street = req.Street.Trim();
+        shop.District = req.District.Trim();
+        shop.PostalCode = req.PostalCode.Trim();
+        shop.BuildingNumber = req.BuildingNumber?.Trim();
+        shop.AdditionalNumber = req.AdditionalNumber?.Trim();
+        if (req.Latitude.HasValue) shop.Latitude = req.Latitude;
+        if (req.Longitude.HasValue) shop.Longitude = req.Longitude;
         if (req.LogoUrl != null) shop.LogoUrl = req.LogoUrl;
 
         await _db.SaveChangesAsync();
-
-        return new MyShopResponse(shop.Id, shop.Name, shop.City, shop.Phone,
-            shop.LogoUrl, shop.Status.ToString(), shop.CrNumber, shop.IdNumber, shop.Rating, shop.TotalJobs, shop.RejectionReason);
+        return ToMyShopResponse(shop);
     }
 
     public Task<PagedResult<ShopResponse>> GetApprovedShopsAsync(PaginationRequest pagination)
@@ -50,10 +54,11 @@ public class ShopService
             .Where(s => s.Status == ShopStatus.Approved)
             .OrderByDescending(s => s.Rating)
             .Select(s => new ShopResponse(
-                s.Id, s.Name, s.City, s.Phone,
+                s.Id, s.Name, s.City, s.District, s.Street, s.Phone,
                 s.LogoUrl, s.Rating, s.TotalJobs,
                 s.Reviews.Count,
-                s.Status.ToString()))
+                s.Status.ToString(),
+                s.Latitude, s.Longitude))
             .ToPagedAsync(pagination);
 
     public async Task<ShopDetailsResponse> GetShopDetailsAsync(Guid id)
@@ -69,9 +74,10 @@ public class ShopService
             r.Comment, r.CreatedAt)).ToList();
 
         return new ShopDetailsResponse(
-            shop.Id, shop.Name, shop.City, shop.Phone,
-            shop.LogoUrl, shop.Rating, shop.TotalJobs,
-            shop.Status.ToString(), reviews);
+            shop.Id, shop.Name, shop.City, shop.Street, shop.District,
+            shop.PostalCode, shop.BuildingNumber, shop.AdditionalNumber,
+            shop.Phone, shop.LogoUrl, shop.Rating, shop.TotalJobs,
+            shop.Status.ToString(), shop.Latitude, shop.Longitude, reviews);
     }
 
     // ── للإدارة: عرض جميع المتاجر مع فلترة اختيارية ──
@@ -91,8 +97,11 @@ public class ShopService
         return query
             .OrderByDescending(s => s.CreatedAt)
             .Select(s => new PendingShopResponse(
-                s.Id, s.Name, s.Owner.FullName, s.Owner.Phone, s.City, s.Phone,
-                s.CrNumber, s.IdNumber, s.LogoUrl, s.CrDocumentUrl, s.IdDocumentUrl,
+                s.Id, s.Name, s.Owner.FullName, s.Owner.Phone,
+                s.City, s.Street, s.District, s.PostalCode,
+                s.BuildingNumber, s.AdditionalNumber, s.Latitude, s.Longitude,
+                s.Phone, s.CrNumber, s.IdNumber, s.LogoUrl,
+                s.CrDocumentUrl, s.IdDocumentUrl,
                 s.Status.ToString(), s.CreatedAt, s.RejectionReason))
             .ToPagedAsync(pagination);
     }
@@ -110,6 +119,13 @@ public class ShopService
         shop.Name = req.Name.Trim();
         shop.Phone = req.Phone.Trim();
         shop.City = req.City.Trim();
+        shop.Street = req.Street.Trim();
+        shop.District = req.District.Trim();
+        shop.PostalCode = req.PostalCode.Trim();
+        shop.BuildingNumber = req.BuildingNumber?.Trim();
+        shop.AdditionalNumber = req.AdditionalNumber?.Trim();
+        if (req.Latitude.HasValue) shop.Latitude = req.Latitude;
+        if (req.Longitude.HasValue) shop.Longitude = req.Longitude;
         shop.CrNumber = req.CrNumber.Trim();
         if (req.IdNumber != null) shop.IdNumber = req.IdNumber.Trim();
         if (req.LogoUrl != null) shop.LogoUrl = req.LogoUrl;
@@ -119,10 +135,16 @@ public class ShopService
         shop.RejectionReason = null;
 
         await _db.SaveChangesAsync();
-
-        return new MyShopResponse(shop.Id, shop.Name, shop.City, shop.Phone,
-            shop.LogoUrl, shop.Status.ToString(), shop.CrNumber, shop.IdNumber, shop.Rating, shop.TotalJobs, null);
+        return ToMyShopResponse(shop, rejectionReason: null);
     }
+
+    private static MyShopResponse ToMyShopResponse(Shop shop, string? rejectionReason = null)
+        => new(shop.Id, shop.Name, shop.City, shop.Street, shop.District,
+            shop.PostalCode, shop.BuildingNumber, shop.AdditionalNumber,
+            shop.Latitude, shop.Longitude,
+            shop.Phone, shop.LogoUrl, shop.Status.ToString(),
+            shop.CrNumber, shop.IdNumber, shop.Rating, shop.TotalJobs,
+            rejectionReason ?? shop.RejectionReason);
 
     public async Task ApproveShopAsync(Guid id)
     {

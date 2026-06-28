@@ -1,15 +1,19 @@
-﻿namespace CarDecoration.API.DTOs;
+namespace CarDecoration.API.DTOs;
 
 public record ShopResponse(
     Guid Id,
     string Name,
     string City,
+    string District,
+    string Street,
     string Phone,
     string? LogoUrl,
     float Rating,
     int TotalJobs,
     int ReviewCount,
-    string Status
+    string Status,
+    double? Latitude,
+    double? Longitude
 );
 
 public record PendingShopResponse(
@@ -18,6 +22,13 @@ public record PendingShopResponse(
     string OwnerName,
     string OwnerPhone,
     string City,
+    string Street,
+    string District,
+    string PostalCode,
+    string? BuildingNumber,
+    string? AdditionalNumber,
+    double? Latitude,
+    double? Longitude,
     string Phone,
     string CrNumber,
     string? IdNumber,
@@ -35,11 +46,18 @@ public record ShopDetailsResponse(
     Guid Id,
     string Name,
     string City,
+    string Street,
+    string District,
+    string PostalCode,
+    string? BuildingNumber,
+    string? AdditionalNumber,
     string Phone,
     string? LogoUrl,
     float Rating,
     int TotalJobs,
     string Status,
+    double? Latitude,
+    double? Longitude,
     List<ReviewResponse> Reviews
 );
 
@@ -47,6 +65,13 @@ public record MyShopResponse(
     Guid Id,
     string Name,
     string City,
+    string Street,
+    string District,
+    string PostalCode,
+    string? BuildingNumber,
+    string? AdditionalNumber,
+    double? Latitude,
+    double? Longitude,
     string Phone,
     string? LogoUrl,
     string Status,
@@ -61,6 +86,13 @@ public record UpdateMyShopRequest(
     string Name,
     string Phone,
     string City,
+    string Street,
+    string District,
+    string PostalCode,
+    string? BuildingNumber,
+    string? AdditionalNumber,
+    double? Latitude,
+    double? Longitude,
     string? LogoUrl
 );
 
@@ -68,6 +100,13 @@ public record ResubmitMyShopRequest(
     string Name,
     string Phone,
     string City,
+    string Street,
+    string District,
+    string PostalCode,
+    string? BuildingNumber,
+    string? AdditionalNumber,
+    double? Latitude,
+    double? Longitude,
     string CrNumber,
     string? IdNumber,
     string? LogoUrl,

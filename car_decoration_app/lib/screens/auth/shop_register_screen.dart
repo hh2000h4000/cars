@@ -4,12 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../../services/auth_service.dart';
 import '../../services/upload_service.dart';
 import '../../services/api_client.dart';
+import '../shop/location_picker_screen.dart';
 
 class ShopRegisterScreen extends StatefulWidget {
   const ShopRegisterScreen({super.key});
@@ -20,15 +22,23 @@ class ShopRegisterScreen extends StatefulWidget {
 
 class _ShopRegisterScreenState extends State<ShopRegisterScreen> {
   // ── Controllers ──────────────────────────────────────────────────────────
-  final _shopNameCtrl    = TextEditingController();
-  final _crNumberCtrl    = TextEditingController();
-  final _ownerNameCtrl   = TextEditingController();
-  final _idNumberCtrl    = TextEditingController();
-  final _phoneCtrl       = TextEditingController();
-  final _shopPhoneCtrl   = TextEditingController();
-  final _emailCtrl       = TextEditingController();
-  final _cityCtrl        = TextEditingController();
-  final _passwordCtrl    = TextEditingController();
+  final _shopNameCtrl       = TextEditingController();
+  final _crNumberCtrl       = TextEditingController();
+  final _ownerNameCtrl      = TextEditingController();
+  final _idNumberCtrl       = TextEditingController();
+  final _phoneCtrl          = TextEditingController();
+  final _shopPhoneCtrl      = TextEditingController();
+  final _emailCtrl          = TextEditingController();
+  final _cityCtrl           = TextEditingController();
+  final _streetCtrl         = TextEditingController();
+  final _districtCtrl       = TextEditingController();
+  final _postalCodeCtrl     = TextEditingController();
+  final _buildingNumberCtrl = TextEditingController();
+  final _additionalNumCtrl  = TextEditingController();
+  final _passwordCtrl       = TextEditingController();
+
+  // ── Location ──────────────────────────────────────────────────────────────
+  LatLng? _location;
 
   // ── Logo ─────────────────────────────────────────────────────────────────
   Uint8List? _logoBytes;
@@ -63,7 +73,9 @@ class _ShopRegisterScreenState extends State<ShopRegisterScreen> {
     _ownerNameCtrl.dispose(); _idNumberCtrl.dispose();
     _phoneCtrl.dispose(); _shopPhoneCtrl.dispose();
     _emailCtrl.dispose(); _cityCtrl.dispose();
-    _passwordCtrl.dispose();
+    _streetCtrl.dispose(); _districtCtrl.dispose();
+    _postalCodeCtrl.dispose(); _buildingNumberCtrl.dispose();
+    _additionalNumCtrl.dispose(); _passwordCtrl.dispose();
     super.dispose();
   }
 
@@ -86,7 +98,19 @@ class _ShopRegisterScreenState extends State<ShopRegisterScreen> {
     if (_shopPhoneCtrl.text.trim().isEmpty) return 'يرجى إدخال رقم جوال المتجر';
     if (!_phoneRe.hasMatch(_shopPhoneCtrl.text.trim())) return 'رقم جوال المتجر يجب أن يبدأ بـ 05 أو 01 ويكون 10 أرقام';
     if (_cityCtrl.text.trim().isEmpty) return 'يرجى إدخال المدينة';
+    if (_streetCtrl.text.trim().isEmpty) return 'يرجى إدخال اسم الشارع';
+    if (_districtCtrl.text.trim().isEmpty) return 'يرجى إدخال اسم الحي';
+    if (_postalCodeCtrl.text.trim().isEmpty) return 'يرجى إدخال الرمز البريدي';
+    if (_location == null) return 'يرجى تحديد موقع المتجر على الخريطة';
     return null;
+  }
+
+  Future<void> _pickLocation() async {
+    final result = await Navigator.push<LatLng>(
+      context,
+      MaterialPageRoute(builder: (_) => LocationPickerScreen(initial: _location)),
+    );
+    if (result != null && mounted) setState(() => _location = result);
   }
 
   // ── Logo picker ───────────────────────────────────────────────────────────
@@ -165,18 +189,25 @@ class _ShopRegisterScreenState extends State<ShopRegisterScreen> {
     setState(() { _loading = true; _error = null; });
     try {
       await AuthService.registerShop(
-        fullName:       _ownerNameCtrl.text.trim(),
-        phone:          _phoneCtrl.text.trim(),
-        email:          _emailCtrl.text.trim(),
-        password:       _passwordCtrl.text,
-        shopName:       _shopNameCtrl.text.trim(),
-        crNumber:       _crNumberCtrl.text.trim(),
-        city:           _cityCtrl.text.trim(),
-        shopPhone:      _shopPhoneCtrl.text.trim(),
-        idNumber:       _idNumberCtrl.text.trim(),
-        crDocumentUrl:  _crDocUrl!,
-        idDocumentUrl:  _idDocUrl!,
-        logoUrl:        _logoUrl,
+        fullName:         _ownerNameCtrl.text.trim(),
+        phone:            _phoneCtrl.text.trim(),
+        email:            _emailCtrl.text.trim(),
+        password:         _passwordCtrl.text,
+        shopName:         _shopNameCtrl.text.trim(),
+        crNumber:         _crNumberCtrl.text.trim(),
+        city:             _cityCtrl.text.trim(),
+        street:           _streetCtrl.text.trim(),
+        district:         _districtCtrl.text.trim(),
+        postalCode:       _postalCodeCtrl.text.trim(),
+        buildingNumber:   _buildingNumberCtrl.text.trim().isEmpty ? null : _buildingNumberCtrl.text.trim(),
+        additionalNumber: _additionalNumCtrl.text.trim().isEmpty ? null : _additionalNumCtrl.text.trim(),
+        latitude:         _location?.latitude,
+        longitude:        _location?.longitude,
+        shopPhone:        _shopPhoneCtrl.text.trim(),
+        idNumber:         _idNumberCtrl.text.trim(),
+        crDocumentUrl:    _crDocUrl!,
+        idDocumentUrl:    _idDocUrl!,
+        logoUrl:          _logoUrl,
       );
       if (mounted) Navigator.pushNamed(context, '/auth/shop-pending');
     } on DioException catch (e) {
@@ -511,6 +542,96 @@ class _ShopRegisterScreenState extends State<ShopRegisterScreen> {
                 label: 'المدينة *',
                 controller: _cityCtrl,
                 hint: 'الرياض',
+              ),
+
+              // ── معلومات الموقع ────────────────────────────────────────────
+              _sectionHeader('العنوان الوطني'),
+
+              _buildField(
+                label: 'الشارع *',
+                controller: _streetCtrl,
+                hint: 'شارع الملك فهد',
+              ),
+
+              _buildField(
+                label: 'الحي *',
+                controller: _districtCtrl,
+                hint: 'حي العليا',
+              ),
+
+              _buildField(
+                label: 'الرمز البريدي *',
+                controller: _postalCodeCtrl,
+                hint: '12345',
+                ltr: true,
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(5),
+                ],
+              ),
+
+              Row(children: [
+                Expanded(
+                  child: _buildField(
+                    label: 'رقم المبنى',
+                    controller: _buildingNumberCtrl,
+                    hint: '1234',
+                    ltr: true,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildField(
+                    label: 'الرقم الإضافي',
+                    controller: _additionalNumCtrl,
+                    hint: '5678',
+                    ltr: true,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  ),
+                ),
+              ]),
+
+              // ── Map picker ───────────────────────────────────────────────
+              _sectionHeader('موقع المتجر على الخريطة'),
+
+              Padding(
+                padding: const EdgeInsets.only(bottom: 13),
+                child: GestureDetector(
+                  onTap: _pickLocation,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: _location != null ? const Color(0xFFF0FDF4) : Colors.white,
+                      border: Border.all(
+                        color: _location != null ? AppColors.green.withOpacity(.5) : AppColors.border,
+                        width: _location != null ? 1.5 : 1,
+                      ),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: _location != null
+                        ? Row(children: [
+                            const Icon(Icons.location_on_rounded, color: AppColors.green, size: 20),
+                            const SizedBox(width: 10),
+                            Expanded(child: Text(
+                              '${_location!.latitude.toStringAsFixed(5)}, ${_location!.longitude.toStringAsFixed(5)}',
+                              style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.green),
+                            )),
+                            const Text('تغيير', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.goldText)),
+                          ])
+                        : const Row(children: [
+                            Icon(Icons.add_location_alt_outlined, color: AppColors.goldText, size: 20),
+                            SizedBox(width: 10),
+                            Expanded(child: Text('حدد موقع المتجر على الخريطة *',
+                              style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textMuted))),
+                            Icon(Icons.chevron_left, color: AppColors.textMuted, size: 18),
+                          ]),
+                  ),
+                ),
               ),
 
               const SizedBox(height: 6),

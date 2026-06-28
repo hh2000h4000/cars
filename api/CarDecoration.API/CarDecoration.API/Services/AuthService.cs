@@ -97,6 +97,15 @@ public class AuthService
         if (string.IsNullOrWhiteSpace(req.IdDocumentUrl))
             throw new Exception("يرجى رفع صورة الهوية");
 
+        if (string.IsNullOrWhiteSpace(req.Street))
+            throw new Exception("يرجى إدخال اسم الشارع");
+
+        if (string.IsNullOrWhiteSpace(req.District))
+            throw new Exception("يرجى إدخال اسم الحي");
+
+        if (string.IsNullOrWhiteSpace(req.PostalCode))
+            throw new Exception("يرجى إدخال الرمز البريدي");
+
         // ── Uniqueness checks ────────────────────────────────────────────────
         if (await _db.Users.AnyAsync(u => u.Email == req.Email.ToLower().Trim()))
             throw new Exception("البريد الإلكتروني مستخدم مسبقاً");
@@ -127,6 +136,13 @@ public class AuthService
             Name = req.ShopName.Trim(),
             CrNumber = req.CrNumber.Trim(),
             City = req.City.Trim(),
+            Street = req.Street.Trim(),
+            District = req.District.Trim(),
+            PostalCode = req.PostalCode.Trim(),
+            BuildingNumber = req.BuildingNumber?.Trim(),
+            AdditionalNumber = req.AdditionalNumber?.Trim(),
+            Latitude = req.Latitude,
+            Longitude = req.Longitude,
             Phone = req.ShopPhone.Trim(),
             LogoUrl = req.LogoUrl,
             IdNumber = req.IdNumber.Trim(),

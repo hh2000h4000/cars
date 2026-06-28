@@ -3,7 +3,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../theme.dart';
 import '../../services/shop_profile_service.dart';
@@ -12,6 +14,7 @@ import '../../services/upload_service.dart';
 import '../../services/api_client.dart';
 import '../../models/paged_result.dart';
 import '../../app_navigator.dart';
+import 'location_picker_screen.dart';
 
 class ShopMyStoreScreen extends StatefulWidget {
   const ShopMyStoreScreen({super.key});
@@ -293,7 +296,19 @@ class _ShopMyStoreScreenState extends State<ShopMyStoreScreen> {
                         children: [
                           _InfoRow(icon: Icons.phone_outlined, label: 'الهاتف', value: shop.phone),
                           _Divider(),
-                          _InfoRow(icon: Icons.location_on_outlined, label: 'المدينة', value: shop.city),
+                          _InfoRow(icon: Icons.location_city_outlined, label: 'المدينة', value: shop.city),
+                          if (shop.district.isNotEmpty) ...[
+                            _Divider(),
+                            _InfoRow(icon: Icons.holiday_village_outlined, label: 'الحي', value: shop.district),
+                          ],
+                          if (shop.street.isNotEmpty) ...[
+                            _Divider(),
+                            _InfoRow(icon: Icons.signpost_outlined, label: 'الشارع', value: shop.street),
+                          ],
+                          if (shop.postalCode.isNotEmpty) ...[
+                            _Divider(),
+                            _InfoRow(icon: Icons.markunread_mailbox_outlined, label: 'الرمز البريدي', value: shop.postalCode),
+                          ],
                           _Divider(),
                           _InfoRow(
                             icon: Icons.badge_outlined,
@@ -363,6 +378,12 @@ class _EditSheetContentState extends State<_EditSheetContent> {
   late final TextEditingController _name;
   late final TextEditingController _phone;
   late final TextEditingController _city;
+  late final TextEditingController _street;
+  late final TextEditingController _district;
+  late final TextEditingController _postalCode;
+  late final TextEditingController _buildingNumber;
+  late final TextEditingController _additionalNum;
+  LatLng? _location;
   String? _logoUrl;
   bool _uploadingLogo = false;
   bool _saving = false;
@@ -373,7 +394,15 @@ class _EditSheetContentState extends State<_EditSheetContent> {
     _name = TextEditingController(text: widget.shop.name);
     _phone = TextEditingController(text: widget.shop.phone);
     _city = TextEditingController(text: widget.shop.city);
+    _street = TextEditingController(text: widget.shop.street);
+    _district = TextEditingController(text: widget.shop.district);
+    _postalCode = TextEditingController(text: widget.shop.postalCode);
+    _buildingNumber = TextEditingController(text: widget.shop.buildingNumber ?? '');
+    _additionalNum = TextEditingController(text: widget.shop.additionalNumber ?? '');
     _logoUrl = widget.shop.logoUrl;
+    if (widget.shop.latitude != null && widget.shop.longitude != null) {
+      _location = LatLng(widget.shop.latitude!, widget.shop.longitude!);
+    }
   }
 
   @override
@@ -381,7 +410,20 @@ class _EditSheetContentState extends State<_EditSheetContent> {
     _name.dispose();
     _phone.dispose();
     _city.dispose();
+    _street.dispose();
+    _district.dispose();
+    _postalCode.dispose();
+    _buildingNumber.dispose();
+    _additionalNum.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickLocation() async {
+    final result = await Navigator.push<LatLng>(
+      context,
+      MaterialPageRoute(builder: (_) => LocationPickerScreen(initial: _location)),
+    );
+    if (result != null && mounted) setState(() => _location = result);
   }
 
   Future<void> _pickLogo() async {
@@ -442,10 +484,13 @@ class _EditSheetContentState extends State<_EditSheetContent> {
     final name = _name.text.trim();
     final phone = _phone.text.trim();
     final city = _city.text.trim();
+    final street = _street.text.trim();
+    final district = _district.text.trim();
+    final postalCode = _postalCode.text.trim();
 
-    if (name.isEmpty || phone.isEmpty || city.isEmpty) {
+    if (name.isEmpty || phone.isEmpty || city.isEmpty || street.isEmpty || district.isEmpty || postalCode.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى ملء جميع الحقول', style: TextStyle(fontFamily: 'Tajawal')), backgroundColor: AppColors.red),
+        const SnackBar(content: Text('يرجى ملء جميع الحقول المطلوبة', style: TextStyle(fontFamily: 'Tajawal')), backgroundColor: AppColors.red),
       );
       return;
     }
@@ -456,6 +501,13 @@ class _EditSheetContentState extends State<_EditSheetContent> {
         name: name,
         phone: phone,
         city: city,
+        street: street,
+        district: district,
+        postalCode: postalCode,
+        buildingNumber: _buildingNumber.text.trim().isEmpty ? null : _buildingNumber.text.trim(),
+        additionalNumber: _additionalNum.text.trim().isEmpty ? null : _additionalNum.text.trim(),
+        latitude: _location?.latitude,
+        longitude: _location?.longitude,
         logoUrl: _logoUrl,
       );
       if (!mounted) return;
@@ -561,7 +613,55 @@ class _EditSheetContentState extends State<_EditSheetContent> {
               const SizedBox(height: 12),
               _Field(label: 'رقم الهاتف', controller: _phone, icon: Icons.phone_outlined, keyboardType: TextInputType.phone),
               const SizedBox(height: 12),
-              _Field(label: 'المدينة', controller: _city, icon: Icons.location_on_outlined),
+              _Field(label: 'المدينة *', controller: _city, icon: Icons.location_city_outlined),
+              const SizedBox(height: 12),
+              _Field(label: 'الشارع *', controller: _street, icon: Icons.signpost_outlined),
+              const SizedBox(height: 12),
+              _Field(label: 'الحي *', controller: _district, icon: Icons.holiday_village_outlined),
+              const SizedBox(height: 12),
+              _Field(label: 'الرمز البريدي *', controller: _postalCode, icon: Icons.markunread_mailbox_outlined, keyboardType: TextInputType.number),
+              const SizedBox(height: 12),
+              Row(children: [
+                Expanded(child: _Field(label: 'رقم المبنى', controller: _buildingNumber, icon: Icons.apartment_outlined, keyboardType: TextInputType.number)),
+                const SizedBox(width: 10),
+                Expanded(child: _Field(label: 'الرقم الإضافي', controller: _additionalNum, icon: Icons.add_location_alt_outlined, keyboardType: TextInputType.number)),
+              ]),
+              const SizedBox(height: 12),
+
+              // Map picker
+              GestureDetector(
+                onTap: _pickLocation,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: _location != null ? AppColors.green.withOpacity(.06) : AppColors.surface,
+                    border: Border.all(
+                      color: _location != null ? AppColors.green.withOpacity(.4) : AppColors.border,
+                      width: _location != null ? 1.5 : 1,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: _location != null
+                      ? Row(children: [
+                          const Icon(Icons.location_on_rounded, color: AppColors.green, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(child: Text(
+                            '${_location!.latitude.toStringAsFixed(5)}, ${_location!.longitude.toStringAsFixed(5)}',
+                            style: const TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.green),
+                          )),
+                          const Text('تغيير', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.goldText)),
+                        ])
+                      : const Row(children: [
+                          Icon(Icons.add_location_alt_outlined, color: AppColors.textMuted, size: 18),
+                          SizedBox(width: 8),
+                          Text('تحديد موقع المتجر على الخريطة',
+                            style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+                          Spacer(),
+                          Icon(Icons.chevron_left, color: AppColors.textMuted, size: 16),
+                        ]),
+                ),
+              ),
 
               const SizedBox(height: 24),
 
@@ -774,7 +874,8 @@ class _Field extends StatelessWidget {
   final TextEditingController controller;
   final IconData icon;
   final TextInputType? keyboardType;
-  const _Field({required this.label, required this.controller, required this.icon, this.keyboardType});
+  final List<TextInputFormatter>? inputFormatters;
+  const _Field({required this.label, required this.controller, required this.icon, this.keyboardType, this.inputFormatters});
 
   @override
   Widget build(BuildContext context) => Column(
@@ -785,6 +886,7 @@ class _Field extends StatelessWidget {
       TextFormField(
         controller: controller,
         keyboardType: keyboardType,
+        inputFormatters: inputFormatters,
         textAlign: TextAlign.right,
         style: const TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
         decoration: InputDecoration(
@@ -1161,8 +1263,14 @@ class _ResubmitSheetContentState extends State<_ResubmitSheetContent> {
   late final TextEditingController _name;
   late final TextEditingController _phone;
   late final TextEditingController _city;
+  late final TextEditingController _street;
+  late final TextEditingController _district;
+  late final TextEditingController _postalCode;
+  late final TextEditingController _buildingNumber;
+  late final TextEditingController _additionalNum;
   late final TextEditingController _crNumber;
   late final TextEditingController _idNumber;
+  LatLng? _location;
   String? _logoUrl;
   String? _crDocUrl;
   String? _idDocUrl;
@@ -1177,9 +1285,17 @@ class _ResubmitSheetContentState extends State<_ResubmitSheetContent> {
     _name = TextEditingController(text: widget.shop.name);
     _phone = TextEditingController(text: widget.shop.phone);
     _city = TextEditingController(text: widget.shop.city);
+    _street = TextEditingController(text: widget.shop.street);
+    _district = TextEditingController(text: widget.shop.district);
+    _postalCode = TextEditingController(text: widget.shop.postalCode);
+    _buildingNumber = TextEditingController(text: widget.shop.buildingNumber ?? '');
+    _additionalNum = TextEditingController(text: widget.shop.additionalNumber ?? '');
     _crNumber = TextEditingController(text: widget.shop.crNumber);
     _idNumber = TextEditingController(text: widget.shop.idNumber ?? '');
     _logoUrl = widget.shop.logoUrl;
+    if (widget.shop.latitude != null && widget.shop.longitude != null) {
+      _location = LatLng(widget.shop.latitude!, widget.shop.longitude!);
+    }
   }
 
   @override
@@ -1187,9 +1303,22 @@ class _ResubmitSheetContentState extends State<_ResubmitSheetContent> {
     _name.dispose();
     _phone.dispose();
     _city.dispose();
+    _street.dispose();
+    _district.dispose();
+    _postalCode.dispose();
+    _buildingNumber.dispose();
+    _additionalNum.dispose();
     _crNumber.dispose();
     _idNumber.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickLocation() async {
+    final result = await Navigator.push<LatLng>(
+      context,
+      MaterialPageRoute(builder: (_) => LocationPickerScreen(initial: _location)),
+    );
+    if (result != null && mounted) setState(() => _location = result);
   }
 
   Future<void> _pickLogo() async {
@@ -1260,8 +1389,11 @@ class _ResubmitSheetContentState extends State<_ResubmitSheetContent> {
     final name = _name.text.trim();
     final phone = _phone.text.trim();
     final city = _city.text.trim();
+    final street = _street.text.trim();
+    final district = _district.text.trim();
+    final postalCode = _postalCode.text.trim();
     final crNumber = _crNumber.text.trim();
-    if (name.isEmpty || phone.isEmpty || city.isEmpty || crNumber.isEmpty) {
+    if (name.isEmpty || phone.isEmpty || city.isEmpty || street.isEmpty || district.isEmpty || postalCode.isEmpty || crNumber.isEmpty) {
       _snack('يرجى ملء جميع الحقول المطلوبة', isError: true);
       return;
     }
@@ -1269,6 +1401,11 @@ class _ResubmitSheetContentState extends State<_ResubmitSheetContent> {
     try {
       final updated = await ShopProfileService.resubmitMyShop(
         name: name, phone: phone, city: city,
+        street: street, district: district, postalCode: postalCode,
+        buildingNumber: _buildingNumber.text.trim().isEmpty ? null : _buildingNumber.text.trim(),
+        additionalNumber: _additionalNum.text.trim().isEmpty ? null : _additionalNum.text.trim(),
+        latitude: _location?.latitude,
+        longitude: _location?.longitude,
         crNumber: crNumber,
         idNumber: _idNumber.text.trim().isEmpty ? null : _idNumber.text.trim(),
         logoUrl: _logoUrl,
@@ -1357,12 +1494,60 @@ class _ResubmitSheetContentState extends State<_ResubmitSheetContent> {
               const SizedBox(height: 12),
               _Field(label: 'رقم جوال المتجر', controller: _phone, icon: Icons.phone_outlined, keyboardType: TextInputType.phone),
               const SizedBox(height: 12),
-              _Field(label: 'المدينة', controller: _city, icon: Icons.location_on_outlined),
+              _Field(label: 'المدينة *', controller: _city, icon: Icons.location_city_outlined),
+              const SizedBox(height: 12),
+              _Field(label: 'الشارع *', controller: _street, icon: Icons.signpost_outlined),
+              const SizedBox(height: 12),
+              _Field(label: 'الحي *', controller: _district, icon: Icons.holiday_village_outlined),
+              const SizedBox(height: 12),
+              _Field(label: 'الرمز البريدي *', controller: _postalCode, icon: Icons.markunread_mailbox_outlined, keyboardType: TextInputType.number),
+              const SizedBox(height: 12),
+              Row(children: [
+                Expanded(child: _Field(label: 'رقم المبنى', controller: _buildingNumber, icon: Icons.apartment_outlined, keyboardType: TextInputType.number)),
+                const SizedBox(width: 10),
+                Expanded(child: _Field(label: 'الرقم الإضافي', controller: _additionalNum, icon: Icons.add_location_alt_outlined, keyboardType: TextInputType.number)),
+              ]),
+              const SizedBox(height: 12),
+
+              // Map picker
+              GestureDetector(
+                onTap: _pickLocation,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: _location != null ? AppColors.green.withOpacity(.06) : AppColors.surface,
+                    border: Border.all(
+                      color: _location != null ? AppColors.green.withOpacity(.4) : AppColors.border,
+                      width: _location != null ? 1.5 : 1,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: _location != null
+                      ? Row(children: [
+                          const Icon(Icons.location_on_rounded, color: AppColors.green, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(child: Text(
+                            '${_location!.latitude.toStringAsFixed(5)}, ${_location!.longitude.toStringAsFixed(5)}',
+                            style: const TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.green),
+                          )),
+                          const Text('تغيير', style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.goldText)),
+                        ])
+                      : const Row(children: [
+                          Icon(Icons.add_location_alt_outlined, color: AppColors.textMuted, size: 18),
+                          SizedBox(width: 8),
+                          Text('تحديد موقع المتجر على الخريطة',
+                            style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+                          Spacer(),
+                          Icon(Icons.chevron_left, color: AppColors.textMuted, size: 16),
+                        ]),
+                ),
+              ),
               const SizedBox(height: 12),
               _Field(label: 'رقم السجل التجاري *', controller: _crNumber, icon: Icons.article_outlined, keyboardType: TextInputType.number),
               const SizedBox(height: 12),
               _Field(label: 'رقم الهوية الوطنية', controller: _idNumber, icon: Icons.badge_outlined, keyboardType: TextInputType.number),
-              const SizedBox(height: 20),
+              const SizedBox(height: 20);
 
               // Documents section
               const Text('الوثائق المطلوبة',
