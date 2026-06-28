@@ -84,28 +84,38 @@ class _ShopMyStoreScreenState extends State<ShopMyStoreScreen> {
 
   void _openEditSheet() {
     if (_shop == null) return;
-    showModalBottomSheet(
+    showModalBottomSheet<ShopProfile>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _EditSheetContent(
-        shop: _shop!,
-        onSaved: (updated) => setState(() => _shop = updated),
-      ),
-    );
+      builder: (_) => _EditSheetContent(shop: _shop!),
+    ).then((updated) {
+      if (updated != null && mounted) {
+        setState(() => _shop = updated);
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('تم تحديث الملف الشخصي', style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
+          backgroundColor: AppColors.green,
+        ));
+      }
+    });
   }
 
   void _openResubmitSheet() {
     if (_shop == null) return;
-    showModalBottomSheet(
+    showModalBottomSheet<ShopProfile>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _ResubmitSheetContent(
-        shop: _shop!,
-        onResubmitted: (updated) => setState(() => _shop = updated),
-      ),
-    );
+      builder: (_) => _ResubmitSheetContent(shop: _shop!),
+    ).then((updated) {
+      if (updated != null && mounted) {
+        setState(() => _shop = updated);
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('تم إرسال طلبك للمراجعة ✓', style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
+          backgroundColor: AppColors.green,
+        ));
+      }
+    });
   }
 
   Future<void> _logout() async {
@@ -343,8 +353,7 @@ class _ShopMyStoreScreenState extends State<ShopMyStoreScreen> {
 
 class _EditSheetContent extends StatefulWidget {
   final ShopProfile shop;
-  final ValueChanged<ShopProfile> onSaved;
-  const _EditSheetContent({required this.shop, required this.onSaved});
+  const _EditSheetContent({required this.shop});
 
   @override
   State<_EditSheetContent> createState() => _EditSheetContentState();
@@ -450,14 +459,7 @@ class _EditSheetContentState extends State<_EditSheetContent> {
         logoUrl: _logoUrl,
       );
       if (!mounted) return;
-      widget.onSaved(updated);
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('تم تحديث الملف الشخصي', style: TextStyle(fontFamily: 'Tajawal')),
-          backgroundColor: AppColors.green,
-        ),
-      );
+      Navigator.pop(context, updated);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1149,8 +1151,7 @@ class _DocsRequestedBanner extends StatelessWidget {
 
 class _ResubmitSheetContent extends StatefulWidget {
   final ShopProfile shop;
-  final ValueChanged<ShopProfile> onResubmitted;
-  const _ResubmitSheetContent({required this.shop, required this.onResubmitted});
+  const _ResubmitSheetContent({required this.shop});
 
   @override
   State<_ResubmitSheetContent> createState() => _ResubmitSheetContentState();
@@ -1275,9 +1276,7 @@ class _ResubmitSheetContentState extends State<_ResubmitSheetContent> {
         idDocumentUrl: _idDocUrl,
       );
       if (!mounted) return;
-      widget.onResubmitted(updated);
-      Navigator.pop(context);
-      _snack('تم إرسال طلبك للمراجعة ✓');
+      Navigator.pop(context, updated);
     } catch (e) {
       if (mounted) {
         setState(() => _saving = false);
