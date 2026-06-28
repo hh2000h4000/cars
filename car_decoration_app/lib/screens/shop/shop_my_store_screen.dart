@@ -26,7 +26,7 @@ class ShopMyStoreScreen extends StatefulWidget {
   State<ShopMyStoreScreen> createState() => _ShopMyStoreScreenState();
 }
 
-class _ShopMyStoreScreenState extends State<ShopMyStoreScreen> with WidgetsBindingObserver {
+class _ShopMyStoreScreenState extends State<ShopMyStoreScreen> {
   ShopProfile? _shop;
   bool _loading = true;
   String? _error;
@@ -39,19 +39,12 @@ class _ShopMyStoreScreenState extends State<ShopMyStoreScreen> with WidgetsBindi
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     _shopStatusSub = SignalRService.instance.onShopStatusChanged.listen((_) => _load());
     _load();
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _load();
-  }
-
-  @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     _shopStatusSub?.cancel();
     super.dispose();
   }

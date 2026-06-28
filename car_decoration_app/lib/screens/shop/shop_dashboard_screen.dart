@@ -14,7 +14,7 @@ class ShopDashboardScreen extends StatefulWidget {
   State<ShopDashboardScreen> createState() => _ShopDashboardScreenState();
 }
 
-class _ShopDashboardScreenState extends State<ShopDashboardScreen> with WidgetsBindingObserver {
+class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
   bool _isOpen = true;
   bool _loading = true;
   String? _loadError;
@@ -30,19 +30,7 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> with WidgetsB
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     _load();
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _load();
   }
 
   Future<void> _load() async {
