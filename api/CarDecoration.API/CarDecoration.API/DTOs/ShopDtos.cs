@@ -63,6 +63,15 @@ public record UpdateMyShopRequest(
     string? LogoUrl
 );
 
+public record ResubmitMyShopRequest(
+    string Name,
+    string Phone,
+    string City,
+    string? LogoUrl,
+    string? CrDocumentUrl,
+    string? IdDocumentUrl
+);
+
 public record ReviewResponse(
     int QualityRating,
     int CommunicationRating,

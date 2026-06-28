@@ -10,6 +10,7 @@ class ShopProfile {
   final String crNumber;
   final double rating;
   final int totalJobs;
+  final String? rejectionReason;
 
   ShopProfile({
     required this.id,
@@ -21,6 +22,7 @@ class ShopProfile {
     required this.crNumber,
     required this.rating,
     required this.totalJobs,
+    this.rejectionReason,
   });
 
   factory ShopProfile.fromJson(Map<String, dynamic> j) => ShopProfile(
@@ -33,6 +35,7 @@ class ShopProfile {
         crNumber: j['crNumber'] as String? ?? '',
         rating: (j['rating'] as num?)?.toDouble() ?? 0.0,
         totalJobs: j['totalJobs'] as int? ?? 0,
+        rejectionReason: j['rejectionReason'] as String?,
       );
 }
 
@@ -53,6 +56,25 @@ class ShopProfileService {
       'phone': phone,
       'city': city,
       if (logoUrl != null) 'logoUrl': logoUrl,
+    });
+    return ShopProfile.fromJson(res.data as Map<String, dynamic>);
+  }
+
+  static Future<ShopProfile> resubmitMyShop({
+    required String name,
+    required String phone,
+    required String city,
+    String? logoUrl,
+    String? crDocumentUrl,
+    String? idDocumentUrl,
+  }) async {
+    final res = await ApiClient.dio.put('/api/shops/my/resubmit', data: {
+      'name': name,
+      'phone': phone,
+      'city': city,
+      if (logoUrl != null) 'logoUrl': logoUrl,
+      if (crDocumentUrl != null) 'crDocumentUrl': crDocumentUrl,
+      if (idDocumentUrl != null) 'idDocumentUrl': idDocumentUrl,
     });
     return ShopProfile.fromJson(res.data as Map<String, dynamic>);
   }

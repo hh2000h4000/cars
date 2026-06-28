@@ -97,6 +97,31 @@ public class ShopService
             .ToPagedAsync(pagination);
     }
 
+    public async Task<MyShopResponse> ResubmitMyShopAsync(ResubmitMyShopRequest req)
+    {
+        var userId = _currentUser.UserId ?? throw new Exception("غير مصرح");
+        var shop = await _db.Shops
+            .FirstOrDefaultAsync(s => s.OwnerId == userId)
+            ?? throw new Exception("المتجر غير موجود");
+
+        if (shop.Status != ShopStatus.Rejected && shop.Status != ShopStatus.DocsRequested)
+            throw new Exception("لا يمكن إعادة التقديم إلا للمتاجر المرفوضة أو المطلوب منها مستندات");
+
+        shop.Name = req.Name.Trim();
+        shop.Phone = req.Phone.Trim();
+        shop.City = req.City.Trim();
+        if (req.LogoUrl != null) shop.LogoUrl = req.LogoUrl;
+        if (req.CrDocumentUrl != null) shop.CrDocumentUrl = req.CrDocumentUrl;
+        if (req.IdDocumentUrl != null) shop.IdDocumentUrl = req.IdDocumentUrl;
+        shop.Status = ShopStatus.Pending;
+        shop.RejectionReason = null;
+
+        await _db.SaveChangesAsync();
+
+        return new MyShopResponse(shop.Id, shop.Name, shop.City, shop.Phone,
+            shop.LogoUrl, shop.Status.ToString(), shop.CrNumber, shop.Rating, shop.TotalJobs, null);
+    }
+
     public async Task ApproveShopAsync(Guid id)
     {
         var role = _currentUser.UserRole ?? throw new Exception("غير مصرح");

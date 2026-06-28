@@ -31,6 +31,21 @@ public class ShopsController : ControllerBase
         }
     }
 
+    [HttpPut("my/resubmit")]
+    [Authorize]
+    public async Task<IActionResult> ResubmitMyShop([FromBody] ResubmitMyShopRequest req)
+    {
+        try
+        {
+            var result = await _service.ResubmitMyShopAsync(req);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpPut("my")]
     [Authorize]
     public async Task<IActionResult> UpdateMyShop([FromBody] UpdateMyShopRequest req)

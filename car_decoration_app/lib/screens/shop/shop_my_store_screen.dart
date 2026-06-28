@@ -95,6 +95,19 @@ class _ShopMyStoreScreenState extends State<ShopMyStoreScreen> {
     );
   }
 
+  void _openResubmitSheet() {
+    if (_shop == null) return;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _ResubmitSheetContent(
+        shop: _shop!,
+        onResubmitted: (updated) => setState(() => _shop = updated),
+      ),
+    );
+  }
+
   Future<void> _logout() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -230,6 +243,24 @@ class _ShopMyStoreScreenState extends State<ShopMyStoreScreen> {
               ),
 
               const SizedBox(height: 24),
+
+              // ── Rejection / DocsRequested banner ─────────────────
+              if (shop.status.toLowerCase() == 'rejected') ...[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                  child: _RejectionBanner(
+                    reason: shop.rejectionReason,
+                    onResubmit: _openResubmitSheet,
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ] else if (shop.status.toLowerCase() == 'docsrequested') ...[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                  child: _DocsRequestedBanner(onResubmit: _openResubmitSheet),
+                ),
+                const SizedBox(height: 20),
+              ],
 
               // ── معلومات المتجر ──────────────────────────────────
               Padding(
@@ -590,18 +621,20 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (label, bg, fg) = switch (status.toLowerCase()) {
-      'approved' => ('معتمد', AppColors.green.withOpacity(.15), AppColors.green),
-      'pending' => ('قيد المراجعة', AppColors.goldText.withOpacity(.15), AppColors.goldText),
-      'rejected' => ('مرفوض', AppColors.red.withOpacity(.15), AppColors.red),
-      _ => ('غير معروف', Colors.white12, Colors.white54),
+    final (label, fg) = switch (status.toLowerCase()) {
+      'approved'      => ('معتمد ✓', AppColors.green),
+      'pending'       => ('قيد المراجعة', AppColors.goldText),
+      'rejected'      => ('مرفوض', AppColors.red),
+      'suspended'     => ('موقوف', const Color(0xFF9C27B0)),
+      'docsrequested' => ('مطلوب مستندات', const Color(0xFF0288D1)),
+      _               => ('غير معروف', Colors.white54),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
       decoration: BoxDecoration(
-        color: bg,
+        color: fg.withOpacity(.15),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: fg.withOpacity(.3)),
+        border: Border.all(color: fg.withOpacity(.35)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -972,6 +1005,436 @@ class _MiniStat extends StatelessWidget {
         const SizedBox(width: 4),
         Text(label, style: const TextStyle(fontFamily: 'Tajawal', fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
       ],
+    ),
+  );
+}
+
+// ── Rejection Banner ─────────────────────────────────────────────────────────
+
+class _RejectionBanner extends StatelessWidget {
+  final String? reason;
+  final VoidCallback onResubmit;
+  const _RejectionBanner({this.reason, required this.onResubmit});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: AppColors.red.withOpacity(.06),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: AppColors.red.withOpacity(.25)),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 32, height: 32,
+              decoration: BoxDecoration(color: AppColors.red.withOpacity(.12), borderRadius: BorderRadius.circular(9)),
+              child: const Icon(Icons.cancel_rounded, color: AppColors.red, size: 17),
+            ),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Text('تم رفض طلب الاعتماد',
+                style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.red)),
+            ),
+          ],
+        ),
+        if (reason != null && reason!.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+            decoration: BoxDecoration(
+              color: AppColors.red.withOpacity(.08),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('سبب الرفض:',
+                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.red)),
+                const SizedBox(height: 3),
+                Text(reason!,
+                  style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.red, height: 1.5)),
+              ],
+            ),
+          ),
+        ],
+        const SizedBox(height: 14),
+        const Text('يمكنك تصحيح البيانات والوثائق ثم إعادة التقديم للمراجعة.',
+          style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary, height: 1.5)),
+        const SizedBox(height: 14),
+        GestureDetector(
+          onTap: onResubmit,
+          child: Container(
+            height: 46,
+            decoration: BoxDecoration(
+              color: AppColors.dark,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            alignment: Alignment.center,
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.send_rounded, color: AppColors.goldLight, size: 16),
+                SizedBox(width: 8),
+                Text('تصحيح وإعادة التقديم',
+                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.goldLight)),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _DocsRequestedBanner extends StatelessWidget {
+  final VoidCallback onResubmit;
+  const _DocsRequestedBanner({required this.onResubmit});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: const Color(0xFF0288D1).withOpacity(.06),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: const Color(0xFF0288D1).withOpacity(.25)),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Row(
+          children: [
+            Icon(Icons.folder_open_rounded, color: Color(0xFF0288D1), size: 20),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text('مطلوب مستندات إضافية',
+                style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF0288D1))),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        const Text('طلب المشرف تحديث الوثائق المرفقة. يرجى رفع المستندات الصحيحة وإعادة التقديم.',
+          style: TextStyle(fontFamily: 'Tajawal', fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary, height: 1.5)),
+        const SizedBox(height: 12),
+        GestureDetector(
+          onTap: onResubmit,
+          child: Container(
+            height: 46,
+            decoration: BoxDecoration(
+              color: const Color(0xFF0288D1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            alignment: Alignment.center,
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.upload_file_rounded, color: Colors.white, size: 16),
+                SizedBox(width: 8),
+                Text('رفع المستندات وإعادة التقديم',
+                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w800, color: Colors.white)),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+// ── Resubmit Sheet ───────────────────────────────────────────────────────────
+
+class _ResubmitSheetContent extends StatefulWidget {
+  final ShopProfile shop;
+  final ValueChanged<ShopProfile> onResubmitted;
+  const _ResubmitSheetContent({required this.shop, required this.onResubmitted});
+
+  @override
+  State<_ResubmitSheetContent> createState() => _ResubmitSheetContentState();
+}
+
+class _ResubmitSheetContentState extends State<_ResubmitSheetContent> {
+  late final TextEditingController _name;
+  late final TextEditingController _phone;
+  late final TextEditingController _city;
+  String? _logoUrl;
+  String? _crDocUrl;
+  String? _idDocUrl;
+  bool _uploadingLogo = false;
+  bool _uploadingCr = false;
+  bool _uploadingId = false;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _name = TextEditingController(text: widget.shop.name);
+    _phone = TextEditingController(text: widget.shop.phone);
+    _city = TextEditingController(text: widget.shop.city);
+    _logoUrl = widget.shop.logoUrl;
+  }
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _phone.dispose();
+    _city.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickLogo() async {
+    if (kIsWeb) {
+      await _pickAndUploadImage(isLogo: true);
+    } else {
+      final src = await showModalBottomSheet<ImageSource>(
+        context: context,
+        backgroundColor: Colors.white,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        builder: (_) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const SizedBox(height: 8),
+          Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2))),
+          const SizedBox(height: 12),
+          ListTile(leading: const Icon(Icons.photo_camera_outlined), title: const Text('الكاميرا', style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
+            onTap: () => Navigator.pop(context, ImageSource.camera)),
+          ListTile(leading: const Icon(Icons.photo_library_outlined), title: const Text('معرض الصور', style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
+            onTap: () => Navigator.pop(context, ImageSource.gallery)),
+          const SizedBox(height: 8),
+        ])),
+      );
+      if (src != null) await _pickAndUploadImage(source: src, isLogo: true);
+    }
+  }
+
+  Future<void> _pickDocument({required bool isCr}) async {
+    setState(() => isCr ? _uploadingCr = true : _uploadingId = true);
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 90);
+      if (picked == null) return;
+      final bytes = await picked.readAsBytes();
+      final filename = isCr ? 'cr_${DateTime.now().millisecondsSinceEpoch}.jpg' : 'id_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final url = await UploadService.uploadDocument(bytes, filename);
+      if (mounted) setState(() => isCr ? _crDocUrl = url : _idDocUrl = url);
+    } catch (e) {
+      if (mounted) _snack('فشل رفع الوثيقة', isError: true);
+    } finally {
+      if (mounted) setState(() => isCr ? _uploadingCr = false : _uploadingId = false);
+    }
+  }
+
+  Future<void> _pickAndUploadImage({ImageSource source = ImageSource.gallery, required bool isLogo}) async {
+    setState(() => _uploadingLogo = true);
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(source: source, imageQuality: 80);
+      if (picked == null) return;
+      final bytes = await picked.readAsBytes();
+      final urls = await UploadService.uploadImages([bytes]);
+      if (mounted && urls.isNotEmpty) setState(() => _logoUrl = urls.first);
+    } catch (_) {
+      if (mounted) _snack('فشل رفع الشعار', isError: true);
+    } finally {
+      if (mounted) setState(() => _uploadingLogo = false);
+    }
+  }
+
+  void _snack(String msg, {bool isError = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(msg, style: const TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
+      backgroundColor: isError ? AppColors.red : AppColors.green,
+    ));
+  }
+
+  Future<void> _submit() async {
+    final name = _name.text.trim();
+    final phone = _phone.text.trim();
+    final city = _city.text.trim();
+    if (name.isEmpty || phone.isEmpty || city.isEmpty) {
+      _snack('يرجى ملء جميع الحقول', isError: true);
+      return;
+    }
+    setState(() => _saving = true);
+    try {
+      final updated = await ShopProfileService.resubmitMyShop(
+        name: name, phone: phone, city: city,
+        logoUrl: _logoUrl,
+        crDocumentUrl: _crDocUrl,
+        idDocumentUrl: _idDocUrl,
+      );
+      if (!mounted) return;
+      widget.onResubmitted(updated);
+      Navigator.pop(context);
+      _snack('تم إرسال طلبك للمراجعة ✓');
+    } catch (e) {
+      if (mounted) {
+        setState(() => _saving = false);
+        _snack(e.toString().replaceAll('Exception: ', ''), isError: true);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mono = _name.text.isNotEmpty ? _name.text[0] : 'م';
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(child: Container(width: 40, height: 4,
+                decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)))),
+              const SizedBox(height: 16),
+
+              // Header
+              Row(children: [
+                Container(width: 36, height: 36,
+                  decoration: BoxDecoration(color: AppColors.dark, borderRadius: BorderRadius.circular(10)),
+                  child: const Icon(Icons.send_rounded, color: AppColors.goldLight, size: 17)),
+                const SizedBox(width: 10),
+                const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('إعادة التقديم للاعتماد',
+                    style: TextStyle(fontFamily: 'Tajawal', fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                  Text('صحّح البيانات وأرفق الوثائق الصحيحة',
+                    style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+                ]),
+              ]),
+              const SizedBox(height: 20),
+
+              // Logo
+              Center(child: GestureDetector(
+                onTap: _uploadingLogo ? null : _pickLogo,
+                child: Stack(children: [
+                  Container(
+                    width: 72, height: 72,
+                    decoration: BoxDecoration(
+                      color: AppColors.dark,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.goldText.withOpacity(.3), width: 2),
+                      image: _logoUrl != null ? DecorationImage(image: NetworkImage(_logoUrl!), fit: BoxFit.cover) : null,
+                    ),
+                    child: _logoUrl == null
+                        ? Center(child: Text(mono, style: const TextStyle(fontFamily: 'Tajawal', fontSize: 26, fontWeight: FontWeight.w900, color: AppColors.goldLight)))
+                        : null,
+                  ),
+                  if (_uploadingLogo)
+                    Positioned.fill(child: Container(
+                      decoration: BoxDecoration(color: Colors.black38, borderRadius: BorderRadius.circular(20)),
+                      child: const Center(child: CircularProgressIndicator(color: AppColors.goldLight, strokeWidth: 2)),
+                    ))
+                  else
+                    Positioned(bottom: 0, left: 0,
+                      child: Container(width: 24, height: 24,
+                        decoration: BoxDecoration(color: AppColors.goldText, borderRadius: BorderRadius.circular(7), border: Border.all(color: Colors.white, width: 2)),
+                        child: const Icon(Icons.camera_alt_rounded, size: 12, color: Colors.white))),
+                ]),
+              )),
+              const SizedBox(height: 4),
+              const Center(child: Text('شعار المتجر',
+                style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, color: AppColors.textMuted))),
+              const SizedBox(height: 20),
+
+              // Basic fields
+              _Field(label: 'اسم المتجر', controller: _name, icon: Icons.store_outlined),
+              const SizedBox(height: 12),
+              _Field(label: 'رقم الهاتف', controller: _phone, icon: Icons.phone_outlined, keyboardType: TextInputType.phone),
+              const SizedBox(height: 12),
+              _Field(label: 'المدينة', controller: _city, icon: Icons.location_on_outlined),
+              const SizedBox(height: 20),
+
+              // Documents section
+              const Text('الوثائق المطلوبة',
+                style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+              const SizedBox(height: 4),
+              const Text('ارفع صور واضحة للوثائق',
+                style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textMuted)),
+              const SizedBox(height: 12),
+
+              Row(children: [
+                Expanded(child: _DocPicker(
+                  label: 'السجل التجاري',
+                  uploaded: _crDocUrl != null,
+                  uploading: _uploadingCr,
+                  onTap: () => _pickDocument(isCr: true),
+                )),
+                const SizedBox(width: 12),
+                Expanded(child: _DocPicker(
+                  label: 'هوية المالك',
+                  uploaded: _idDocUrl != null,
+                  uploading: _uploadingId,
+                  onTap: () => _pickDocument(isCr: false),
+                )),
+              ]),
+              const SizedBox(height: 24),
+
+              // Submit button
+              GestureDetector(
+                onTap: _saving ? null : _submit,
+                child: Container(
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: _saving ? AppColors.border : AppColors.dark,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  alignment: Alignment.center,
+                  child: _saving
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.goldLight))
+                      : const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                          Icon(Icons.send_rounded, color: AppColors.goldLight, size: 16),
+                          SizedBox(width: 8),
+                          Text('إرسال للمراجعة', style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.goldLight)),
+                        ]),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DocPicker extends StatelessWidget {
+  final String label;
+  final bool uploaded;
+  final bool uploading;
+  final VoidCallback onTap;
+  const _DocPicker({required this.label, required this.uploaded, required this.uploading, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: uploading ? null : onTap,
+    child: Container(
+      height: 80,
+      decoration: BoxDecoration(
+        color: uploaded ? AppColors.green.withOpacity(.06) : AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: uploaded ? AppColors.green.withOpacity(.4) : AppColors.border, width: uploaded ? 1.5 : 1),
+      ),
+      child: uploading
+          ? const Center(child: CircularProgressIndicator(color: AppColors.goldText, strokeWidth: 2))
+          : Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Icon(uploaded ? Icons.check_circle_rounded : Icons.upload_file_rounded,
+                color: uploaded ? AppColors.green : AppColors.textMuted, size: 26),
+              const SizedBox(height: 6),
+              Text(label, textAlign: TextAlign.center,
+                style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w700,
+                  color: uploaded ? AppColors.green : AppColors.textMuted)),
+              if (uploaded) ...[
+                const SizedBox(height: 2),
+                const Text('تم الرفع ✓', style: TextStyle(fontFamily: 'Tajawal', fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.green)),
+              ],
+            ]),
     ),
   );
 }
