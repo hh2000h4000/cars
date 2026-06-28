@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'location_service.dart';
@@ -37,7 +38,8 @@ class NominatimLocationService implements LocationServiceProvider {
           ),
         );
       }).toList();
-    } catch (_) {
+    } catch (e) {
+      debugPrint('[Nominatim] searchAddress error: $e');
       return [];
     }
   }
@@ -58,7 +60,8 @@ class NominatimLocationService implements LocationServiceProvider {
       final data = res.data as Map<String, dynamic>?;
       if (data == null || data['error'] != null) return null;
       return _shortName(data);
-    } catch (_) {
+    } catch (e) {
+      debugPrint('[Nominatim] reverseGeocode error: $e');
       return null;
     }
   }
