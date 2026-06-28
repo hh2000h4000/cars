@@ -36,22 +36,22 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
   Future<void> _load() async {
     setState(() { _loading = true; _loadError = null; });
     try {
-      final shopFuture = ApiClient.dio.get('/api/shops/my');
-      final requestsFuture = ShopRequestService.getShopRequests();
-      final shopRes = await shopFuture;
-      final requestsResult = await requestsFuture;
+      final shopRes = await ApiClient.dio.get('/api/shops/my');
       final shopData = shopRes.data as Map<String, dynamic>;
-      if (mounted) {
-        setState(() {
-          _shopName = shopData['name'] as String? ?? '';
-          _shopStatus = shopData['status'] as String? ?? 'Pending';
-          _rejectionReason = shopData['rejectionReason'] as String?;
-          _rating = (shopData['rating'] as num?)?.toDouble() ?? 0.0;
-          _totalJobs = shopData['totalJobs'] as int? ?? 0;
-          _requests = requestsResult.items;
-          _loading = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _shopName = shopData['name'] as String? ?? '';
+        _shopStatus = shopData['status'] as String? ?? 'Pending';
+        _rejectionReason = shopData['rejectionReason'] as String?;
+        _rating = (shopData['rating'] as num?)?.toDouble() ?? 0.0;
+        _totalJobs = shopData['totalJobs'] as int? ?? 0;
+        _loading = false;
+      });
+      // Requests are only available for approved shops — failure is silently ignored
+      try {
+        final requestsResult = await ShopRequestService.getShopRequests();
+        if (mounted) setState(() => _requests = requestsResult.items);
+      } catch (_) {}
     } catch (e) {
       if (mounted) setState(() { _loading = false; _loadError = ApiClient.extractError(e); });
     }

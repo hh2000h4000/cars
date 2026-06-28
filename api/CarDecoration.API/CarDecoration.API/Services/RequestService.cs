@@ -108,8 +108,11 @@ public class RequestService
         var userId = _currentUser.UserId ?? throw new Exception("غير مصرح");
 
         var shop = await _db.Shops
-            .FirstOrDefaultAsync(s => s.OwnerId == userId && s.Status == ShopStatus.Approved)
-            ?? throw new Exception("المتجر غير موجود أو غير معتمد");
+            .FirstOrDefaultAsync(s => s.OwnerId == userId)
+            ?? throw new Exception("المتجر غير موجود");
+
+        if (shop.Status != ShopStatus.Approved)
+            return PagedResult<ShopRequestResponse>.Create([], 0, pagination.Page, pagination.PageSize);
 
         return await _db.RequestShops
             .Where(rs => rs.ShopId == shop.Id)
