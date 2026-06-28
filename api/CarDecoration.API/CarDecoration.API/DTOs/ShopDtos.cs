@@ -51,6 +51,7 @@ public record MyShopResponse(
     string? LogoUrl,
     string Status,
     string CrNumber,
+    string? IdNumber,
     float Rating,
     int TotalJobs,
     string? RejectionReason
@@ -67,6 +68,8 @@ public record ResubmitMyShopRequest(
     string Name,
     string Phone,
     string City,
+    string CrNumber,
+    string? IdNumber,
     string? LogoUrl,
     string? CrDocumentUrl,
     string? IdDocumentUrl

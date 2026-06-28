@@ -24,7 +24,7 @@ public class ShopService
             .FirstOrDefaultAsync(s => s.OwnerId == userId)
             ?? throw new Exception("المتجر غير موجود");
         return new MyShopResponse(shop.Id, shop.Name, shop.City, shop.Phone,
-            shop.LogoUrl, shop.Status.ToString(), shop.CrNumber, shop.Rating, shop.TotalJobs, shop.RejectionReason);
+            shop.LogoUrl, shop.Status.ToString(), shop.CrNumber, shop.IdNumber, shop.Rating, shop.TotalJobs, shop.RejectionReason);
     }
 
     public async Task<MyShopResponse> UpdateMyShopAsync(UpdateMyShopRequest req)
@@ -42,7 +42,7 @@ public class ShopService
         await _db.SaveChangesAsync();
 
         return new MyShopResponse(shop.Id, shop.Name, shop.City, shop.Phone,
-            shop.LogoUrl, shop.Status.ToString(), shop.CrNumber, shop.Rating, shop.TotalJobs, shop.RejectionReason);
+            shop.LogoUrl, shop.Status.ToString(), shop.CrNumber, shop.IdNumber, shop.Rating, shop.TotalJobs, shop.RejectionReason);
     }
 
     public Task<PagedResult<ShopResponse>> GetApprovedShopsAsync(PaginationRequest pagination)
@@ -110,6 +110,8 @@ public class ShopService
         shop.Name = req.Name.Trim();
         shop.Phone = req.Phone.Trim();
         shop.City = req.City.Trim();
+        shop.CrNumber = req.CrNumber.Trim();
+        if (req.IdNumber != null) shop.IdNumber = req.IdNumber.Trim();
         if (req.LogoUrl != null) shop.LogoUrl = req.LogoUrl;
         if (req.CrDocumentUrl != null) shop.CrDocumentUrl = req.CrDocumentUrl;
         if (req.IdDocumentUrl != null) shop.IdDocumentUrl = req.IdDocumentUrl;
@@ -119,7 +121,7 @@ public class ShopService
         await _db.SaveChangesAsync();
 
         return new MyShopResponse(shop.Id, shop.Name, shop.City, shop.Phone,
-            shop.LogoUrl, shop.Status.ToString(), shop.CrNumber, shop.Rating, shop.TotalJobs, null);
+            shop.LogoUrl, shop.Status.ToString(), shop.CrNumber, shop.IdNumber, shop.Rating, shop.TotalJobs, null);
     }
 
     public async Task ApproveShopAsync(Guid id)

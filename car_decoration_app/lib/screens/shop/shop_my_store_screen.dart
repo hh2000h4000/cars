@@ -1160,6 +1160,8 @@ class _ResubmitSheetContentState extends State<_ResubmitSheetContent> {
   late final TextEditingController _name;
   late final TextEditingController _phone;
   late final TextEditingController _city;
+  late final TextEditingController _crNumber;
+  late final TextEditingController _idNumber;
   String? _logoUrl;
   String? _crDocUrl;
   String? _idDocUrl;
@@ -1174,6 +1176,8 @@ class _ResubmitSheetContentState extends State<_ResubmitSheetContent> {
     _name = TextEditingController(text: widget.shop.name);
     _phone = TextEditingController(text: widget.shop.phone);
     _city = TextEditingController(text: widget.shop.city);
+    _crNumber = TextEditingController(text: widget.shop.crNumber);
+    _idNumber = TextEditingController(text: widget.shop.idNumber ?? '');
     _logoUrl = widget.shop.logoUrl;
   }
 
@@ -1182,6 +1186,8 @@ class _ResubmitSheetContentState extends State<_ResubmitSheetContent> {
     _name.dispose();
     _phone.dispose();
     _city.dispose();
+    _crNumber.dispose();
+    _idNumber.dispose();
     super.dispose();
   }
 
@@ -1253,14 +1259,17 @@ class _ResubmitSheetContentState extends State<_ResubmitSheetContent> {
     final name = _name.text.trim();
     final phone = _phone.text.trim();
     final city = _city.text.trim();
-    if (name.isEmpty || phone.isEmpty || city.isEmpty) {
-      _snack('يرجى ملء جميع الحقول', isError: true);
+    final crNumber = _crNumber.text.trim();
+    if (name.isEmpty || phone.isEmpty || city.isEmpty || crNumber.isEmpty) {
+      _snack('يرجى ملء جميع الحقول المطلوبة', isError: true);
       return;
     }
     setState(() => _saving = true);
     try {
       final updated = await ShopProfileService.resubmitMyShop(
         name: name, phone: phone, city: city,
+        crNumber: crNumber,
+        idNumber: _idNumber.text.trim().isEmpty ? null : _idNumber.text.trim(),
         logoUrl: _logoUrl,
         crDocumentUrl: _crDocUrl,
         idDocumentUrl: _idDocUrl,
@@ -1347,9 +1356,13 @@ class _ResubmitSheetContentState extends State<_ResubmitSheetContent> {
               // Basic fields
               _Field(label: 'اسم المتجر', controller: _name, icon: Icons.store_outlined),
               const SizedBox(height: 12),
-              _Field(label: 'رقم الهاتف', controller: _phone, icon: Icons.phone_outlined, keyboardType: TextInputType.phone),
+              _Field(label: 'رقم جوال المتجر', controller: _phone, icon: Icons.phone_outlined, keyboardType: TextInputType.phone),
               const SizedBox(height: 12),
               _Field(label: 'المدينة', controller: _city, icon: Icons.location_on_outlined),
+              const SizedBox(height: 12),
+              _Field(label: 'رقم السجل التجاري *', controller: _crNumber, icon: Icons.article_outlined, keyboardType: TextInputType.number),
+              const SizedBox(height: 12),
+              _Field(label: 'رقم الهوية الوطنية', controller: _idNumber, icon: Icons.badge_outlined, keyboardType: TextInputType.number),
               const SizedBox(height: 20),
 
               // Documents section

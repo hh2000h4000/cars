@@ -8,6 +8,7 @@ class ShopProfile {
   final String? logoUrl;
   final String status;
   final String crNumber;
+  final String? idNumber;
   final double rating;
   final int totalJobs;
   final String? rejectionReason;
@@ -20,6 +21,7 @@ class ShopProfile {
     this.logoUrl,
     required this.status,
     required this.crNumber,
+    this.idNumber,
     required this.rating,
     required this.totalJobs,
     this.rejectionReason,
@@ -33,6 +35,7 @@ class ShopProfile {
         logoUrl: j['logoUrl'] as String?,
         status: j['status'] as String? ?? '',
         crNumber: j['crNumber'] as String? ?? '',
+        idNumber: j['idNumber'] as String?,
         rating: (j['rating'] as num?)?.toDouble() ?? 0.0,
         totalJobs: j['totalJobs'] as int? ?? 0,
         rejectionReason: j['rejectionReason'] as String?,
@@ -64,6 +67,8 @@ class ShopProfileService {
     required String name,
     required String phone,
     required String city,
+    required String crNumber,
+    String? idNumber,
     String? logoUrl,
     String? crDocumentUrl,
     String? idDocumentUrl,
@@ -72,6 +77,8 @@ class ShopProfileService {
       'name': name,
       'phone': phone,
       'city': city,
+      'crNumber': crNumber,
+      if (idNumber != null) 'idNumber': idNumber,
       if (logoUrl != null) 'logoUrl': logoUrl,
       if (crDocumentUrl != null) 'crDocumentUrl': crDocumentUrl,
       if (idDocumentUrl != null) 'idDocumentUrl': idDocumentUrl,
