@@ -17,6 +17,7 @@ class ShopDashboardScreen extends StatefulWidget {
 class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
   bool _isOpen = true;
   bool _loading = true;
+  String? _loadError;
 
   String _shopName = '';
   String _shopStatus = 'Pending';
@@ -33,7 +34,7 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() { _loading = true; _loadError = null; });
     try {
       final shopFuture = ApiClient.dio.get('/api/shops/my');
       final requestsFuture = ShopRequestService.getShopRequests();
@@ -51,8 +52,8 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
           _loading = false;
         });
       }
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
+    } catch (e) {
+      if (mounted) setState(() { _loading = false; _loadError = ApiClient.extractError(e); });
     }
   }
 
@@ -87,7 +88,18 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
       backgroundColor: AppColors.surface,
       body: _loading
           ? const Center(child: CircularProgressIndicator(color: AppColors.goldText))
-          : RefreshIndicator(
+          : _loadError != null
+              ? Center(child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.wifi_off_rounded, color: Colors.white38, size: 42),
+                    const SizedBox(height: 12),
+                    Text(_loadError!, style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13, color: Colors.white54), textAlign: TextAlign.center),
+                    const SizedBox(height: 16),
+                    TextButton(onPressed: _load, child: const Text('إعادة المحاولة', style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700, color: AppColors.goldText))),
+                  ],
+                ))
+              : RefreshIndicator(
               onRefresh: _load,
               color: AppColors.goldText,
               child: SingleChildScrollView(
