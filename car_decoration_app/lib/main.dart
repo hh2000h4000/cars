@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'app.dart';
 import 'providers/app_provider.dart';
+import 'providers/shop_owner_provider.dart';
 import 'services/auth_service.dart';
 import 'services/api_client.dart';
 import 'services/app_logger.dart';
@@ -64,12 +65,15 @@ Future<void> main() async {
       }
 
       runApp(
-        ChangeNotifierProvider(
-          create: (_) {
-            final provider = AppProvider();
-            if (isLoggedIn) provider.initFromApi();
-            return provider;
-          },
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) {
+              final provider = AppProvider();
+              if (isLoggedIn) provider.initFromApi();
+              return provider;
+            }),
+            ChangeNotifierProvider(create: (_) => ShopOwnerProvider()),
+          ],
           child: CarDecorationApp(initialRoute: initialRoute),
         ),
       );

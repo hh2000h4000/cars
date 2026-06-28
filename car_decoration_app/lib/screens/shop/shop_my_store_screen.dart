@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -7,15 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:provider/provider.dart';
 
 import '../../theme.dart';
+import '../../providers/shop_owner_provider.dart';
 import '../../services/shop_profile_service.dart';
 import '../../services/review_service.dart';
 import '../../services/upload_service.dart';
 import '../../services/api_client.dart';
 import '../../models/paged_result.dart';
 import '../../app_navigator.dart';
-import '../../services/signalr_service.dart';
 import 'location_picker_screen.dart';
 import 'shop_resubmit_screen.dart';
 
@@ -27,11 +27,6 @@ class ShopMyStoreScreen extends StatefulWidget {
 }
 
 class _ShopMyStoreScreenState extends State<ShopMyStoreScreen> {
-  ShopProfile? _shop;
-  bool _loading = true;
-  String? _error;
-  StreamSubscription<Map<String, dynamic>>? _shopStatusSub;
-
   PagedResult<ReviewItem>? _reviewsResult;
   bool _reviewsLoading = true;
   bool _loadingMoreReviews = false;
@@ -39,27 +34,7 @@ class _ShopMyStoreScreenState extends State<ShopMyStoreScreen> {
   @override
   void initState() {
     super.initState();
-    _shopStatusSub = SignalRService.instance.onShopStatusChanged.listen((_) => _load());
-    _load();
-  }
-
-  @override
-  void dispose() {
-    _shopStatusSub?.cancel();
-    super.dispose();
-  }
-
-  Future<void> _load() async {
-    setState(() { _loading = true; _error = null; });
-    try {
-      final shop = await ShopProfileService.getMyShop();
-      if (mounted) {
-        setState(() { _shop = shop; _loading = false; });
-        _loadReviews();
-      }
-    } catch (e) {
-      if (mounted) setState(() { _error = 'تعذر تحميل بيانات المتجر'; _loading = false; });
-    }
+    _loadReviews();
   }
 
   Future<void> _loadReviews({bool loadMore = false}) async {
@@ -97,15 +72,16 @@ class _ShopMyStoreScreenState extends State<ShopMyStoreScreen> {
   }
 
   void _openEditSheet() {
-    if (_shop == null) return;
+    final shop = context.read<ShopOwnerProvider>().shop;
+    if (shop == null) return;
     showModalBottomSheet<ShopProfile>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _EditSheetContent(shop: _shop!),
+      builder: (_) => _EditSheetContent(shop: shop),
     ).then((updated) {
       if (updated != null && mounted) {
-        setState(() => _shop = updated);
+        context.read<ShopOwnerProvider>().applyProfileUpdate(updated);
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('تم تحديث الملف الشخصي', style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
           backgroundColor: AppColors.green,
@@ -115,13 +91,14 @@ class _ShopMyStoreScreenState extends State<ShopMyStoreScreen> {
   }
 
   void _openResubmitSheet() {
-    if (_shop == null) return;
+    final shop = context.read<ShopOwnerProvider>().shop;
+    if (shop == null) return;
     Navigator.push<ShopProfile>(
       context,
-      MaterialPageRoute(builder: (_) => ShopResubmitScreen(shop: _shop!)),
+      MaterialPageRoute(builder: (_) => ShopResubmitScreen(shop: shop)),
     ).then((updated) {
       if (updated != null && mounted) {
-        setState(() => _shop = updated);
+        context.read<ShopOwnerProvider>().applyProfileUpdate(updated);
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('تم إرسال طلبك للمراجعة ✓', style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
           backgroundColor: AppColors.green,
@@ -157,25 +134,29 @@ class _ShopMyStoreScreenState extends State<ShopMyStoreScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) {
+    final shopProvider = context.watch<ShopOwnerProvider>();
+
+    if (shopProvider.shop == null && shopProvider.error == null) {
       return const Scaffold(
         backgroundColor: AppColors.surface,
         body: Center(child: CircularProgressIndicator(color: AppColors.goldText)),
       );
     }
 
-    if (_error != null) {
+    if (shopProvider.shop == null) {
       return Scaffold(
         backgroundColor: AppColors.surface,
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(_error!, style: const TextStyle(fontFamily: 'Tajawal', color: AppColors.textSecondary)),
+              const Text('تعذر تحميل بيانات المتجر',
+                style: TextStyle(fontFamily: 'Tajawal', color: AppColors.textSecondary)),
               const SizedBox(height: 12),
               TextButton(
-                onPressed: _load,
-                child: const Text('إعادة المحاولة', style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700, color: AppColors.goldText)),
+                onPressed: () => context.read<ShopOwnerProvider>().load(),
+                child: const Text('إعادة المحاولة',
+                  style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700, color: AppColors.goldText)),
               ),
             ],
           ),
@@ -183,13 +164,16 @@ class _ShopMyStoreScreenState extends State<ShopMyStoreScreen> {
       );
     }
 
-    final shop = _shop!;
+    final shop = shopProvider.shop!;
     final mono = shop.name.isNotEmpty ? shop.name[0] : 'م';
 
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: RefreshIndicator(
-        onRefresh: _load,
+        onRefresh: () => Future.wait([
+          context.read<ShopOwnerProvider>().load(),
+          _loadReviews(),
+        ]),
         color: AppColors.goldText,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),

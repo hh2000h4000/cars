@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../theme.dart';
+import '../../providers/shop_owner_provider.dart';
 import '../../services/api_client.dart';
 import '../../services/chat_service.dart';
 import '../../services/signalr_service.dart';
@@ -33,7 +35,9 @@ class _ShopShellState extends State<ShopShell> with WidgetsBindingObserver {
       final token = await ApiClient.getToken();
       if (token == null && mounted) {
         Navigator.pushNamedAndRemoveUntil(context, '/auth/login', (r) => false);
+        return;
       }
+      if (mounted) context.read<ShopOwnerProvider>().load();
     });
     _connectSignalR();
   }
@@ -51,6 +55,8 @@ class _ShopShellState extends State<ShopShell> with WidgetsBindingObserver {
     if (!mounted) return;
     final status = data['status'] as String? ?? '';
     final reason = data['reason'] as String?;
+    // Update provider directly from payload — no API call needed
+    context.read<ShopOwnerProvider>().applyStatusChange(status, reason);
     if (status == 'Suspended' || status == 'Rejected' || status == 'DocsRequested') {
       setState(() => _index = 3);
     }
@@ -162,6 +168,7 @@ class _ShopShellState extends State<ShopShell> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       SignalRService.instance.connect();
       _refreshBadge();
+      context.read<ShopOwnerProvider>().load();
     }
   }
 
