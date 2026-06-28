@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace CarDecoration.API.Migrations
 {
+    /// <inheritdoc />
     public partial class AddShopAddress : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
