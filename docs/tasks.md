@@ -83,6 +83,29 @@
 
 ## قيد التنفيذ — تحسينات احترافية 🔧
 
+### جلسة 2026-06-28 ✅
+
+- [x] **ShopResubmitScreen — Full-Screen Integration:** استبدال `_ResubmitSheetContent` (bottom sheet ~350 سطر) بـ `ShopResubmitScreen` كاملة. `_openResubmitSheet()` تستخدم `Navigator.push` بدلاً من `showModalBottomSheet`. النتيجة المُرجَعة `ShopProfile` تُحدَّث المتجر مباشرةً.
+
+- [x] **SignalR — Real-Time Shop Status (Backend):** `ShopService.cs` يُرسل `ShopStatusChanged` event عبر `IHubContext<ChatHub>` بعد كل تغيير في الحالة:
+  - `ApproveShopAsync` → `{ status: "Approved", reason: null }`
+  - `RejectShopAsync` → `{ status: "Rejected", reason: shop.RejectionReason }`
+  - `SuspendShopAsync` → `{ status: "Suspended", reason: null }`
+  - `RestoreShopAsync` → `{ status: "Approved", reason: null }`
+
+- [x] **SignalR — Real-Time Shop Status (Flutter):** `SignalRService` يستمع لـ `ShopStatusChanged`. `ShopShell` يستقبل الحدث، يعرض `Dialog` مخصص لكل حالة (4 حالات بألوان مختلفة)، ينتقل لتبويب "متجري" عند Rejected/Suspended/DocsRequested. `AppLifecycle.resumed` كطبقة احتياطية تُعيد الاتصال.
+
+- [x] **Bug Fix — Excessive API Calls on App Resume:** كان `WidgetsBindingObserver` مُضافاً في Shell + Dashboard + MyStore معاً → 5 استدعاءات متزامنة عند كل `AppLifecycle.resumed`. الحل: حذف `WidgetsBindingObserver` من `ShopDashboardScreen` و`ShopMyStoreScreen` تماماً. Shell وحده يتولى reconnect و badge refresh.
+
+- [x] **ShopOwnerProvider — Single Source of Truth:** provider مركزي لبيانات `/api/shops/my`:
+  - `ShopProfile.copyWith()` مُضاف بنمط sentinel للحقول nullable
+  - `ShopOwnerProvider` (ChangeNotifier): `load()` / `applyStatusChange()` / `applyProfileUpdate()` / `clear()`
+  - مسجَّل في `main.dart` عبر `MultiProvider`
+  - `ShopShell` يستدعي `load()` مرة واحدة عند الإقلاع وعند resume
+  - SignalR event → `applyStatusChange()` مباشرةً — صفر API calls إضافية
+  - `ShopDashboardScreen`: حُذف استدعاء `/api/shops/my` المباشر، يقرأ من `context.watch<ShopOwnerProvider>()`
+  - `ShopMyStoreScreen`: حُذفت `_shopStatusSub`، يقرأ من provider، `applyProfileUpdate()` بعد edit/resubmit
+
 ### أولوية عالية 🔴
 - [x] **JWT Refresh Token** — Access Token 15 دقيقة + Refresh Token 30 يوم مخزن في DB. Dio interceptor يجدد تلقائياً عند 401. Token rotation عند كل تجديد. تم: 2026-06-26
 - [x] **Pagination** — Offset/Page (`?page=1&pageSize=20`, max 50). `PagedResult<T>` DTO. Endpoints: Shops، Requests (customer + shop). AppProvider يدعم `loadMoreRequests/loadMoreShops`. الشاشات: زر "تحميل المزيد" في RequestsScreen، ShopRequestsScreen، ShopSelectScreen. تم: 2026-06-26
@@ -126,7 +149,7 @@
 - [ ] Input validation (no FluentValidation or DataAnnotations currently)
 
 ### Flutter App
-- [ ] ShopMyStoreScreen — currently a placeholder ("قريباً")
+- [x] ~~ShopMyStoreScreen — currently a placeholder~~ — مكتملة بالكامل: معلومات المتجر، تعديل الملف، إعادة التقديم، التقييمات، تسجيل الخروج ✅
 - [ ] Quotation withdrawal UI — زر "سحب العرض" في واجهة المتجر (الـ service `withdrawQuotation()` موجود لكن UI غير مكتمل)
 - [ ] Badge عدد الرسائل غير المقروءة على تاب المحادثات في bottom nav (مؤجل)
 - [ ] Push notifications (no FCM integration)

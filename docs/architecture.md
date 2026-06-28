@@ -112,7 +112,10 @@ Each role has a `Shell` widget with a bottom `NavigationBar`.
 
 ### State Management
 
-Single `AppProvider` (ChangeNotifier) via `provider` package. Holds all state for all roles.
+Two `ChangeNotifier` providers registered via `MultiProvider` in `main.dart`:
+
+#### AppProvider (`providers/app_provider.dart`)
+بيانات العميل — vehicles, shops, requests, reviews, complaints.
 
 Initialized on login via `AppProvider.initFromApi()`:
 ```dart
@@ -122,6 +125,23 @@ Future.wait([
   RequestService.getMyRequests() → requests
 ])
 ```
+
+#### ShopOwnerProvider (`providers/shop_owner_provider.dart`)
+**Single Source of Truth** لبيانات ملف المتجر (`/api/shops/my`). المسؤولية: بيانات الملف الشخصي الأساسية فقط — لا طلبات، لا تقييمات، لا محادثات.
+
+```dart
+// Public API
+load()                              // يستدعيها ShopShell فقط (مرة واحدة)
+applyStatusChange(status, reason)  // تحديث من SignalR — صفر API calls
+applyProfileUpdate(ShopProfile)    // بعد edit/resubmit ناجح
+clear()                             // عند logout
+```
+
+**قواعد الاستخدام:**
+- `ShopShell` يستدعي `load()` في `initState` (عبر `addPostFrameCallback`) وعند `AppLifecycle.resumed`
+- SignalR event `ShopStatusChanged` → `applyStatusChange()` مباشرة، بدون API call
+- `ShopDashboardScreen` و`ShopMyStoreScreen` يقرآن عبر `context.watch<ShopOwnerProvider>()`
+- بعد تعديل الملف: `applyProfileUpdate(updated)` من نتيجة API — لا reload
 
 All API calls use `catchError((Object e) {...})` — single parameter to avoid Flutter web DDC StackTrace cast bug.
 
@@ -203,3 +223,34 @@ averageRating = AVG(qualityRating + communicationRating + commitmentRating + gen
 shop.Rating = averageRating
 shop.TotalJobs++
 ```
+
+### Real-Time Shop Status via SignalR
+
+عند تغيير الـ Admin لحالة المتجر:
+
+```
+Admin → PUT /api/shops/{id}/approve|reject|suspend
+      ↓
+ShopService → SaveChangesAsync()
+      ↓
+IHubContext<ChatHub>.Clients.User(ownerId).SendAsync("ShopStatusChanged", { status, reason })
+      ↓
+Flutter SignalRService.onShopStatusChanged stream
+      ↓
+ShopShell._onShopStatusChanged()
+  ├─ ShopOwnerProvider.applyStatusChange(status, reason)  → Dashboard + MyStore تُعاد البناء
+  ├─ setState(_index = 3)  إذا كانت الحالة حرجة (Rejected/Suspended/DocsRequested)
+  └─ _showStatusDialog()  → Dialog مناسب للحالة
+```
+
+**مبدأ مهم:** الـ event يحمل `{ status, reason }` — بيانات كافية للتحديث. لا يوجد API call إضافي.
+
+### SignalR Connection Management
+
+- `SignalRService` singleton — `withAutomaticReconnect()` مفعّل
+- `ShopShell` هو **المسؤول الوحيد** عن:
+  - استدعاء `connect()` عند الإقلاع
+  - استدعاء `connect()` عند `AppLifecycle.resumed`
+  - الاستماع لـ `onShopStatusChanged`
+  - الاستماع لـ `onNotification` (badge الرسائل)
+- الشاشات الفردية (Dashboard، MyStore) **لا تتصل بـ SignalR مباشرةً**

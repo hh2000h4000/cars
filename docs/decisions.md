@@ -6,10 +6,50 @@ Technical decisions made during development, with rationale.
 
 ## Architecture
 
-### Single AppProvider for all state
-**Decision:** One `ChangeNotifier` class (`AppProvider`) holds all state for all user roles.
+### Single AppProvider for all state (customer/admin only)
+**Decision:** One `ChangeNotifier` class (`AppProvider`) holds all state for customer and admin roles. Shop owner data is handled separately in `ShopOwnerProvider`.
 **Why:** Simple to implement for a project of this scale. Avoids setting up Riverpod/Bloc infrastructure.
 **Trade-off:** Provider grows large. Separating into VehicleProvider, RequestProvider, etc. would be cleaner at scale but is premature here.
+
+### ShopOwnerProvider — Single Source of Truth for shop profile (2026-06-28)
+**Decision:** بيانات `/api/shops/my` مُركَّزة في `ShopOwnerProvider` (ChangeNotifier منفصل). الشاشات تقرأ منه عبر `context.watch<>()`. `ShopShell` هو المسؤول الوحيد عن استدعاء `load()`.
+**Why:**
+- كانت `ShopDashboardScreen` و`ShopMyStoreScreen` كل منهما تستدعي `/api/shops/my` باستقلالية → استدعاءان متزامنان عند كل إقلاع
+- عند `AppLifecycle.resumed` مع وجود `WidgetsBindingObserver` في الشاشتين → 5 استدعاءات متزامنة
+- الـ SignalR event كان يستدعي `_load()` في كلتا الشاشتين → استدعاءان إضافيان عند كل تغيير حالة
+**Result:** استدعاء واحد فقط عند الإقلاع، صفر استدعاءات عند SignalR event.
+**Scope constraint:** Provider يخزّن بيانات الملف الشخصي فقط — لا طلبات، لا تقييمات، لا محادثات. هذه تُحمَّل بشكل مستقل في كل شاشة تحتاجها.
+
+### ShopProfile.copyWith() بنمط sentinel للحقول nullable (2026-06-28)
+**Decision:** استخدام `const Object _sentinel = Object()` كقيمة افتراضية لمعاملات `copyWith()` الخاصة بالحقول nullable.
+**Why:** الأسلوب المعتاد `String? field` لا يميّز بين "المستخدم لم يمرر القيمة" و"المستخدم مرر null". مع sentinel:
+```dart
+// لم يُمرَّر → يبقى القديم
+_shop!.copyWith(status: 'Approved')
+// مُمرَّر بشكل صريح null → يُصفَّر
+_shop!.copyWith(status: 'Approved', rejectionReason: null)
+```
+**Context:** مطلوب في `applyStatusChange()` لأن حالة `Approved` يجب أن تصفّر `rejectionReason`.
+
+### SignalR push بدلاً من polling لتحديث حالة المتجر (2026-06-28)
+**Decision:** Backend يرسل `ShopStatusChanged` event عبر SignalR عند كل تغيير حالة. Flutter تحدّث الـ Provider مباشرةً من payload الحدث — بدون API call.
+**Why:** Polling يعني:
+- تأخير في الإشعار (بين دورات الـ timer)
+- استنزاف البطارية والشبكة
+- ضغط على الـ backend (N مستخدم × X ثانية = M طلب/ثانية)
+SignalR push: فوري، صفر overhead على التطبيق بين الأحداث.
+**Payload sufficiency:** الـ event يحمل `{ status, reason }` — هذا كافٍ لتحديث الواجهة الكاملة بدون API call إضافي.
+**Fallback:** `AppLifecycle.resumed` يستدعي `provider.load()` كطبقة احتياطية إذا فُقد الاتصال.
+
+### WidgetsBindingObserver في Shell فقط — لا في الشاشات الفردية (2026-06-28)
+**Decision:** `WidgetsBindingObserver` مُسجَّل في `ShopShell` فقط. الشاشات الفردية (Dashboard، MyStore) لا تسجّله.
+**Why:** `IndexedStack` يُبقي جميع الشاشات حيّةً دائماً (لا `dispose`). إذا سجّلت كل شاشة `WidgetsBindingObserver`، فكل شاشة ستتلقى `didChangeAppLifecycleState` بشكل مستقل → استدعاءات API متزامنة.
+**Pattern:** Shell = lifecycle owner → delegates to Provider. Screens = passive consumers.
+
+### ShopResubmitScreen — Full-Screen بدلاً من Bottom Sheet (2026-06-28)
+**Decision:** استبدال `_ResubmitSheetContent` (Bottom Sheet) بـ `ShopResubmitScreen` (شاشة كاملة عبر `Navigator.push`).
+**Why:** نموذج إعادة التقديم طويل (8+ حقول + رفع مستندات + map picker). Bottom Sheet محدود الارتفاع ويتعارض مع keyboard على الأجهزة الصغيرة. Full-screen يُتيح UX أفضل وscroll طبيعي.
+**Data flow:** الشاشة تُرجع `ShopProfile` محدثاً عبر `Navigator.pop(updated)`. المتصل يستدعي `ShopOwnerProvider.applyProfileUpdate(updated)`.
 
 ### Static service classes
 **Decision:** All Flutter services (`VehicleService`, `RequestService`, etc.) are classes with static methods — no instances, no dependency injection.
@@ -93,11 +133,6 @@ Technical decisions made during development, with rationale.
 ### Tajawal font bundled locally
 **Decision:** Tajawal font files are bundled in `assets/fonts/` rather than using `google_fonts` package.
 **Why:** Works offline, no network dependency, consistent rendering across platforms.
-
-### No pagination
-**Decision:** All list endpoints return the full dataset.
-**Why:** Data volume is small during development. Pagination adds complexity.
-**Trade-off:** Will need pagination before production for requests/messages/reviews.
 
 ### ApiClient uses HTTP not HTTPS in dev
 **Decision:** `baseUrl = 'http://localhost:5053'` (not HTTPS).

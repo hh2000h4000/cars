@@ -69,7 +69,7 @@ Customer → Request (multi-shop) → Shop accepts → ChatRoom opens
 → Job done → Customer reviews → Shop rating updated
 ```
 
-## Current Status (آخر تحديث: 2026-06-27)
+## Current Status (آخر تحديث: 2026-06-28)
 
 - Backend: يعمل على PostgreSQL، جميع endpoints مكتملة ✅
 - Flutter: يعمل على موبايل وChromeWeb، بيانات حقيقية من API ✅
@@ -87,6 +87,10 @@ Customer → Request (multi-shop) → Shop accepts → ChatRoom opens
 - **نظام اعتماد المتاجر (Admin):** 5 حالات كاملة (Pending/Approved/Rejected/DocsRequested/Suspended)، شاشة إدارة مع بحث وتصفية، رفض بسبب إلزامي، تعليق/استعادة ✅
 - **شاشة لوحة التحكم للمتجر:** تعرض الحالة الصحيحة من API (لا نص ثابت) مع 5 badges مختلفة ✅
 - **Migrations:** 20260627000001 (lifecycle) + 20260627000002 (docs) + 20260627000003 (rejectionReason) ✅
+- **ShopResubmitScreen:** شاشة إعادة التقديم كاملة (full-screen form) بدلاً من bottom sheet ✅
+- **SignalR — تحديث حالة المتجر لحظياً:** الـ Backend يرسل `ShopStatusChanged` event عبر `IHubContext<ChatHub>` عند Approve/Reject/Suspend. Flutter يستقبل الحدث في `ShopShell`، يعرض dialog مناسب، ينقل لتبويب "متجري" عند الحالات الحرجة ✅
+- **ShopOwnerProvider:** Single Source of Truth لبيانات ملف المتجر (`/api/shops/my`). استدعاء واحد فقط من Shell، تحديث SignalR مباشر من payload بدون API call إضافي ✅
+- **Bug Fix — WidgetsBindingObserver:** حُذف من الشاشات الفردية (Dashboard + MyStore) لمنع 5 استدعاءات متزامنة عند العودة للتطبيق ✅
 
 ## Ports & URLs
 
@@ -146,9 +150,25 @@ Customer → Request (multi-shop) → Shop accepts → ChatRoom opens
 
 **Migrations:** بعد أي تغيير على Models → `dotnet ef database update` على جهاز المستخدم.
 
+## Providers Structure (مهم — لا تخلط البيانات)
+
+| Provider | المسؤولية | من يستدعي load() |
+|----------|-----------|-----------------|
+| `AppProvider` | بيانات العميل: vehicles, shops, requests | `main.dart` عند login |
+| `ShopOwnerProvider` | ملف المتجر الأساسي فقط: name, status, logo, rating | `ShopShell` فقط |
+
+> **قاعدة:** `ShopOwnerProvider` لا يخزّن الطلبات ولا التقييمات ولا المحادثات — فقط `/api/shops/my`.
+
+## SignalR Events (الأحداث المدعومة)
+
+| الحدث | المُرسِل (Backend) | المستقبل (Flutter) |
+|-------|-------------------|-------------------|
+| `NewMessage` | `ChatHub` | `SignalRService.onNotification` → badge الرسائل |
+| `ShopStatusChanged` | `ShopService` عبر `IHubContext<ChatHub>` | `ShopShell._onShopStatusChanged` → dialog + `ShopOwnerProvider.applyStatusChange()` |
+
 ## What's Left (الأهم)
 
-- `ShopMyStoreScreen` لا تزال placeholder ("قريباً")
+- `ShopMyStoreScreen` مكتملة لكن لا تُعدَّل بيانات المتجر عبر نموذج التعديل فقط — تبويب "متجري" كامل ✅
 - Quotation withdrawal UI — زر "سحب العرض" في واجهة المتجر (`withdrawQuotation()` service موجود، UI ناقص)
 - Badge عدد الرسائل غير المقروءة على تاب المحادثات في bottom nav (مؤجل)
 - Push Notifications عبر FCM (يحتاج Firebase + backend integration)
