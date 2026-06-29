@@ -25,6 +25,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
   String? _acceptedChatRoomId;
   bool _accepting = false;
   bool _cancelling = false;
+  bool _reopening = false;
   bool _hasReviewed = false;
 
   @override
@@ -60,17 +61,67 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
     }
   }
 
+  Future<void> _reopenRequest() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title: const Text('إلغاء الاتفاق',
+          textAlign: TextAlign.right,
+          style: TextStyle(fontFamily: 'Tajawal', fontSize: 17, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+        content: const Text(
+          'سيتم إلغاء الاتفاق مع المتجر الحالي وإعادة فتح الطلب لاستقبال عروض جديدة. هل تريد المتابعة؟',
+          textAlign: TextAlign.right,
+          style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary, height: 1.65),
+        ),
+        actionsAlignment: MainAxisAlignment.start,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('تأكيد',
+              style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w800, color: AppColors.goldText)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('تراجع',
+              style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _reopening = true);
+    try {
+      await RequestService.reopenRequest(widget.requestId);
+      if (!mounted) return;
+      context.read<AppProvider>().reloadRequests();
+      await _loadQuotations();
+      if (mounted) setState(() => _reopening = false);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _reopening = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.toString().replaceAll('Exception: ', ''),
+          style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13)),
+        backgroundColor: AppColors.red,
+        duration: const Duration(seconds: 4),
+      ));
+    }
+  }
+
   Future<void> _cancelRequest() async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: const Text('إلغاء الطلب',
+        title: const Text('إلغاء الطلب نهائياً',
           textAlign: TextAlign.right,
           style: TextStyle(fontFamily: 'Tajawal', fontSize: 17, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
         content: const Text(
-          'إلغاء الطلب سيؤدي إلى إنهاء الاتفاق مع المتجر. سيتعين عليك إنشاء طلب جديد إذا أردت المتابعة. هل أنت متأكد؟',
+          'سيتم إلغاء الطلب نهائياً ولن يتمكن أي متجر من تقديم عروض جديدة عليه. هل تريد المتابعة؟',
           textAlign: TextAlign.right,
           style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary, height: 1.65),
         ),
@@ -303,6 +354,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                       const SizedBox(height: 12),
                       ..._quotations.map((q) => _QuotationCard(
                         quotation: q,
+                        requestStatus: request.status,
                         isAccepted: _acceptedQuoteId == q.id,
                         isAccepting: _accepting,
                         onAccept: () => _acceptQuote(q.id),
@@ -357,8 +409,15 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                     if (request.status == RequestStatus.shopSelected) ...[
                       const SizedBox(height: 10),
                       OutlinedDarkButton(
-                        label: _cancelling ? 'جاري الإلغاء...' : 'إلغاء الطلب',
-                        onTap: _cancelling ? null : _cancelRequest,
+                        label: _reopening ? 'جاري إعادة الفتح...' : 'إلغاء الاتفاق وإعادة فتح الطلب',
+                        onTap: (_reopening || _cancelling) ? null : _reopenRequest,
+                        textColor: AppColors.goldText,
+                        borderColor: AppColors.goldLight,
+                      ),
+                      const SizedBox(height: 10),
+                      OutlinedDarkButton(
+                        label: _cancelling ? 'جاري الإلغاء...' : 'إلغاء الطلب نهائياً',
+                        onTap: (_cancelling || _reopening) ? null : _cancelRequest,
                         textColor: AppColors.red,
                         borderColor: AppColors.red.withOpacity(.3),
                       ),
@@ -530,6 +589,7 @@ class _RequestStepper extends StatelessWidget {
 
 class _QuotationCard extends StatelessWidget {
   final Quotation quotation;
+  final RequestStatus requestStatus;
   final bool isAccepted;
   final bool isAccepting;
   final VoidCallback onAccept;
@@ -538,6 +598,7 @@ class _QuotationCard extends StatelessWidget {
 
   const _QuotationCard({
     required this.quotation,
+    required this.requestStatus,
     required this.isAccepted,
     required this.isAccepting,
     required this.onAccept,
@@ -596,13 +657,17 @@ class _QuotationCard extends StatelessWidget {
                     color: AppColors.surface,
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(17)),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.cancel_outlined, color: AppColors.textMuted, size: 13),
-                      SizedBox(width: 5),
-                      Text('تم رفض هذا العرض تلقائياً',
-                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+                      const Icon(Icons.cancel_outlined, color: AppColors.textMuted, size: 13),
+                      const SizedBox(width: 5),
+                      Text(
+                        requestStatus == RequestStatus.open
+                            ? 'تم الإلغاء — انتظر عرضاً جديداً'
+                            : 'تم رفض هذا العرض تلقائياً',
+                        style: const TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textMuted),
+                      ),
                     ],
                   ),
                 )

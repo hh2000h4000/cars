@@ -258,6 +258,32 @@ public class RequestService
         await _db.SaveChangesAsync();
     }
 
+    // إلغاء الاتفاق مع المتجر وإعادة الطلب لاستقبال عروض جديدة
+    public async Task ReopenAsync(Guid id)
+    {
+        var userId = _currentUser.UserId
+            ?? throw new Exception("غير مصرح");
+
+        var request = await _db.Requests
+            .Include(r => r.Quotations)
+            .FirstOrDefaultAsync(r => r.Id == id && r.CustomerId == userId)
+            ?? throw new Exception("الطلب غير موجود");
+
+        if (request.Status != RequestStatus.ShopSelected)
+            throw new Exception("لا يمكن إلغاء الاتفاق — الطلب ليس في حالة اختيار متجر");
+
+        var acceptedQuotation = request.Quotations
+            .FirstOrDefault(q => q.Status == QuotationStatus.Accepted);
+        if (acceptedQuotation != null)
+            acceptedQuotation.Status = QuotationStatus.Rejected;
+
+        request.Status = RequestStatus.Open;
+        request.SelectedShopId = null;
+
+        await _db.SaveChangesAsync();
+    }
+
+    // إلغاء الطلب نهائياً — لا يمكن الرجوع
     public async Task CancelAsync(Guid id)
     {
         var userId = _currentUser.UserId

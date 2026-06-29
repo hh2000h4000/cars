@@ -124,6 +124,21 @@ public class RequestsController : ControllerBase
         }
     }
 
+    [HttpPut("{id}/reopen")]
+    public async Task<IActionResult> Reopen(Guid id)
+    {
+        try
+        {
+            await _service.ReopenAsync(id);
+            return Ok(new { message = "تم إلغاء الاتفاق وإعادة فتح الطلب" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Reopen request failed for {RequestId}", id);
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> Cancel(Guid id)
     {

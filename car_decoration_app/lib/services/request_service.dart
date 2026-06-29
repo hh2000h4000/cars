@@ -50,7 +50,11 @@ class RequestService {
   }
 
   static Future<void> cancelRequest(String id) async {
-    await ApiClient.dio.put('/api/requests/$id/cancel');
+    await ApiClient.dio.delete('/api/requests/$id');
+  }
+
+  static Future<void> reopenRequest(String id) async {
+    await ApiClient.dio.put('/api/requests/$id/reopen');
   }
 
   static Future<ServiceRequest> updateRequest({
