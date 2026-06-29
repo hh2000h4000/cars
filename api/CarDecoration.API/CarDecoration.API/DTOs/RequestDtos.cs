@@ -52,5 +52,6 @@ public record ShopRequestResponse(
     string Status,
     string ShopStatus,
     Guid? ChatRoomId,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    string? QuotationStatus
 );

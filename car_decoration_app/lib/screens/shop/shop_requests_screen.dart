@@ -61,7 +61,8 @@ class _ShopRequestsScreenState extends State<ShopRequestsScreen> {
 
   List<ShopRequest> get _active =>
       _all.where((r) =>
-          r.status == 'ShopSelected' || r.status == 'InProgress').toList();
+          (r.status == 'ShopSelected' && r.quotationStatus != 'Rejected') ||
+          r.status == 'InProgress').toList();
 
   List<ShopRequest> get _completed =>
       _all.where((r) => r.status == 'Completed').toList();
@@ -253,7 +254,7 @@ class _RequestCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  _StatusBadge(request.shopStatus, requestStatus: request.status),
+                  _StatusBadge(request.shopStatus, requestStatus: request.status, quotationStatus: request.quotationStatus),
                 ],
               ),
               const SizedBox(height: 10),
@@ -337,22 +338,30 @@ class _RequestCard extends StatelessWidget {
 class _StatusBadge extends StatelessWidget {
   final ShopRequestShopStatus status;
   final String? requestStatus;
-  const _StatusBadge(this.status, {this.requestStatus});
+  final String? quotationStatus;
+  const _StatusBadge(this.status, {this.requestStatus, this.quotationStatus});
 
   @override
   Widget build(BuildContext context) {
-    final (label, bg, fg) = switch (requestStatus) {
-      'Completed' => ('مكتمل', const Color(0xFFE8F5E9), AppColors.green),
-      'InProgress' => ('قيد التنفيذ', const Color(0xFFE3F2FD), const Color(0xFF1565C0)),
-      'ShopSelected' => ('تم الاختيار', const Color(0xFFF3E5F5), const Color(0xFF6A1B9A)),
-      'Cancelled' => ('ملغي', const Color(0xFFFFEBEE), AppColors.red),
-      _ => switch (status) {
-        ShopRequestShopStatus.pending => ('جديد', AppColors.goldBg, AppColors.goldText),
-        ShopRequestShopStatus.accepted => ('مقبول', const Color(0xFFE8F5E9), AppColors.green),
-        ShopRequestShopStatus.rejected => ('مرفوض', const Color(0xFFFFEBEE), AppColors.red),
-        ShopRequestShopStatus.withdrawn => ('مسحوب', AppColors.surface, AppColors.textMuted),
-      },
-    };
+    final isRejectedShop = requestStatus == 'ShopSelected' && quotationStatus == 'Rejected';
+    final isChosenShop   = requestStatus == 'ShopSelected' && quotationStatus == 'Accepted';
+
+    final (label, bg, fg) = isRejectedShop
+        ? ('محجوز لمتجر آخر', const Color(0xFFFFEBEE), AppColors.red)
+        : isChosenShop
+            ? ('تم اختياري', const Color(0xFFE8F5E9), AppColors.green)
+            : switch (requestStatus) {
+                'Completed' => ('مكتمل', const Color(0xFFE8F5E9), AppColors.green),
+                'InProgress' => ('قيد التنفيذ', const Color(0xFFE3F2FD), const Color(0xFF1565C0)),
+                'ShopSelected' => ('تم الاختيار', const Color(0xFFF3E5F5), const Color(0xFF6A1B9A)),
+                'Cancelled' => ('ملغي', const Color(0xFFFFEBEE), AppColors.red),
+                _ => switch (status) {
+                  ShopRequestShopStatus.pending => ('جديد', AppColors.goldBg, AppColors.goldText),
+                  ShopRequestShopStatus.accepted => ('مقبول', const Color(0xFFE8F5E9), AppColors.green),
+                  ShopRequestShopStatus.rejected => ('مرفوض', const Color(0xFFFFEBEE), AppColors.red),
+                  ShopRequestShopStatus.withdrawn => ('مسحوب', AppColors.surface, AppColors.textMuted),
+                },
+              };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(

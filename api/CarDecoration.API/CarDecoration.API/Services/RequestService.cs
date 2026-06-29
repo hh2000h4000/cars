@@ -144,7 +144,11 @@ public class RequestService
                     .Where(c => c.ShopId == shop.Id)
                     .Select(c => (Guid?)c.Id)
                     .FirstOrDefault(),
-                rs.Request.CreatedAt))
+                rs.Request.CreatedAt,
+                rs.Request.Quotations
+                    .Where(q => q.ShopId == rs.ShopId)
+                    .Select(q => (string?)q.Status.ToString())
+                    .FirstOrDefault()))
             .ToPagedAsync(pagination);
     }
 

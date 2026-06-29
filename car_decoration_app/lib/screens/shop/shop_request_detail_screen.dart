@@ -307,18 +307,8 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
                       ),
                     ],
 
-                    // ── Rejected banner (shop status rejected = customer chose someone else without accepting this shop) ──
-                    if (isRejected) ...[
-                      const SizedBox(height: 16),
-                      _InfoBanner(
-                        icon: Icons.info_outline_rounded,
-                        message: 'تم اختيار متجر آخر من قِبل العميل',
-                        color: AppColors.red,
-                      ),
-                    ],
-
-                    // ── Customer chose another shop (quotation rejected) ──
-                    if (isRejectedByCustomer) ...[
+                    // ── Rejected — customer chose another shop ──
+                    if (isRejected || isRejectedByCustomer) ...[
                       const SizedBox(height: 16),
                       _InfoBanner(
                         icon: Icons.do_not_disturb_on_outlined,

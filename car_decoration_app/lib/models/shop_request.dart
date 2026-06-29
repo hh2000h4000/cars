@@ -13,6 +13,7 @@ class ShopRequest {
   final ShopRequestShopStatus shopStatus;
   final String? chatRoomId;
   final DateTime createdAt;
+  final String? quotationStatus;
 
   const ShopRequest({
     required this.id,
@@ -27,6 +28,7 @@ class ShopRequest {
     required this.shopStatus,
     this.chatRoomId,
     required this.createdAt,
+    this.quotationStatus,
   });
 
   String get mono => customerName.isNotEmpty ? customerName[0] : '؟';
@@ -75,6 +77,7 @@ class ShopRequest {
       shopStatus: shopStatus,
       chatRoomId: json['chatRoomId'] as String?,
       createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
+      quotationStatus: json['quotationStatus'] as String?,
     );
   }
 }
