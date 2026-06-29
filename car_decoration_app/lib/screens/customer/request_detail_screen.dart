@@ -389,13 +389,21 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
 
                     const SizedBox(height: 16),
 
-                    if (request.status == RequestStatus.open)
+                    if (request.status == RequestStatus.open) ...[
                       OutlinedDarkButton(
                         label: 'تعديل الطلب',
                         onTap: () => Navigator.pushNamed(context, '/customer/requests/edit', arguments: request),
                         textColor: AppColors.textPrimary,
                         borderColor: AppColors.border,
                       ),
+                      const SizedBox(height: 10),
+                      OutlinedDarkButton(
+                        label: _cancelling ? 'جاري الإلغاء...' : 'إلغاء الطلب',
+                        onTap: _cancelling ? null : _cancelRequest,
+                        textColor: AppColors.red,
+                        borderColor: AppColors.red.withOpacity(.3),
+                      ),
+                    ],
 
                     if (request.status == RequestStatus.shopSelected ||
                         request.status == RequestStatus.inProgress)
