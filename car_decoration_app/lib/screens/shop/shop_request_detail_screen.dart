@@ -124,11 +124,12 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final r = widget.request;
-    final isPending     = _shopStatus == ShopRequestShopStatus.pending;
-    final isRejected    = _shopStatus == ShopRequestShopStatus.rejected;
+    final isPending      = _shopStatus == ShopRequestShopStatus.pending;
+    final isRejected     = _shopStatus == ShopRequestShopStatus.rejected;
     final isShopSelected = _requestStatus == 'ShopSelected';
-    final isInProgress  = _requestStatus == 'InProgress';
-    final isCompleted   = _requestStatus == 'Completed';
+    final isInProgress   = _requestStatus == 'InProgress';
+    final isCompleted    = _requestStatus == 'Completed';
+    final isCancelled    = _requestStatus == 'Cancelled' || _requestStatus == 'Expired';
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -293,6 +294,16 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
                       ),
                     ),
 
+                    // ── Cancelled/Expired banner ──
+                    if (isCancelled) ...[
+                      const SizedBox(height: 16),
+                      _InfoBanner(
+                        icon: Icons.cancel_outlined,
+                        message: _requestStatus == 'Expired' ? 'انتهت صلاحية هذا الطلب' : 'تم إلغاء هذا الطلب من قِبل العميل',
+                        color: AppColors.red,
+                      ),
+                    ],
+
                     // ── Rejected banner ──
                     if (isRejected) ...[
                       const SizedBox(height: 16),
@@ -337,15 +348,25 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
           color: Colors.white,
           border: Border(top: BorderSide(color: AppColors.border)),
         ),
-        child: _buildBottomAction(isPending, isRejected, isShopSelected, isInProgress, isCompleted),
+        child: _buildBottomAction(isPending, isRejected, isShopSelected, isInProgress, isCompleted, isCancelled),
       ),
     );
   }
 
   Widget _buildBottomAction(
     bool isPending, bool isRejected,
-    bool isShopSelected, bool isInProgress, bool isCompleted,
+    bool isShopSelected, bool isInProgress, bool isCompleted, bool isCancelled,
   ) {
+    if (isCancelled) {
+      return const SizedBox(
+        height: 50,
+        child: Center(
+          child: Text('هذا الطلب لم يعد متاحاً',
+            style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+        ),
+      );
+    }
+
     if (isCompleted) {
       return const SizedBox(
         height: 50,
