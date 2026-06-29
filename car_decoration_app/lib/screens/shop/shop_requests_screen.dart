@@ -61,7 +61,7 @@ class _ShopRequestsScreenState extends State<ShopRequestsScreen> {
 
   List<ShopRequest> get _active =>
       _all.where((r) =>
-          (r.status == 'ShopSelected' && r.quotationStatus != 'Rejected') ||
+          (r.status == 'ShopSelected' && r.quotationStatus == 'Accepted') ||
           r.status == 'InProgress').toList();
 
   List<ShopRequest> get _completed =>
@@ -343,8 +343,8 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isRejectedShop = requestStatus == 'ShopSelected' && quotationStatus == 'Rejected';
     final isChosenShop   = requestStatus == 'ShopSelected' && quotationStatus == 'Accepted';
+    final isRejectedShop = requestStatus == 'ShopSelected' && !isChosenShop;
 
     final (label, bg, fg) = isRejectedShop
         ? ('محجوز لمتجر آخر', const Color(0xFFFFEBEE), AppColors.red)
