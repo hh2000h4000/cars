@@ -31,6 +31,25 @@ _shop!.copyWith(status: 'Approved', rejectionReason: null)
 ```
 **Context:** مطلوب في `applyStatusChange()` لأن حالة `Approved` يجب أن تصفّر `rejectionReason`.
 
+### FCM Push Notifications — الأحداث المطلوبة (مرجع للتنفيذ المستقبلي)
+**Context:** SignalR يعمل فقط عندما التطبيق مفتوح. FCM يضمن وصول الإشعار حتى لو التطبيق مغلق.
+**القاعدة:** كل حدث يغيّر حالة طرف غائب → يُطلق FCM notification.
+
+| الحدث (trigger) | المُستَلِم | قناة الإرسال الحالية | FCM مطلوب؟ |
+|----------------|-----------|---------------------|------------|
+| طلب جديد وصل للمتجر | ShopOwner | لا شيء | ✅ نعم |
+| عرض سعر جديد وصل للعميل | Customer | لا شيء | ✅ نعم |
+| العميل قبل عرض المتجر | ShopOwner | لا شيء | ✅ نعم |
+| العميل ألغى الطلب نهائياً | ShopOwner | لا شيء | ✅ نعم |
+| العميل ألغى الاتفاق (reopen) | ShopOwner | لا شيء | ✅ نعم |
+| رسالة جديدة في المحادثة | الطرف الآخر | SignalR (إذا مفتوح) | ✅ احتياطي FCM |
+| تغيير حالة المتجر (Admin) | ShopOwner | SignalR ✅ | ✅ احتياطي FCM |
+
+**متطلبات التنفيذ:**
+- Backend: جدول `DeviceTokens(UserId, Token, Platform)` + Firebase Admin SDK
+- Backend: إرسال FCM من كل Service بعد `SaveChangesAsync()` للأحداث أعلاه
+- Flutter: `firebase_messaging` + طلب إذن + رفع Token عند login + تحديثه عند تجديد JWT
+
 ### SignalR push بدلاً من polling لتحديث حالة المتجر (2026-06-28)
 **Decision:** Backend يرسل `ShopStatusChanged` event عبر SignalR عند كل تغيير حالة. Flutter تحدّث الـ Provider مباشرةً من payload الحدث — بدون API call.
 **Why:** Polling يعني:
