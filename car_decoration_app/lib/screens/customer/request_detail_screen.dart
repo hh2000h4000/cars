@@ -387,6 +387,51 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                       ),
                     ],
 
+                    // Accepted shops without quotations yet
+                    Builder(builder: (_) {
+                      final quotationChatIds = _quotations
+                          .where((q) => q.chatRoomId != null)
+                          .map((q) => q.chatRoomId!)
+                          .toSet();
+                      final interested = request.acceptedShops
+                          .where((s) => s.chatRoomId == null || !quotationChatIds.contains(s.chatRoomId))
+                          .toList();
+                      if (interested.isEmpty) return const SizedBox.shrink();
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              const Text('وافقوا على طلبك',
+                                style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: AppColors.goldBg,
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: Text('${interested.length}',
+                                  style: const TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.goldText)),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          const Text('هؤلاء المتاجر مهتمون بطلبك — في انتظار إرسالهم عرض السعر',
+                            style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textMuted)),
+                          const SizedBox(height: 10),
+                          ...interested.map((s) => _InterestedShopRow(
+                            shopName: s.shopName,
+                            chatRoomId: s.chatRoomId,
+                            onChat: s.chatRoomId != null
+                                ? () => Navigator.pushNamed(context, '/customer/chat', arguments: s.chatRoomId)
+                                : null,
+                          )),
+                        ],
+                      );
+                    }),
+
                     const SizedBox(height: 16),
 
                     if (request.status == RequestStatus.open) ...[
@@ -815,6 +860,52 @@ class _QuotationCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _InterestedShopRow extends StatelessWidget {
+  final String shopName;
+  final String? chatRoomId;
+  final VoidCallback? onChat;
+  const _InterestedShopRow({required this.shopName, this.chatRoomId, this.onChat});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    margin: const EdgeInsets.only(bottom: 10),
+    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      border: Border.all(color: AppColors.goldLight),
+      borderRadius: BorderRadius.circular(14),
+    ),
+    child: Row(
+      children: [
+        ShopAvatar(mono: shopName.isNotEmpty ? shopName[0] : 'م', size: 38, fontSize: 15),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(shopName,
+                style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+              const Text('وافق على طلبك — في انتظار إرسال العرض',
+                style: TextStyle(fontFamily: 'Tajawal', fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.goldText)),
+            ],
+          ),
+        ),
+        if (onChat != null) ...[
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: onChat,
+            child: Container(
+              width: 38, height: 38,
+              decoration: BoxDecoration(color: AppColors.dark, borderRadius: BorderRadius.circular(11)),
+              child: const Icon(Icons.chat_bubble_outline_rounded, color: Colors.white, size: 16),
+            ),
+          ),
+        ],
+      ],
+    ),
+  );
 }
 
 class _InfoChip extends StatelessWidget {

@@ -1,5 +1,19 @@
 enum RequestStatus { open, shopSelected, inProgress, completed, cancelled, expired }
 
+class AcceptedShopSummary {
+  final String shopName;
+  final String shopId;
+  final String? chatRoomId;
+
+  const AcceptedShopSummary({required this.shopName, required this.shopId, this.chatRoomId});
+
+  factory AcceptedShopSummary.fromJson(Map<String, dynamic> json) => AcceptedShopSummary(
+    shopName: json['shopName'] as String? ?? '',
+    shopId: json['shopId'] as String? ?? '',
+    chatRoomId: json['chatRoomId'] as String?,
+  );
+}
+
 extension RequestStatusLabel on RequestStatus {
   String get label {
     switch (this) {
@@ -40,6 +54,7 @@ class ServiceRequest {
   final String? selectedShopName;
   final DateTime? appointmentDate;
   final List<String> imageUrls;
+  final List<AcceptedShopSummary> acceptedShops;
 
   factory ServiceRequest.fromJson(Map<String, dynamic> json) {
     final statusStr = (json['status'] as String?)?.toLowerCase() ?? 'open';
@@ -66,6 +81,7 @@ class ServiceRequest {
       try { appointmentDate = DateTime.parse(apptStr).toLocal(); } catch (_) {}
     }
     final rawUrls = json['imageUrls'] as List<dynamic>?;
+    final rawAccepted = json['acceptedShops'] as List<dynamic>?;
     return ServiceRequest(
       id: json['id'] as String,
       requestNumber: json['requestNumber'] as int? ?? 0,
@@ -82,6 +98,9 @@ class ServiceRequest {
       notes: json['notes'] as String?,
       appointmentDate: appointmentDate,
       imageUrls: rawUrls?.cast<String>() ?? [],
+      acceptedShops: rawAccepted
+          ?.map((e) => AcceptedShopSummary.fromJson(e as Map<String, dynamic>))
+          .toList() ?? [],
     );
   }
 
@@ -102,5 +121,6 @@ class ServiceRequest {
     this.selectedShopName,
     this.appointmentDate,
     this.imageUrls = const [],
+    this.acceptedShops = const [],
   });
 }

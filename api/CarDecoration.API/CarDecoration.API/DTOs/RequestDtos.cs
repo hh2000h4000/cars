@@ -18,6 +18,8 @@ public record UpdateRequestRequest(
     List<string>? ImageUrls
 );
 
+public record AcceptedShopSummary(string ShopName, string ShopId, Guid? ChatRoomId);
+
 public record RequestResponse(
     Guid Id,
     int RequestNumber,
@@ -33,7 +35,8 @@ public record RequestResponse(
     string Status,
     List<string> ShopNames,
     List<string> ImageUrls,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    List<AcceptedShopSummary> AcceptedShops
 );
 
 public record ShopRequestResponse(

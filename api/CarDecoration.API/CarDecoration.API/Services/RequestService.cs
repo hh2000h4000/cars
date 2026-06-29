@@ -81,7 +81,8 @@ public class RequestService
             request.Status.ToString(),
             shops.Select(s => s.Name).ToList(),
             req.ImageUrls ?? [],
-            request.CreatedAt);
+            request.CreatedAt,
+            []);
     }
 
     public Task<PagedResult<RequestResponse>> GetMyRequestsAsync(PaginationRequest pagination)
@@ -99,7 +100,17 @@ public class RequestService
                 r.Status.ToString(),
                 r.RequestShops.Select(rs => rs.Shop.Name).ToList(),
                 r.RequestImages.OrderBy(i => i.Order).Select(i => i.Url).ToList(),
-                r.CreatedAt))
+                r.CreatedAt,
+                r.RequestShops
+                    .Where(rs => rs.Status == RequestShopStatus.Accepted)
+                    .Select(rs => new AcceptedShopSummary(
+                        rs.Shop.Name,
+                        rs.ShopId.ToString(),
+                        r.ChatRooms
+                            .Where(c => c.ShopId == rs.ShopId)
+                            .Select(c => (Guid?)c.Id)
+                            .FirstOrDefault()))
+                    .ToList()))
             .ToPagedAsync(pagination);
     }
 
@@ -213,7 +224,8 @@ public class RequestService
             request.Status.ToString(),
             shopNames,
             req.ImageUrls ?? [],
-            request.CreatedAt);
+            request.CreatedAt,
+            []);
     }
 
     // المتجر يبدأ العمل فعلياً
