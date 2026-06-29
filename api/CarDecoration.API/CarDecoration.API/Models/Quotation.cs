@@ -1,6 +1,6 @@
 ﻿namespace CarDecoration.API.Models;
 
-public enum QuotationStatus { Pending, Accepted, Rejected, Withdrawn }
+public enum QuotationStatus { Pending, Accepted, Rejected }
 
 public class Quotation : BaseEntity
 {

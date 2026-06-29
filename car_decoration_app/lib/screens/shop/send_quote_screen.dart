@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../../models/shop_request.dart';
+import '../../models/quotation.dart';
 import '../../services/quotation_service.dart';
 
 class SendQuoteScreen extends StatefulWidget {
   final ShopRequest request;
-  const SendQuoteScreen({super.key, required this.request});
+  final Quotation? existingQuotation;
+  const SendQuoteScreen({super.key, required this.request, this.existingQuotation});
 
   @override
   State<SendQuoteScreen> createState() => _SendQuoteScreenState();
@@ -22,7 +24,23 @@ class _SendQuoteScreenState extends State<SendQuoteScreen> {
   final _partController = TextEditingController();
   bool _submitting = false;
 
+  bool get _isEditMode => widget.existingQuotation != null;
+
   static const _warrantyOptions = ['بدون ضمان', '٦ أشهر', 'سنة', 'سنتان'];
+
+  @override
+  void initState() {
+    super.initState();
+    final q = widget.existingQuotation;
+    if (q != null) {
+      _priceController.text = q.finalPrice.toStringAsFixed(0);
+      _visitFeeController.text = q.visitFeeRaw == 0 ? '0' : q.visitFeeRaw.toStringAsFixed(0);
+      _durationController.text = q.duration;
+      _detailsController.text = q.serviceDetails;
+      _warranty = (q.warranty == 'لا يوجد') ? '' : q.warranty;
+      _parts.addAll(q.parts);
+    }
+  }
 
   @override
   void dispose() {
@@ -70,28 +88,51 @@ class _SendQuoteScreenState extends State<SendQuoteScreen> {
 
     setState(() => _submitting = true);
     try {
-      await QuotationService.sendQuote(
-        requestId: widget.request.id,
-        finalPrice: price,
-        duration: duration,
-        serviceDetails: details,
-        parts: _parts.isEmpty ? 'غير محدد' : _parts.join('، '),
-        visitFee: visitFee,
-        warranty: _warranty.isEmpty || _warranty == 'بدون ضمان' ? null : _warranty,
-      );
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('تم إرسال العرض بنجاح — في انتظار رد العميل',
-            style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
-          backgroundColor: AppColors.green,
-        ));
-        Navigator.pop(context);
-        Navigator.pop(context);
+      final partsStr = _parts.isEmpty ? 'غير محدد' : _parts.join('، ');
+      final warrantyVal = _warranty.isEmpty || _warranty == 'بدون ضمان' ? null : _warranty;
+
+      if (_isEditMode) {
+        final updated = await QuotationService.updateQuotation(
+          widget.existingQuotation!.id,
+          finalPrice: price,
+          duration: duration,
+          serviceDetails: details,
+          parts: partsStr,
+          visitFee: visitFee,
+          warranty: warrantyVal,
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('تم تحديث العرض بنجاح',
+              style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
+            backgroundColor: AppColors.green,
+          ));
+          Navigator.pop(context, updated);
+        }
+      } else {
+        await QuotationService.sendQuote(
+          requestId: widget.request.id,
+          finalPrice: price,
+          duration: duration,
+          serviceDetails: details,
+          parts: partsStr,
+          visitFee: visitFee,
+          warranty: warrantyVal,
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('تم إرسال العرض بنجاح — في انتظار رد العميل',
+              style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700)),
+            backgroundColor: AppColors.green,
+          ));
+          Navigator.pop(context);
+          Navigator.pop(context);
+        }
       }
     } catch (e) {
       if (mounted) {
         setState(() => _submitting = false);
-        _showError('فشل إرسال العرض. حاول مجدداً.');
+        _showError(_isEditMode ? 'فشل تحديث العرض. حاول مجدداً.' : 'فشل إرسال العرض. حاول مجدداً.');
       }
     }
   }
@@ -118,8 +159,8 @@ class _SendQuoteScreenState extends State<SendQuoteScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Row(
                   children: [
-                    const Text('إرسال عرض سعر',
-                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    Text(_isEditMode ? 'تعديل عرض السعر' : 'إرسال عرض سعر',
+                      style: const TextStyle(fontFamily: 'Tajawal', fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                     const Spacer(),
                     const AppBackButton(),
                   ],
@@ -287,7 +328,9 @@ class _SendQuoteScreenState extends State<SendQuoteScreen> {
               const SizedBox(height: 28),
 
               DarkButton(
-                label: _submitting ? 'جاري الإرسال...' : 'إرسال العرض',
+                label: _submitting
+                    ? (_isEditMode ? 'جاري التحديث...' : 'جاري الإرسال...')
+                    : (_isEditMode ? 'تحديث العرض' : 'إرسال العرض'),
                 onTap: _submitting ? null : _submit,
               ),
             ],

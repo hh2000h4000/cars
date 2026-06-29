@@ -6,8 +6,8 @@ import '../../providers/app_provider.dart';
 import '../../models/service_request.dart';
 import '../../models/quotation.dart';
 import '../../services/quotation_service.dart';
+import '../../services/request_service.dart';
 import '../../services/review_service.dart';
-import '../../services/api_client.dart';
 import 'review_screen.dart';
 
 class RequestDetailScreen extends StatefulWidget {
@@ -24,6 +24,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
   String? _acceptedQuoteId;
   String? _acceptedChatRoomId;
   bool _accepting = false;
+  bool _cancelling = false;
   bool _hasReviewed = false;
 
   @override
@@ -59,8 +60,88 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
     }
   }
 
+  Future<void> _cancelRequest() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title: const Text('إلغاء الطلب',
+          textAlign: TextAlign.right,
+          style: TextStyle(fontFamily: 'Tajawal', fontSize: 17, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+        content: const Text(
+          'إلغاء الطلب سيؤدي إلى إنهاء الاتفاق مع المتجر. سيتعين عليك إنشاء طلب جديد إذا أردت المتابعة. هل أنت متأكد؟',
+          textAlign: TextAlign.right,
+          style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary, height: 1.65),
+        ),
+        actionsAlignment: MainAxisAlignment.start,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('تأكيد الإلغاء',
+              style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w800, color: AppColors.red)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('تراجع',
+              style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _cancelling = true);
+    try {
+      await RequestService.cancelRequest(widget.requestId);
+      if (!mounted) return;
+      context.read<AppProvider>().reloadRequests();
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _cancelling = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.toString().replaceAll('Exception: ', ''),
+          style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13)),
+        backgroundColor: AppColors.red,
+        duration: const Duration(seconds: 4),
+      ));
+    }
+  }
+
   Future<void> _acceptQuote(String quotationId) async {
     if (_accepting) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title: const Text('تأكيد قبول العرض',
+          textAlign: TextAlign.right,
+          style: TextStyle(fontFamily: 'Tajawal', fontSize: 17, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+        content: const Text(
+          'عند قبول هذا العرض، سيتم رفض جميع العروض الأخرى المرتبطة بهذا الطلب تلقائياً، ولن تتمكن من اختيار متجر آخر لنفس الطلب.',
+          textAlign: TextAlign.right,
+          style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary, height: 1.65),
+        ),
+        actionsAlignment: MainAxisAlignment.start,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('تأكيد القبول',
+              style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w800, color: AppColors.goldText)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('تراجع',
+              style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
     setState(() => _accepting = true);
     try {
       final chatRoomId = await QuotationService.acceptQuotation(quotationId);
@@ -273,6 +354,16 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                         borderColor: AppColors.red.withOpacity(.4),
                       ),
 
+                    if (request.status == RequestStatus.shopSelected) ...[
+                      const SizedBox(height: 10),
+                      OutlinedDarkButton(
+                        label: _cancelling ? 'جاري الإلغاء...' : 'إلغاء الطلب',
+                        onTap: _cancelling ? null : _cancelRequest,
+                        textColor: AppColors.red,
+                        borderColor: AppColors.red.withOpacity(.3),
+                      ),
+                    ],
+
                     if (request.status == RequestStatus.completed)
                       _hasReviewed
                           ? Container(
@@ -456,8 +547,7 @@ class _QuotationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isRejected = quotation.status == QuotationStatus.rejected ||
-        quotation.status == QuotationStatus.withdrawn;
+    final isRejected = quotation.status == QuotationStatus.rejected;
     final isPending = quotation.status == QuotationStatus.pending;
 
     return Opacity(

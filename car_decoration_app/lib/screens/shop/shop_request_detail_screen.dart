@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../../models/shop_request.dart';
+import '../../models/quotation.dart';
 import '../../services/shop_request_service.dart';
+import '../../services/quotation_service.dart';
+import 'send_quote_screen.dart';
 
 class ShopRequestDetailScreen extends StatefulWidget {
   final ShopRequest request;
@@ -19,6 +22,7 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
   late ShopRequestShopStatus _shopStatus;
   late String _requestStatus;
   String? _chatRoomId;
+  Quotation? _myQuotation;
 
   @override
   void initState() {
@@ -26,6 +30,29 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
     _shopStatus = widget.request.shopStatus;
     _requestStatus = widget.request.status;
     _chatRoomId = widget.request.chatRoomId;
+    _loadMyQuotation();
+  }
+
+  Future<void> _loadMyQuotation() async {
+    final q = await QuotationService.getMyQuotation(widget.request.id);
+    if (mounted) setState(() => _myQuotation = q);
+  }
+
+  Future<void> _openQuoteScreen() async {
+    final result = await Navigator.push<Quotation>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SendQuoteScreen(
+          request: widget.request,
+          existingQuotation: _myQuotation?.status == QuotationStatus.pending ? _myQuotation : null,
+        ),
+      ),
+    );
+    if (result != null && mounted) {
+      setState(() => _myQuotation = result);
+    } else if (result == null && _myQuotation == null && mounted) {
+      _loadMyQuotation();
+    }
   }
 
   Future<void> _accept() async {
@@ -394,14 +421,17 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
     }
 
     // Accepted but not yet ShopSelected (waiting for customer to pick)
+    final hasPendingQuote = _myQuotation?.status == QuotationStatus.pending;
+    final quoteLabel = hasPendingQuote ? 'تعديل العرض' : 'إرسال عرض سعر';
+
     if (_chatRoomId != null) {
       return Row(
         children: [
           Expanded(
             flex: 2,
             child: DarkButton(
-              label: 'إرسال عرض سعر',
-              onTap: () => Navigator.pushNamed(context, '/shop/send-quote', arguments: widget.request),
+              label: quoteLabel,
+              onTap: _openQuoteScreen,
               height: 50,
             ),
           ),
@@ -418,8 +448,8 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
     }
 
     return DarkButton(
-      label: 'إرسال عرض سعر',
-      onTap: () => Navigator.pushNamed(context, '/shop/send-quote', arguments: widget.request),
+      label: quoteLabel,
+      onTap: _openQuoteScreen,
       height: 50,
     );
   }

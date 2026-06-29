@@ -44,9 +44,9 @@ public class QuotationService
 
         var exists = await _db.Quotations
             .AnyAsync(q => q.RequestId == req.RequestId && q.ShopId == shop.Id
-                        && q.Status != QuotationStatus.Withdrawn);
+                        && q.Status == QuotationStatus.Pending);
         if (exists)
-            throw new Exception("لقد أرسلت عرض سعر لهذا الطلب مسبقاً");
+            throw new Exception("لقد أرسلت عرض سعر لهذا الطلب مسبقاً — يمكنك تعديله بدلاً من إرسال عرض جديد");
 
         var quotation = new Quotation
         {
@@ -156,24 +156,56 @@ public class QuotationService
         return chatRoom.Id;
     }
 
-    // المتجر يسحب عرضه
-    public async Task WithdrawAsync(Guid quotationId)
+    // المتجر يعدّل عرضه — مسموح فقط إذا كانت الحالة Pending
+    public async Task<QuotationResponse> UpdateAsync(Guid quotationId, UpdateQuotationRequest req)
     {
         var userId = _currentUser.UserId
             ?? throw new Exception("غير مصرح");
 
         var shop = await _db.Shops
             .FirstOrDefaultAsync(s => s.OwnerId == userId && s.Status == ShopStatus.Approved)
-            ?? throw new Exception("المتجر غير موجود");
+            ?? throw new Exception("المتجر غير موجود أو غير معتمد");
 
         var quotation = await _db.Quotations
             .FirstOrDefaultAsync(q => q.Id == quotationId && q.ShopId == shop.Id)
             ?? throw new Exception("العرض غير موجود");
 
         if (quotation.Status != QuotationStatus.Pending)
-            throw new Exception("لا يمكن سحب هذا العرض — تم البت فيه مسبقاً");
+            throw new Exception("لا يمكن تعديل هذا العرض — لقد تم البت فيه");
 
-        quotation.Status = QuotationStatus.Withdrawn;
+        quotation.ServiceDetails = req.ServiceDetails;
+        quotation.Parts = req.Parts;
+        quotation.Warranty = req.Warranty;
+        quotation.VisitFee = req.VisitFee;
+        quotation.Duration = req.Duration;
+        quotation.FinalPrice = req.FinalPrice;
+
         await _db.SaveChangesAsync();
+
+        return new QuotationResponse(
+            quotation.Id, quotation.RequestId, shop.Id, shop.Name,
+            quotation.ServiceDetails, quotation.Parts, quotation.Warranty,
+            quotation.VisitFee, quotation.Duration, quotation.FinalPrice,
+            quotation.Status.ToString(), quotation.CreatedAt, null);
+    }
+
+    // المتجر يرى عرضه الخاص لطلب معين
+    public async Task<QuotationResponse?> GetMyQuotationAsync(Guid requestId)
+    {
+        var userId = _currentUser.UserId
+            ?? throw new Exception("غير مصرح");
+
+        var shop = await _db.Shops
+            .FirstOrDefaultAsync(s => s.OwnerId == userId)
+            ?? throw new Exception("المتجر غير موجود");
+
+        return await _db.Quotations
+            .Where(q => q.RequestId == requestId && q.ShopId == shop.Id)
+            .Select(q => new QuotationResponse(
+                q.Id, q.RequestId, q.ShopId, q.Shop.Name,
+                q.ServiceDetails, q.Parts, q.Warranty,
+                q.VisitFee, q.Duration, q.FinalPrice,
+                q.Status.ToString(), q.CreatedAt, null))
+            .FirstOrDefaultAsync();
     }
 }

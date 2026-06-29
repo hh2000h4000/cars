@@ -22,13 +22,43 @@ class _QuotationDetailScreenState extends State<QuotationDetailScreen> {
   void initState() {
     super.initState();
     _accepted = widget.quotation.status == QuotationStatus.accepted;
-    _rejected = widget.quotation.status == QuotationStatus.rejected ||
-        widget.quotation.status == QuotationStatus.withdrawn;
+    _rejected = widget.quotation.status == QuotationStatus.rejected;
     _chatRoomId = widget.quotation.chatRoomId;
   }
 
   Future<void> _accept() async {
     if (_loading) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title: const Text('تأكيد قبول العرض',
+          textAlign: TextAlign.right,
+          style: TextStyle(fontFamily: 'Tajawal', fontSize: 17, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+        content: const Text(
+          'عند قبول هذا العرض، سيتم رفض جميع العروض الأخرى المرتبطة بهذا الطلب تلقائياً، ولن تتمكن من اختيار متجر آخر لنفس الطلب.',
+          textAlign: TextAlign.right,
+          style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary, height: 1.65),
+        ),
+        actionsAlignment: MainAxisAlignment.start,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('تأكيد القبول',
+              style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w800, color: AppColors.goldText)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('تراجع',
+              style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
     setState(() => _loading = true);
     try {
       final chatRoomId = await QuotationService.acceptQuotation(widget.quotation.id);
@@ -340,44 +370,21 @@ class _QuotationDetailScreenState extends State<QuotationDetailScreen> {
                     child: const Text('تم رفض هذا العرض',
                       style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
                   )
-                : Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: Container(
-                            height: 50,
-                            decoration: BoxDecoration(
-                              border: Border.all(color: AppColors.border),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            alignment: Alignment.center,
-                            child: const Text('رفض',
-                              style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
-                          ),
-                        ),
+                : GestureDetector(
+                    onTap: _loading ? null : _accept,
+                    child: Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: _loading ? AppColors.border : AppColors.dark,
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        flex: 2,
-                        child: GestureDetector(
-                          onTap: _loading ? null : _accept,
-                          child: Container(
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: _loading ? AppColors.border : AppColors.dark,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            alignment: Alignment.center,
-                            child: _loading
-                                ? const SizedBox(width: 20, height: 20,
-                                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                                : const Text('قبول العرض',
-                                    style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white)),
-                          ),
-                        ),
-                      ),
-                    ],
+                      alignment: Alignment.center,
+                      child: _loading
+                          ? const SizedBox(width: 20, height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          : const Text('قبول العرض',
+                              style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white)),
+                    ),
                   ),
       ),
     );

@@ -49,6 +49,10 @@ class RequestService {
     return ServiceRequest.fromJson(res.data as Map<String, dynamic>);
   }
 
+  static Future<void> cancelRequest(String id) async {
+    await ApiClient.dio.put('/api/requests/$id/cancel');
+  }
+
   static Future<ServiceRequest> updateRequest({
     required String id,
     required String description,

@@ -10,6 +10,15 @@ public record CreateQuotationRequest(
     decimal FinalPrice
 );
 
+public record UpdateQuotationRequest(
+    string ServiceDetails,
+    string Parts,
+    string? Warranty,
+    decimal VisitFee,
+    string Duration,
+    decimal FinalPrice
+);
+
 public record QuotationResponse(
     Guid Id,
     Guid RequestId,

@@ -59,13 +59,28 @@ public class QuotationsController : ControllerBase
         }
     }
 
-    [HttpPut("{id}/withdraw")]
-    public async Task<IActionResult> Withdraw(Guid id)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, UpdateQuotationRequest req)
     {
         try
         {
-            await _service.WithdrawAsync(id);
-            return Ok(new { message = "تم سحب العرض بنجاح" });
+            var result = await _service.UpdateAsync(id, req);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpGet("my/{requestId}")]
+    public async Task<IActionResult> GetMyQuotation(Guid requestId)
+    {
+        try
+        {
+            var result = await _service.GetMyQuotationAsync(requestId);
+            if (result == null) return NoContent();
+            return Ok(result);
         }
         catch (Exception ex)
         {

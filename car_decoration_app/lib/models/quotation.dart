@@ -1,4 +1,4 @@
-enum QuotationStatus { pending, accepted, rejected, withdrawn }
+enum QuotationStatus { pending, accepted, rejected }
 
 class Quotation {
   final String id;
@@ -12,6 +12,7 @@ class Quotation {
   final String duration;
   final String serviceDetails;
   final List<String> parts;
+  final double visitFeeRaw;
   final bool isBestValue;
   final String? chatRoomId;
   QuotationStatus status;
@@ -28,6 +29,7 @@ class Quotation {
     required this.duration,
     required this.serviceDetails,
     required this.parts,
+    this.visitFeeRaw = 0,
     this.isBestValue = false,
     this.status = QuotationStatus.pending,
     this.chatRoomId,
@@ -44,10 +46,9 @@ class Quotation {
     final statusStr = (json['status'] as String?)?.toLowerCase() ?? 'pending';
     final QuotationStatus status;
     switch (statusStr) {
-      case 'accepted':  status = QuotationStatus.accepted;  break;
-      case 'rejected':  status = QuotationStatus.rejected;  break;
-      case 'withdrawn': status = QuotationStatus.withdrawn; break;
-      default:          status = QuotationStatus.pending;
+      case 'accepted': status = QuotationStatus.accepted; break;
+      case 'rejected': status = QuotationStatus.rejected; break;
+      default:         status = QuotationStatus.pending;
     }
     final visitFeeVal = (json['visitFee'] as num?)?.toDouble() ?? 0;
     final partsRaw = json['parts'] as String? ?? '';
@@ -59,6 +60,7 @@ class Quotation {
       shopRating: 0.0,
       finalPrice: (json['finalPrice'] as num?)?.toDouble() ?? 0,
       visitFee: visitFeeVal == 0 ? 'مجاناً' : '${visitFeeVal.toStringAsFixed(0)} ريال',
+      visitFeeRaw: visitFeeVal,
       warranty: json['warranty'] as String? ?? 'لا يوجد',
       duration: json['duration'] as String? ?? 'غير محدد',
       serviceDetails: json['serviceDetails'] as String? ?? '',
