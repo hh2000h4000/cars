@@ -130,6 +130,9 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
     final isInProgress   = _requestStatus == 'InProgress';
     final isCompleted    = _requestStatus == 'Completed';
     final isCancelled    = _requestStatus == 'Cancelled' || _requestStatus == 'Expired';
+    // هل اختار العميل هذا المتجر تحديداً؟
+    final isChosenShop       = isShopSelected && _myQuotation?.status == QuotationStatus.accepted;
+    final isRejectedByCustomer = isShopSelected && _myQuotation != null && _myQuotation!.status == QuotationStatus.rejected;
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -156,7 +159,7 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
                     ),
                   ),
                   // Status badge
-                  _StatusBadge(requestStatus: _requestStatus, shopStatus: _shopStatus),
+                  _StatusBadge(requestStatus: _requestStatus, shopStatus: _shopStatus, isRejectedByCustomer: isRejectedByCustomer),
                 ],
               ),
             ),
@@ -304,7 +307,7 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
                       ),
                     ],
 
-                    // ── Rejected banner ──
+                    // ── Rejected banner (shop status rejected = customer chose someone else without accepting this shop) ──
                     if (isRejected) ...[
                       const SizedBox(height: 16),
                       _InfoBanner(
@@ -314,8 +317,18 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
                       ),
                     ],
 
-                    // ── ShopSelected banner ──
-                    if (isShopSelected && _chatRoomId != null) ...[
+                    // ── Customer chose another shop (quotation rejected) ──
+                    if (isRejectedByCustomer) ...[
+                      const SizedBox(height: 16),
+                      _InfoBanner(
+                        icon: Icons.do_not_disturb_on_outlined,
+                        message: 'اختار العميل متجراً آخر — تم رفض عرضك',
+                        color: AppColors.red,
+                      ),
+                    ],
+
+                    // ── ShopSelected banner — only for the chosen shop ──
+                    if (isChosenShop && _chatRoomId != null) ...[
                       const SizedBox(height: 16),
                       _InfoBanner(
                         icon: Icons.check_circle_outline_rounded,
@@ -348,14 +361,15 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
           color: Colors.white,
           border: Border(top: BorderSide(color: AppColors.border)),
         ),
-        child: _buildBottomAction(isPending, isRejected, isShopSelected, isInProgress, isCompleted, isCancelled),
+        child: _buildBottomAction(isPending, isRejected, isChosenShop, isRejectedByCustomer, isInProgress, isCompleted, isCancelled),
       ),
     );
   }
 
   Widget _buildBottomAction(
     bool isPending, bool isRejected,
-    bool isShopSelected, bool isInProgress, bool isCompleted, bool isCancelled,
+    bool isChosenShop, bool isRejectedByCustomer,
+    bool isInProgress, bool isCompleted, bool isCancelled,
   ) {
     if (isCancelled) {
       return const SizedBox(
@@ -377,11 +391,11 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
       );
     }
 
-    if (isRejected) {
+    if (isRejected || isRejectedByCustomer) {
       return const SizedBox(
         height: 50,
         child: Center(
-          child: Text('تم اختيار متجر آخر',
+          child: Text('اختار العميل متجراً آخر',
             style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
         ),
       );
@@ -395,7 +409,7 @@ class _ShopRequestDetailScreenState extends State<ShopRequestDetailScreen> {
       );
     }
 
-    if (isShopSelected && _chatRoomId != null) {
+    if (isChosenShop && _chatRoomId != null) {
       return Row(
         children: [
           Expanded(
@@ -506,7 +520,8 @@ class _InfoBanner extends StatelessWidget {
 class _StatusBadge extends StatelessWidget {
   final String requestStatus;
   final ShopRequestShopStatus shopStatus;
-  const _StatusBadge({required this.requestStatus, required this.shopStatus});
+  final bool isRejectedByCustomer;
+  const _StatusBadge({required this.requestStatus, required this.shopStatus, this.isRejectedByCustomer = false});
 
   @override
   Widget build(BuildContext context) {
@@ -514,11 +529,11 @@ class _StatusBadge extends StatelessWidget {
     Color bg;
     Color fg;
 
-    if (shopStatus == ShopRequestShopStatus.rejected) {
-      label = 'غير مختار'; bg = AppColors.red.withOpacity(.1); fg = AppColors.red;
+    if (shopStatus == ShopRequestShopStatus.rejected || isRejectedByCustomer) {
+      label = 'محجوز لمتجر آخر'; bg = AppColors.red.withOpacity(.1); fg = AppColors.red;
     } else {
       switch (requestStatus) {
-        case 'ShopSelected': label = 'تم الاختيار'; bg = AppColors.green.withOpacity(.1); fg = AppColors.green; break;
+        case 'ShopSelected': label = 'تم اختياري'; bg = AppColors.green.withOpacity(.1); fg = AppColors.green; break;
         case 'InProgress':   label = 'قيد التنفيذ'; bg = Colors.blue.withOpacity(.1); fg = Colors.blue; break;
         case 'Completed':    label = 'مكتمل'; bg = AppColors.green.withOpacity(.1); fg = AppColors.green; break;
         case 'Cancelled':    label = 'ملغي'; bg = AppColors.red.withOpacity(.1); fg = AppColors.red; break;
