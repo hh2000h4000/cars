@@ -175,7 +175,7 @@ class _ShopRequestsScreenState extends State<ShopRequestsScreen> {
                                   }
                                   return Padding(
                                     padding: EdgeInsets.only(bottom: i < currentList.length - 1 || _hasMore ? 12 : 0),
-                                    child: _RequestCard(request: currentList[i]),
+                                    child: _RequestCard(request: currentList[i], onRefresh: _load),
                                   );
                                 },
                               ),
@@ -215,7 +215,8 @@ class _LoadMoreButton extends StatelessWidget {
 // ── Request card ──────────────────────────────────────────────────────────────
 class _RequestCard extends StatelessWidget {
   final ShopRequest request;
-  const _RequestCard({required this.request});
+  final VoidCallback onRefresh;
+  const _RequestCard({required this.request, required this.onRefresh});
 
   @override
   Widget build(BuildContext context) => Container(
@@ -282,7 +283,7 @@ class _RequestCard extends StatelessWidget {
               Expanded(
                 child: GestureDetector(
                   onTap: () => Navigator.pushNamed(context, '/shop/request-detail', arguments: request)
-                      .then((_) => _load()),
+                      .then((_) => onRefresh()),
                   child: Container(
                     height: 42,
                     decoration: BoxDecoration(
