@@ -50,6 +50,44 @@ _shop!.copyWith(status: 'Approved', rejectionReason: null)
 - Backend: إرسال FCM من كل Service بعد `SaveChangesAsync()` للأحداث أعلاه
 - Flutter: `firebase_messaging` + طلب إذن + رفع Token عند login + تحديثه عند تجديد JWT
 
+### SignalR: أحداث محددة — لا أحداث عامة (2026-06-30)
+**Decision:** كل حدث يُرسَل عبر SignalR يحمل اسماً محدداً يصف ما حدث بالضبط:
+- `RequestAccepted` (المتجر قبل الطلب → تحديث قائمة الطلبات عند العميل)
+- `JobStarted` (المتجر بدأ العمل → تحديث حالة الطلب للعميل)
+- `JobCompleted` (المتجر أنهى العمل → تحديث حالة الطلب للعميل)
+- `ShopStatusChanged` (Admin غيّر حالة المتجر → تحديث Provider عند المتجر)
+
+**Never:** `RequestUpdated` (حدث عام يحمل كل شيء ولا يوضح ماذا تغيّر).
+**Why:** الحدث العام يُجبر كل مستلم على استيعاب كل السياق وفحص ما الذي تغيّر. الحدث المحدد:
+- أوضح للمطور عند قراءة الكود
+- أسهل لتتبع مصدر الخطأ
+- يمكّن كل معالج (handler) من تحديث الجزء الدقيق المعني فقط بدلاً من reload كامل
+**Contrast:** ChatGPT اقترح `RequestUpdated` generic event. هذا مرفوض — يُنتج "monster event" يصعب اتباعه في production.
+
+### On-Enter Fetch ≠ Polling (2026-06-30)
+**Decision:** عند دخول شاشة أو تبويب، استدعاء API واحد لتحديث البيانات ليس polling.
+**التعريف الدقيق:**
+- **Polling:** timer يستدعي API كل X ثانية بغض النظر عن وجود المستخدم أو حاجته
+- **On-Enter Fetch:** استدعاء واحد فقط عندما ينتقل المستخدم فعلياً لهذه الشاشة
+**On-Enter Fetch مقبول:** لقائمة المحادثات عند فتح تبويب الدردشة — يضمن البيانات الحديثة بدون overhead.
+**متى نتجاوزه:** عند تطبيق SignalR events الكاملة (RequestAccepted, JobStarted, JobCompleted) — الشاشة تتحدث بالأحداث لا باستدعاء مستمر.
+
+### UX: بطاقة طلب المتجر — زر واحد فقط (2026-06-30)
+**Decision:** بطاقة الطلب في شاشة `ShopRequestsScreen` تحتوي زر واحد فقط: "عرض التفاصيل".
+**Before:** زران: "عرض التفاصيل" + "قبول وإرسال عرض" — لا فرق مرئياً للمستخدم.
+**Why:** قبول الطلب وإرسال العرض عملية تحتاج مراجعة التفاصيل أولاً. قبول مباشر من البطاقة بدون قراءة يُنتج أخطاء (قبول طلب لا يناسب المتجر). الـ intent الصحيح: "اقرأ ثم قرر."
+**Pattern:** Detail screen تحتوي جميع actions. List screen = عرض فقط.
+
+### markAsRead — تحديث DB وليس local state (2026-06-30)
+**Decision:** عند فتح شاشة المحادثة، استدعاء `PUT /api/chats/{id}/read` الذي يُحدّث `LastReadCustomerAt` أو `LastReadShopOwnerAt` في جدول `ChatRooms`.
+**Why:** تخزين "مقروء" على الجهاز فقط (SecureStorage/SharedPreferences) يعني:
+- إذا سجّل المستخدم دخوله من جهاز آخر → badge لا يتصفّر
+- إذا مسح cache التطبيق → يظهر كل شيء كغير مقروء مجدداً
+- backend لا يعرف أن الرسالة قُرئت → لا يمكن إرسال receipts للطرف الآخر
+**Pattern مرجع:** WhatsApp، Messenger — جميعها تُرسل read receipt للسيرفر.
+**Endpoint الأمثل:** `PUT /api/chats/{id}/read` (idempotent, لا جسم مطلوب — السيرفر يعرف userId من JWT).
+**unread count حساب:** `SELECT COUNT(*) FROM Messages WHERE ChatRoomId=X AND CreatedAt > LastReadAt` — يُحسب بـ SQL، لا في الجهاز.
+
 ### SignalR push بدلاً من polling لتحديث حالة المتجر (2026-06-28)
 **Decision:** Backend يرسل `ShopStatusChanged` event عبر SignalR عند كل تغيير حالة. Flutter تحدّث الـ Provider مباشرةً من payload الحدث — بدون API call.
 **Why:** Polling يعني:

@@ -100,7 +100,7 @@ class CarDecorationApp extends StatelessWidget {
         page = const ShopSelectScreen();
         break;
       case '/customer/request-detail':
-        page = RequestDetailScreen(requestId: args as String? ?? '1042');
+        page = RequestDetailScreen(requestId: args as String? ?? '');
         break;
       case '/customer/quotation-detail':
         page = QuotationDetailScreen(quotation: args as Quotation);
@@ -112,7 +112,7 @@ class CarDecorationApp extends StatelessWidget {
         page = ReviewScreen(args: args as ReviewArgs);
         break;
       case '/customer/complaint':
-        page = ComplaintScreen(requestId: args as String? ?? '1042');
+        page = ComplaintScreen(requestId: args as String? ?? '');
         break;
       case '/customer/vehicles':
         page = const CustomerShell();

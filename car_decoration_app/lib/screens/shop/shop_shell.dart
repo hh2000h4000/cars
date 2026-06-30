@@ -9,7 +9,7 @@ import '../../services/chat_service.dart';
 import '../../services/signalr_service.dart';
 import 'shop_dashboard_screen.dart';
 import 'shop_requests_screen.dart';
-import 'shop_chats_screen.dart';
+import 'shop_chats_screen.dart' show ShopChatsScreen, ShopChatsScreenState;
 import 'shop_my_store_screen.dart';
 
 class ShopShell extends StatefulWidget {
@@ -24,6 +24,7 @@ class _ShopShellState extends State<ShopShell> with WidgetsBindingObserver {
   int _unreadCount = 0;
   StreamSubscription<String>? _notifSub;
   StreamSubscription<Map<String, dynamic>>? _shopStatusSub;
+  final _chatsKey = GlobalKey<ShopChatsScreenState>();
 
   static const _chatTabIndex = 2;
 
@@ -188,11 +189,11 @@ class _ShopShellState extends State<ShopShell> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  static const _screens = [
-    ShopDashboardScreen(),
-    ShopRequestsScreen(),
-    ShopChatsScreen(),
-    ShopMyStoreScreen(),
+  List<Widget> get _screens => [
+    const ShopDashboardScreen(),
+    const ShopRequestsScreen(),
+    ShopChatsScreen(key: _chatsKey),
+    const ShopMyStoreScreen(),
   ];
 
   static const _items = [
@@ -225,7 +226,10 @@ class _ShopShellState extends State<ShopShell> with WidgetsBindingObserver {
                   child: GestureDetector(
                     onTap: () {
                       setState(() => _index = i);
-                      if (i == _chatTabIndex) _refreshBadge();
+                      if (i == _chatTabIndex) {
+                        _refreshBadge();
+                        _chatsKey.currentState?.reload();
+                      }
                     },
                     behavior: HitTestBehavior.opaque,
                     child: Column(

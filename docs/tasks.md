@@ -182,6 +182,32 @@
 
 ---
 
+## Sprint Plan (متفق عليه 2026-06-30)
+
+### Sprint 1 — 🔴 فوري
+| # | المهمة | الملف |
+|---|--------|-------|
+| B1 | Crash: `provider.requests.first` على قائمة فارغة | `request_detail_screen.dart` |
+| B2 | خطأ 400: UUID vs requestNumber في مسارات Navigation | بحث شامل في كل routes |
+| B7 | API calls تتكرر بلا توقف — تحديد المصدر أولاً | ShopShell / CustomerShell |
+| B6 | Badge المحادثات لا يختفي → إضافة `markAsRead` endpoint | Backend + ChatScreen |
+| B8 | قائمة المتجر لا تتحدث بعد قبول الطلب → navigator result | ShopRequestsScreen |
+
+### Sprint 2 — 🟠 مهم
+| # | المهمة |
+|---|--------|
+| B4 | حذف زر مكرر من بطاقة طلب المتجر (إبقاء "عرض التفاصيل" فقط) |
+| B5 | قائمة المحادثات لا تظهر الجديدة → On-Enter Fetch |
+
+### Sprint 3 — 🟡 مستقبل (SignalR)
+| # | الحدث | المُرسِل | المستقبل |
+|---|-------|---------|---------|
+| S1 | `RequestAccepted` | RequestService | CustomerShell → يُحدّث acceptedShops |
+| S2 | `JobStarted` | RequestService | CustomerShell → يُحدّث request status |
+| S3 | `JobCompleted` | RequestService | CustomerShell → يُحدّث request status |
+
+---
+
 ## Known Bugs / Issues
 
 | # | Description | Status |
@@ -196,3 +222,12 @@
 | 8 | ~~Shop dashboard showed "متجر معتمد" badge for ALL shops regardless of actual status~~ | ✅ Fixed 2026-06-27 |
 | 9 | ~~EF Core couldn't discover migration 20260627000002 (missing .Designer.cs file)~~ | ✅ Fixed 2026-06-27 |
 | 10 | ~~admin_dashboard_screen.dart compile error: `getPendingShops` renamed to `getAllShops`~~ | ✅ Fixed 2026-06-27 |
+| 11 | ~~Crash: `provider.requests.first` throws when list empty~~ | ✅ Fixed 2026-06-30 — null check + loading state |
+| 12 | ~~`GET /api/reviews/request/1042` 400 error — app.dart fallback was `'1042'` not UUID~~ | ✅ Fixed 2026-06-30 — changed to `''` |
+| 13 | API calls `/api/shops/my` + `/api/chats` on screen wake — expected behavior: `ShopShell.didChangeAppLifecycleState(resumed)` | ✅ Not a bug — documented in decisions.md |
+| 14 | ~~Chat list doesn't show new chat after shop accepts~~ | ✅ Fixed 2026-06-30 — GlobalKey + `reload()` on tab tap |
+| 15 | ~~Unread badge: `markAsRead` already implemented (ChatScreen._markAsRead → POST /api/chats/{id}/read)~~ | ✅ Already working — verified 2026-06-30 |
+| 16 | ~~Shop request list doesn't update after accept~~ | ✅ Fixed 2026-06-30 — `.then((_) => _load())` in ShopRequestsScreen + ShopDashboardScreen |
+| 17 | ~~Shop request card has 2 identical buttons~~ | ✅ Fixed 2026-06-30 — kept "عرض التفاصيل" + "فتح المحادثة" (when chatRoomId exists) |
+| 18 | Shop acceptance not shown instantly to customer — needs SignalR `RequestAccepted` event | Sprint 3 |
+| 19 | Job status changes (InProgress/Completed) not shown instantly to customer — customer sees update after navigating back | Sprint 3 — interim: `.then((_) => reloadRequests())` added |

@@ -6,10 +6,10 @@ class ShopChatsScreen extends StatefulWidget {
   const ShopChatsScreen({super.key});
 
   @override
-  State<ShopChatsScreen> createState() => _ShopChatsScreenState();
+  State<ShopChatsScreen> createState() => ShopChatsScreenState();
 }
 
-class _ShopChatsScreenState extends State<ShopChatsScreen> {
+class ShopChatsScreenState extends State<ShopChatsScreen> {
   List<ChatRoom> _rooms = [];
   bool _loading = true;
 
@@ -18,6 +18,8 @@ class _ShopChatsScreenState extends State<ShopChatsScreen> {
     super.initState();
     _load();
   }
+
+  void reload() => _load();
 
   Future<void> _load() async {
     try {

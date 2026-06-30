@@ -236,7 +236,8 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                   itemBuilder: (_, i) {
                     final r = _recentNew[i];
                     return GestureDetector(
-                      onTap: () => Navigator.pushNamed(context, '/shop/request-detail', arguments: r),
+                      onTap: () => Navigator.pushNamed(context, '/shop/request-detail', arguments: r)
+                          .then((_) => _loadRequests()),
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                         decoration: BoxDecoration(

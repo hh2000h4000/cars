@@ -281,7 +281,8 @@ class _RequestCard extends StatelessWidget {
             children: [
               Expanded(
                 child: GestureDetector(
-                  onTap: () => Navigator.pushNamed(context, '/shop/request-detail', arguments: request),
+                  onTap: () => Navigator.pushNamed(context, '/shop/request-detail', arguments: request)
+                      .then((_) => _load()),
                   child: Container(
                     height: 42,
                     decoration: BoxDecoration(
@@ -295,38 +296,24 @@ class _RequestCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: request.shopStatus == ShopRequestShopStatus.pending
-                    ? GestureDetector(
-                        onTap: () => Navigator.pushNamed(context, '/shop/request-detail', arguments: request),
-                        child: Container(
-                          height: 42,
-                          decoration: BoxDecoration(
-                            color: AppColors.dark,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          alignment: Alignment.center,
-                          child: const Text('قبول وإرسال عرض',
-                            style: TextStyle(fontFamily: 'Tajawal', fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white)),
-                        ),
-                      )
-                    : request.chatRoomId != null
-                        ? GestureDetector(
-                            onTap: () => Navigator.pushNamed(context, '/customer/chat', arguments: request.chatRoomId),
-                            child: Container(
-                              height: 42,
-                              decoration: BoxDecoration(
-                                color: AppColors.dark,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              alignment: Alignment.center,
-                              child: const Text('فتح المحادثة',
-                                style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white)),
-                            ),
-                          )
-                        : const SizedBox.shrink(),
-              ),
+              if (request.chatRoomId != null) ...[
+                const SizedBox(width: 10),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => Navigator.pushNamed(context, '/customer/chat', arguments: request.chatRoomId),
+                    child: Container(
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: AppColors.dark,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Text('فتح المحادثة',
+                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white)),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),

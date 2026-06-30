@@ -10,7 +10,7 @@ import '../../services/signalr_service.dart';
 import 'home_screen.dart';
 import 'requests_screen.dart';
 import 'vehicles_screen.dart';
-import 'chats_screen.dart';
+import 'chats_screen.dart' show ChatsScreen, ChatsScreenState;
 import 'profile_screen.dart';
 
 class CustomerShell extends StatefulWidget {
@@ -25,6 +25,7 @@ class _CustomerShellState extends State<CustomerShell>
   int _index = 0;
   int _unreadCount = 0;
   StreamSubscription<String>? _notifSub;
+  final _chatsKey = GlobalKey<ChatsScreenState>();
   late final List<Widget> _screens;
 
   static const _chatTabIndex = 3;
@@ -36,7 +37,7 @@ class _CustomerShellState extends State<CustomerShell>
       const HomeScreen(),
       const RequestsScreen(),
       const VehiclesScreen(),
-      const ChatsScreen(),
+      ChatsScreen(key: _chatsKey),
       ProfileScreen(onSwitchTab: (i) => setState(() => _index = i)),
     ];
     WidgetsBinding.instance.addObserver(this);
@@ -128,7 +129,10 @@ class _CustomerShellState extends State<CustomerShell>
                   child: GestureDetector(
                     onTap: () {
                       setState(() => _index = i);
-                      if (i == _chatTabIndex) _refreshBadge();
+                      if (i == _chatTabIndex) {
+                        _refreshBadge();
+                        _chatsKey.currentState?.reload();
+                      }
                     },
                     behavior: HitTestBehavior.opaque,
                     child: Column(

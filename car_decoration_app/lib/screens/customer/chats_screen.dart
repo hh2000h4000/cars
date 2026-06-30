@@ -7,10 +7,10 @@ class ChatsScreen extends StatefulWidget {
   const ChatsScreen({super.key});
 
   @override
-  State<ChatsScreen> createState() => _ChatsScreenState();
+  State<ChatsScreen> createState() => ChatsScreenState();
 }
 
-class _ChatsScreenState extends State<ChatsScreen> {
+class ChatsScreenState extends State<ChatsScreen> {
   List<ChatRoom> _rooms = [];
   bool _loading = true;
 
@@ -19,6 +19,8 @@ class _ChatsScreenState extends State<ChatsScreen> {
     super.initState();
     _load();
   }
+
+  void reload() => _load();
 
   Future<void> _load() async {
     try {

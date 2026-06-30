@@ -223,10 +223,14 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<AppProvider>();
-    final request = provider.requests.firstWhere(
-      (r) => r.id == widget.requestId,
-      orElse: () => provider.requests.first,
-    );
+    final matches = provider.requests.where((r) => r.id == widget.requestId);
+    if (matches.isEmpty) {
+      return const Scaffold(
+        backgroundColor: AppColors.surface,
+        body: SafeArea(child: Center(child: CircularProgressIndicator(color: AppColors.goldText))),
+      );
+    }
+    final request = matches.first;
     final hasAccepted = _acceptedQuoteId != null;
 
     return Scaffold(
