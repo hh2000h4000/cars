@@ -256,12 +256,20 @@ class FormFieldBox extends StatelessWidget {
 
 // ─── Back button ─────────────────────────────────────────────────────────────
 class AppBackButton extends StatelessWidget {
-  const AppBackButton({super.key});
+  /// When provided, used as fallback if there's nothing to pop (e.g. web deep link).
+  final String? fallbackRoute;
+  const AppBackButton({super.key, this.fallbackRoute});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.pop(context),
+      onTap: () {
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        } else if (fallbackRoute != null) {
+          Navigator.pushNamedAndRemoveUntil(context, fallbackRoute!, (r) => false);
+        }
+      },
       child: Container(
         width: 40,
         height: 40,

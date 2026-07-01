@@ -255,8 +255,16 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             const Text('لم يتم تحديد الطلب', style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, color: AppColors.textSecondary)),
             const SizedBox(height: 12),
-            TextButton(onPressed: () => Navigator.pop(context),
-              child: const Text('رجوع', style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700, color: AppColors.goldText))),
+            TextButton(
+              onPressed: () {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                } else {
+                  Navigator.pushNamedAndRemoveUntil(context, '/customer/home', (r) => false);
+                }
+              },
+              child: const Text('رجوع', style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700, color: AppColors.goldText)),
+            ),
           ]),
         )),
       );
@@ -302,7 +310,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                   Text('طلب #${request.requestNumber}',
                     style: const TextStyle(fontFamily: 'Tajawal', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
                   const SizedBox(width: 14),
-                  const AppBackButton(),
+                  const AppBackButton(fallbackRoute: '/customer/home'),
                 ],
               ),
             ),
