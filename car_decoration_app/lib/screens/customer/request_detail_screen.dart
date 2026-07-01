@@ -27,6 +27,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
   bool _cancelling = false;
   bool _reopening = false;
   bool _hasReviewed = false;
+  ServiceRequest? _cachedRequest;
 
   @override
   void initState() {
@@ -224,15 +225,31 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.requestId.isEmpty) {
+      return Scaffold(
+        backgroundColor: AppColors.surface,
+        body: SafeArea(child: Center(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const Text('لم يتم تحديد الطلب', style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, color: AppColors.textSecondary)),
+            const SizedBox(height: 12),
+            TextButton(onPressed: () => Navigator.pop(context),
+              child: const Text('رجوع', style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700, color: AppColors.goldText))),
+          ]),
+        )),
+      );
+    }
+
     final provider = context.watch<AppProvider>();
-    final matches = provider.requests.where((r) => r.id == widget.requestId);
-    if (matches.isEmpty) {
+    final match = provider.requests.where((r) => r.id == widget.requestId).firstOrNull;
+    if (match != null) _cachedRequest = match;
+
+    final request = _cachedRequest;
+    if (request == null) {
       return const Scaffold(
         backgroundColor: AppColors.surface,
         body: SafeArea(child: Center(child: CircularProgressIndicator(color: AppColors.goldText))),
       );
     }
-    final request = matches.first;
     final hasAccepted = _acceptedQuoteId != null;
 
     return Scaffold(
