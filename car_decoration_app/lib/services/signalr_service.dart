@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:signalr_netcore/signalr_client.dart';
 import 'api_client.dart';
+import 'app_logger.dart';
 
 /// Singleton that manages the SignalR connection for real-time chat.
 /// - onMessage: stream of incoming MessageResponse maps (for chat screen)
@@ -28,10 +29,14 @@ class SignalRService {
       _connection?.state == HubConnectionState.Connected;
 
   Future<void> connect() async {
+    AppLogger.info('[SignalR] connect called — isConnected=$isConnected state=${_connection?.state}');
     if (isConnected) return;
 
     final token = await ApiClient.getToken();
-    if (token == null) return;
+    if (token == null) {
+      AppLogger.warning('[SignalR] connect aborted — no token');
+      return;
+    }
 
     _connection = HubConnectionBuilder()
         .withUrl(
@@ -66,8 +71,9 @@ class SignalRService {
 
     try {
       await _connection!.start();
-    } catch (_) {
-      // Fail silently — app functions correctly without real-time
+      AppLogger.info('[SignalR] connect SUCCESS — state=${_connection!.state}');
+    } catch (e) {
+      AppLogger.error('[SignalR] connect FAILED', error: e);
     }
   }
 

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../theme.dart';
@@ -5,6 +6,7 @@ import '../../widgets/widgets.dart';
 import '../../providers/app_provider.dart';
 import '../../models/service_request.dart';
 import '../../models/quotation.dart';
+import '../../services/app_logger.dart';
 import '../../services/quotation_service.dart';
 import '../../services/request_service.dart';
 import '../../services/review_service.dart';
@@ -32,6 +34,10 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
   @override
   void initState() {
     super.initState();
+    AppLogger.info(
+      '[RequestDetail] ENTER — requestId="${widget.requestId}" '
+      'isEmpty=${widget.requestId.isEmpty}',
+    );
     _loadQuotations();
     _checkHasReviewed();
   }
@@ -241,6 +247,13 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
 
     final provider = context.watch<AppProvider>();
     final match = provider.requests.where((r) => r.id == widget.requestId).firstOrNull;
+    debugPrint(
+      '[RequestDetail] build — requestId="${widget.requestId}" '
+      'requests.length=${provider.requests.length} '
+      'initLoading=${provider.isLoading} '
+      'matchFound=${match != null} '
+      'hasCached=${_cachedRequest != null}',
+    );
     if (match != null) _cachedRequest = match;
 
     final request = _cachedRequest;
