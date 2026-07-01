@@ -36,6 +36,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
   }
 
   Future<void> _checkHasReviewed() async {
+    if (widget.requestId.isEmpty) return;
     try {
       final result = await ReviewService.hasReviewed(widget.requestId);
       if (mounted) setState(() => _hasReviewed = result);
@@ -43,6 +44,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
   }
 
   Future<void> _loadQuotations() async {
+    if (widget.requestId.isEmpty) return;
     setState(() => _loadingQuotations = true);
     try {
       final quotes = await QuotationService.getQuotations(widget.requestId);
