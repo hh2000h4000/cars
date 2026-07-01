@@ -34,6 +34,21 @@ public class RequestsController : ControllerBase
         }
     }
 
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        try
+        {
+            var result = await _service.GetByIdAsync(id);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "GetById failed for {RequestId}", id);
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpGet("my")]
     public async Task<IActionResult> GetMyRequests([FromQuery] PaginationRequest pagination)
     {

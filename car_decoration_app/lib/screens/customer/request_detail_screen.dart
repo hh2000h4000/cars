@@ -30,6 +30,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
   bool _reopening = false;
   bool _hasReviewed = false;
   ServiceRequest? _cachedRequest;
+  bool _fetchingRequest = false;
 
   @override
   void initState() {
@@ -40,6 +41,25 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
     );
     _loadQuotations();
     _checkHasReviewed();
+    // Fetch directly from API if provider is empty (e.g. web page refresh)
+    WidgetsBinding.instance.addPostFrameCallback((_) => _fetchIfNotInProvider());
+  }
+
+  Future<void> _fetchIfNotInProvider() async {
+    if (widget.requestId.isEmpty || !mounted) return;
+    final provider = context.read<AppProvider>();
+    if (provider.requests.any((r) => r.id == widget.requestId)) return;
+
+    AppLogger.info('[RequestDetail] provider empty — fetching from API');
+    setState(() => _fetchingRequest = true);
+    try {
+      final request = await RequestService.getRequest(widget.requestId);
+      if (mounted) setState(() { _cachedRequest = request; _fetchingRequest = false; });
+      AppLogger.info('[RequestDetail] API fetch SUCCESS');
+    } catch (e) {
+      AppLogger.error('[RequestDetail] API fetch FAILED', error: e);
+      if (mounted) setState(() => _fetchingRequest = false);
+    }
   }
 
   Future<void> _checkHasReviewed() async {
@@ -258,9 +278,22 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
 
     final request = _cachedRequest;
     if (request == null) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: AppColors.surface,
-        body: SafeArea(child: Center(child: CircularProgressIndicator(color: AppColors.goldText))),
+        body: SafeArea(child: Center(
+          child: _fetchingRequest
+              ? const CircularProgressIndicator(color: AppColors.goldText)
+              : Column(mainAxisSize: MainAxisSize.min, children: [
+                  const Text('تعذر تحميل الطلب',
+                    style: TextStyle(fontFamily: 'Tajawal', fontSize: 15, color: AppColors.textSecondary)),
+                  const SizedBox(height: 12),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('رجوع',
+                      style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w700, color: AppColors.goldText)),
+                  ),
+                ]),
+        )),
       );
     }
     final hasAccepted = _acceptedQuoteId != null;

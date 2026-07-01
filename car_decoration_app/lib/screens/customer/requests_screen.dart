@@ -171,7 +171,7 @@ class _RequestCard extends StatelessWidget {
     final showBottom = hasQuotes || request.status == RequestStatus.open;
 
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, '/customer/request-detail', arguments: request.id)
+      onTap: () => Navigator.pushNamed(context, '/customer/request-detail/${request.id}')
           .then((_) => context.read<AppProvider>().reloadRequests()),
       child: Container(
         decoration: BoxDecoration(

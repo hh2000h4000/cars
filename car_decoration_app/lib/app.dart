@@ -66,11 +66,25 @@ class CarDecorationApp extends StatelessWidget {
 
   Route<dynamic>? _generateRoute(RouteSettings settings) {
     final args = settings.arguments;
+    final routeName = settings.name ?? '';
+
+    // Dynamic route: /customer/request-detail/{uuid}
+    if (routeName.startsWith('/customer/request-detail/')) {
+      final id = routeName.split('/').last;
+      return MaterialPageRoute(
+        builder: (_) => RequestDetailScreen(requestId: id),
+        settings: settings,
+      );
+    }
 
     Widget page;
-    switch (settings.name) {
+    switch (routeName) {
       case '/onboarding':
         page = const OnboardingScreen();
+        break;
+      case '/customer/request-detail':
+        // Legacy route (arguments-based) — kept for backward compatibility
+        page = RequestDetailScreen(requestId: args as String? ?? '');
         break;
       case '/auth/login':
         page = const LoginScreen();
@@ -98,9 +112,6 @@ class CarDecorationApp extends StatelessWidget {
         break;
       case '/customer/requests/shop-select':
         page = const ShopSelectScreen();
-        break;
-      case '/customer/request-detail':
-        page = RequestDetailScreen(requestId: args as String? ?? '');
         break;
       case '/customer/quotation-detail':
         page = QuotationDetailScreen(quotation: args as Quotation);

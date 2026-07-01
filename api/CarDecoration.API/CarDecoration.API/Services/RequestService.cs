@@ -85,6 +85,35 @@ public class RequestService
             []);
     }
 
+    public async Task<RequestResponse> GetByIdAsync(Guid id)
+    {
+        var userId = _currentUser.UserId ?? throw new Exception("غير مصرح");
+
+        return await _db.Requests
+            .Where(r => r.Id == id && r.CustomerId == userId && !r.IsDeleted)
+            .Select(r => new RequestResponse(
+                r.Id, r.RequestNumber, r.Vehicle.Id,
+                r.Vehicle.Brand, r.Vehicle.Model, r.Vehicle.Year, r.Vehicle.Color,
+                r.Description, r.Location,
+                r.AppointmentDate, r.Notes,
+                r.Status.ToString(),
+                r.RequestShops.Select(rs => rs.Shop.Name).ToList(),
+                r.RequestImages.OrderBy(i => i.Order).Select(i => i.Url).ToList(),
+                r.CreatedAt,
+                r.RequestShops
+                    .Where(rs => rs.Status == RequestShopStatus.Accepted)
+                    .Select(rs => new AcceptedShopSummary(
+                        rs.Shop.Name,
+                        rs.ShopId.ToString(),
+                        r.ChatRooms
+                            .Where(c => c.ShopId == rs.ShopId)
+                            .Select(c => (Guid?)c.Id)
+                            .FirstOrDefault()))
+                    .ToList()))
+            .FirstOrDefaultAsync()
+            ?? throw new Exception("الطلب غير موجود أو لا تملك صلاحية الوصول إليه");
+    }
+
     public Task<PagedResult<RequestResponse>> GetMyRequestsAsync(PaginationRequest pagination)
     {
         var userId = _currentUser.UserId ?? throw new Exception("غير مصرح");
