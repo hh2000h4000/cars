@@ -83,8 +83,9 @@ class CarDecorationApp extends StatelessWidget {
         page = const OnboardingScreen();
         break;
       case '/customer/request-detail':
-        // Legacy route (arguments-based) — kept for backward compatibility
-        page = RequestDetailScreen(requestId: args as String? ?? '');
+        // Flutter Web pushes this as parent route in deep link hierarchy.
+        // Show CustomerShell so popping the detail screen lands on requests list.
+        page = const CustomerShell();
         break;
       case '/auth/login':
         page = const LoginScreen();
