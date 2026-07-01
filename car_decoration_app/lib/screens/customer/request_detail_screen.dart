@@ -35,10 +35,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
   @override
   void initState() {
     super.initState();
-    AppLogger.info(
-      '[RequestDetail] ENTER — requestId="${widget.requestId}" '
-      'isEmpty=${widget.requestId.isEmpty}',
-    );
+    if (kDebugMode) AppLogger.info('[RequestDetail] ENTER — requestId="${widget.requestId}"');
     _loadQuotations();
     _checkHasReviewed();
     // Fetch directly from API if provider is empty (e.g. web page refresh)
@@ -50,12 +47,12 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
     final provider = context.read<AppProvider>();
     if (provider.requests.any((r) => r.id == widget.requestId)) return;
 
-    AppLogger.info('[RequestDetail] provider empty — fetching from API');
+    if (kDebugMode) AppLogger.info('[RequestDetail] provider empty — fetching from API');
     setState(() => _fetchingRequest = true);
     try {
       final request = await RequestService.getRequest(widget.requestId);
       if (mounted) setState(() { _cachedRequest = request; _fetchingRequest = false; });
-      AppLogger.info('[RequestDetail] API fetch SUCCESS');
+      if (kDebugMode) AppLogger.info('[RequestDetail] API fetch SUCCESS');
     } catch (e) {
       AppLogger.error('[RequestDetail] API fetch FAILED', error: e);
       if (mounted) setState(() => _fetchingRequest = false);
@@ -267,13 +264,6 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
 
     final provider = context.watch<AppProvider>();
     final match = provider.requests.where((r) => r.id == widget.requestId).firstOrNull;
-    debugPrint(
-      '[RequestDetail] build — requestId="${widget.requestId}" '
-      'requests.length=${provider.requests.length} '
-      'initLoading=${provider.isLoading} '
-      'matchFound=${match != null} '
-      'hasCached=${_cachedRequest != null}',
-    );
     if (match != null) _cachedRequest = match;
 
     final request = _cachedRequest;

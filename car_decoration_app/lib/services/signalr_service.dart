@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 import 'api_client.dart';
 import 'app_logger.dart';
@@ -29,7 +30,7 @@ class SignalRService {
       _connection?.state == HubConnectionState.Connected;
 
   Future<void> connect() async {
-    AppLogger.info('[SignalR] connect called — isConnected=$isConnected state=${_connection?.state}');
+    if (kDebugMode) AppLogger.info('[SignalR] connect called — isConnected=$isConnected state=${_connection?.state}');
     if (isConnected) return;
 
     final token = await ApiClient.getToken();
@@ -71,7 +72,7 @@ class SignalRService {
 
     try {
       await _connection!.start();
-      AppLogger.info('[SignalR] connect SUCCESS — state=${_connection!.state}');
+      if (kDebugMode) AppLogger.info('[SignalR] connect SUCCESS — state=${_connection!.state}');
     } catch (e) {
       AppLogger.error('[SignalR] connect FAILED', error: e);
     }

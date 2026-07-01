@@ -171,13 +171,13 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> reloadRequests() async {
-    AppLogger.info('[AppProvider] reloadRequests START — current count=${requests.length}');
+    if (kDebugMode) AppLogger.info('[AppProvider] reloadRequests START — current count=${requests.length}');
     try {
       final r = await RequestService.getMyRequests();
       requests = r.items;
       _requestsPage = 1;
       _hasMoreRequests = r.hasNextPage;
-      AppLogger.info('[AppProvider] reloadRequests SUCCESS — loaded ${requests.length} requests');
+      if (kDebugMode) AppLogger.info('[AppProvider] reloadRequests SUCCESS — loaded ${requests.length} requests');
       notifyListeners();
     } catch (e) {
       AppLogger.error('[AppProvider] reloadRequests FAILED', error: e);
