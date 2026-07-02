@@ -302,13 +302,7 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
                 child: Row(
                   children: [
-                    // متوسط الرد (RIGHT in RTL — first)
-                    const _StatCard(value: '—', label: 'متوسط الرد', unit: 'د'),
-                    const SizedBox(width: 10),
-                    // طلبات جديدة (middle)
-                    _StatCard(value: _newCount.toString(), label: 'طلبات جديدة'),
-                    const SizedBox(width: 10),
-                    // Rating (LEFT in RTL — last)
+                    // Rating (RIGHT in RTL — first)
                     _StatCard(
                       value: shop.rating > 0
                           ? shop.rating.toStringAsFixed(1)
@@ -316,6 +310,12 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                       label: '${shop.totalJobs} عملية',
                       hasStar: shop.rating > 0,
                     ),
+                    const SizedBox(width: 10),
+                    // طلبات جديدة (middle)
+                    _StatCard(value: _newCount.toString(), label: 'طلبات جديدة'),
+                    const SizedBox(width: 10),
+                    // متوسط الرد (LEFT in RTL — last)
+                    const _StatCard(value: '—', label: 'متوسط الرد', unit: 'د'),
                   ],
                 ),
               ),
@@ -770,6 +770,7 @@ class _OverviewCard extends StatelessWidget {
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 // Icon at top (LEFT-aligned in RTL via CrossAxisAlignment.end)
                 Container(
@@ -781,7 +782,7 @@ class _OverviewCard extends StatelessWidget {
                   ),
                   child: Icon(icon, color: iconColor, size: 20),
                 ),
-                const Spacer(),
+                const SizedBox(height: 10),
                 // Number centered
                 Align(
                   alignment: Alignment.center,
