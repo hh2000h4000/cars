@@ -182,6 +182,34 @@
 
 ---
 
+## جلسة 2026-07-01 ✅
+
+### تشخيص المشاكل (Diagnostic Logging)
+- [x] إضافة logging تشخيصي في `RequestDetailScreen.initState` + `build` لتتبع السبب الجذري للـ loading المستمر
+- [x] إضافة logging في `AppProvider.reloadRequests()` (start / success / failure)
+- [x] إضافة logging في `SignalRService.connect()` (called / success / failure / no token)
+- [x] تنظيف الـ logging: كل `AppLogger.info` ملفوف بـ `kDebugMode`، حذف `debugPrint` من `build()` تماماً، إبقاء `AppLogger.error/warning` بدون شرط
+
+### B1 — Root Cause Fix: Loading مستمر عند تحديث صفحة الويب
+**السبب الجذري:** `Navigator.arguments` تُخزَّن في الذاكرة فقط → تُفقد عند browser refresh → `requestId = ''` → خطأ 405/404
+
+- [x] **Backend:** إضافة `GET /api/requests/{id}` — `RequestService.GetByIdAsync(Guid id)` + endpoint في Controller
+- [x] **Flutter Routing:** تحويل UUID من `arguments` إلى URL path: `/customer/request-detail/{uuid}` (يُحفَظ في URL المتصفح، لا يُفقد عند refresh)
+- [x] **Flutter Navigation:** تحديث `requests_screen.dart` — `pushNamed('/customer/request-detail/${request.id}')` بدلاً من `arguments: request.id`
+- [x] **Flutter Screen:** إضافة `_fetchIfNotInProvider()` — يجلب الطلب من API مباشرة إذا كان `provider.requests` فارغاً (حالة web refresh حيث CustomerShell لا يُحمَّل)
+- [x] **Flutter Screen:** إضافة `_cachedRequest` — يحفظ الطلب محلياً لمنع الـ spinner المستمر أثناء `reloadRequests()`
+- [x] **Flutter Provider:** إضافة `bool get isLoading => initLoading` getter
+- [x] **Legacy route:** `/customer/request-detail` (بدون UUID) يعرض `CustomerShell` الآن بدلاً من `RequestDetailScreen('')`
+
+### B18 — Back Navigation بعد Web Refresh
+**المشكلة:** Flutter Web يبني stack هكذا عند deep link: `[CustomerShell] → [RequestDetailScreen('')] → [RequestDetailScreen(uuid)]` — الـ pop يرجع لـ `RequestDetailScreen('')` فيظهر "لم يتم تحديد الطلب"
+
+- [x] **AppBackButton:** إضافة `fallbackRoute` parameter اختياري — إذا `canPop = false` يستخدم `pushNamedAndRemoveUntil(fallbackRoute)` بدلاً من pop
+- [x] **RequestDetailScreen:** استخدام `AppBackButton(fallbackRoute: '/customer/home')` — الرجوع دائماً لشاشة الطلبات حتى بعد refresh
+- [x] **Legacy route fix:** تغيير `/customer/request-detail` ليعرض `CustomerShell` بدلاً من `RequestDetailScreen('')` — يحل مشكلة Flutter Web's parent route hierarchy
+
+---
+
 ## Sprint Plan (متفق عليه 2026-06-30)
 
 ### Sprint 1 — 🔴 فوري
@@ -231,3 +259,38 @@
 | 17 | ~~Shop request card has 2 identical buttons~~ | ✅ Fixed 2026-06-30 — kept "عرض التفاصيل" + "فتح المحادثة" (when chatRoomId exists) |
 | 18 | Shop acceptance not shown instantly to customer — needs SignalR `RequestAccepted` event | Sprint 3 |
 | 19 | Job status changes (InProgress/Completed) not shown instantly to customer — customer sees update after navigating back | Sprint 3 — interim: `.then((_) => reloadRequests())` added |
+| 20 | ~~Infinite loading after browser refresh — `requestId=''` because Navigator.arguments lost on refresh~~ | ✅ Fixed 2026-07-01 — UUID moved to URL path `/customer/request-detail/{uuid}`, screen fetches from `GET /api/requests/{id}` directly |
+| 21 | ~~Back navigation after browser refresh → blank "لم يتم تحديد الطلب" screen~~ | ✅ Fixed 2026-07-01 — legacy route `/customer/request-detail` now shows CustomerShell (correct parent in Flutter Web hierarchy) |
+
+---
+
+## تحسينات مستقبلية مقترحة (اتُّفق عليها — لم تُنفَّذ بعد)
+
+### الترحيل لـ go_router (أولوية متوسطة)
+**السبب:** Navigator 1.0 + `onGenerateRoute` محدود في web:
+- لا يدعم deep links بشكل أصيل (يحتاج workarounds يدوية كما رأينا في جلسة 2026-07-01)
+- لا يحافظ على state الشاشات بين التنقلات في web
+- لا يدعم nested navigation بشكل نظيف
+
+**المكاسب بعد الترحيل:**
+- UUID في URL يُعالَج تلقائياً بدون `routeName.split('/').last`
+- `_fetchIfNotInProvider()` قد لا تكون ضرورية — go_router يمرر params بشكل صريح
+- Deep links، browser back/forward، bookmarking — كلها تعمل بشكل صحيح
+
+**الملفات المتأثرة:** `app.dart` (router config)، كل `Navigator.pushNamed()` في الشاشات
+
+### Sprint 3 — SignalR: أحداث حالة الطلب للعميل
+| الحدث | المُرسِل | الفائدة |
+|-------|---------|---------|
+| `RequestAccepted` | RequestService (عند قبول المتجر) | CustomerShell يُحدّث الطلب فوراً — لا يحتاج العميل refresh |
+| `JobStarted` | RequestService (عند `PUT /requests/{id}/start`) | حالة الطلب تتغير لـ InProgress فوراً |
+| `JobCompleted` | RequestService (عند `PUT /requests/{id}/complete`) | حالة الطلب تتغير لـ Completed + زر التقييم يظهر |
+
+**الملفات:** `RequestService.cs` (يُرسل الأحداث)، `SignalRService.dart` (يستقبل)، `AppProvider` (يطبق التغيير)، `CustomerShell` (يعرض dialog/notification)
+
+### تطبيق `_fetchIfNotInProvider()` على باقي Detail Screens
+**الشاشات المرشحة:**
+- `QuotationDetailScreen` — تستقبل `Quotation` object كـ argument (نفس مشكلة web refresh)
+- `ShopRequestDetailScreen` — تستقبل `ShopRequest` كـ argument
+
+**الخطوات:** إضافة endpoint `GET /api/quotations/{id}` و`GET /api/requests/shop/{id}` + تطبيق نفس pattern.

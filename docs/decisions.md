@@ -118,6 +118,74 @@ SignalR push: فوري، صفر overhead على التطبيق بين الأحد
 **Why:** go_router was added but not adopted. The named route pattern is sufficient.
 **Trade-off:** go_router offers deep linking and web URL support. Can migrate later.
 
+### UUID في URL path بدلاً من Navigator.arguments (2026-07-01)
+**Decision:** التنقل لتفاصيل الطلب يستخدم `pushNamed('/customer/request-detail/${request.id}')` — UUID مضمّن في المسار، لا في `arguments`.
+**Why:** `Navigator.arguments` تُخزَّن في الذاكرة فقط وتُفقد عند browser refresh. البديل: UUID في URL path يبقى في شريط العنوان ويُحفَظ عبر التنقل والتحديث.
+**Root Cause المكتشف:** كان الكود `pushNamed('/customer/request-detail', arguments: request.id)` يُرسل UUID كـ argument. عند refresh → arguments = null → `requestId = ''` → screen تستدعي `GET /api/requests/` بمسار فارغ → 405/404.
+**Pattern المعتمد:** كل screen تحتاج UUID في web يجب أن يكون UUID جزءاً من route name.
+**Future:** هذا أحد أسباب الترحيل لـ `go_router` — تدعم deep links بشكل أصيل.
+
+### `_fetchIfNotInProvider()` — screen تجلب بياناتها مستقلةً (2026-07-01)
+**Decision:** `RequestDetailScreen` تتحقق عند `initState` — إذا كان `provider.requests` فارغاً (حالة web refresh) تجلب الطلب من `GET /api/requests/{id}` مباشرةً.
+**Why:** عند browser refresh، Flutter يبدأ من الـ deep link URL مباشرةً بدون تحميل `CustomerShell` → `AppProvider.initFromApi()` لا يُستدعى → `provider.requests = []` → Screen لا تجد الطلب → loading لا نهاية له.
+**Pattern:**
+```dart
+Future<void> _fetchIfNotInProvider() async {
+  if (widget.requestId.isEmpty || !mounted) return;
+  final provider = context.read<AppProvider>();
+  if (provider.requests.any((r) => r.id == widget.requestId)) return; // موجود، نخرج
+  setState(() => _fetchingRequest = true);
+  try {
+    final request = await RequestService.getRequest(widget.requestId);
+    if (mounted) setState(() { _cachedRequest = request; _fetchingRequest = false; });
+  } catch (e) {
+    AppLogger.error('[RequestDetail] API fetch FAILED', error: e);
+    if (mounted) setState(() => _fetchingRequest = false);
+  }
+}
+```
+**Requirement:** يحتاج `GET /api/requests/{id}` backend endpoint (مُضاف في نفس الجلسة).
+
+### `_cachedRequest` — منع الـ spinner أثناء reload (2026-07-01)
+**Decision:** `RequestDetailScreen` تحتفظ بـ `ServiceRequest? _cachedRequest` — يُحدَّث في كل build من `provider.requests`، لكن لا يُصفَّر بين التحديثات.
+**Why:** عند استدعاء `reloadRequests()`، تصبح `provider.requests = []` مؤقتاً ثم تُعاد بالبيانات الجديدة. بدون cache، الـ screen تعرض loading spinner في كل reload حتى لو كان المستخدم يشاهد الطلب بالفعل.
+**Pattern:**
+```dart
+// في build():
+final match = provider.requests.where((r) => r.id == widget.requestId).firstOrNull;
+if (match != null) _cachedRequest = match; // تحديث إذا موجود في provider
+final request = _cachedRequest;             // استخدام الـ cache دائماً
+```
+**سلوك:** أول تحميل → `_cachedRequest = null` → spinner يظهر مرة واحدة. بعدها في كل reload → spinner مخفي والبيانات القديمة تظهر حتى تصل الجديدة.
+
+### Legacy route `/customer/request-detail` → CustomerShell (2026-07-01)
+**Decision:** في `app.dart`، الـ case `'/customer/request-detail'` (بدون UUID) يعرض `CustomerShell` لا `RequestDetailScreen('')`.
+**Why — Flutter Web Parent Route Hierarchy:** عند deep link `https://app.com/customer/request-detail/uuid-123`، Flutter Web يبني navigation stack هكذا:
+```
+[CustomerShell]                    ← initialRoute
+→ [RequestDetailScreen('')]        ← parent route /customer/request-detail
+→ [RequestDetailScreen('uuid-123')]← الـ deep link الفعلي
+```
+كان الكود القديم يُنشئ `RequestDetailScreen('')` كـ parent route → pop من الشاشة الحقيقية يرجع لـ "لم يتم تحديد الطلب".
+**Fix:** تغيير الـ parent route ليعرض `CustomerShell` → pop صحيح إلى قائمة الطلبات.
+**Note:** هذه ليست مشكلة عند التنقل الطبيعي داخل التطبيق — فقط عند browser refresh / deep link مباشر.
+
+### `AppBackButton.fallbackRoute` — back آمن عند غياب stack (2026-07-01)
+**Decision:** إضافة parameter اختياري `String? fallbackRoute` لـ `AppBackButton`. إذا `Navigator.canPop(context) = false`، يستخدم `pushNamedAndRemoveUntil(fallbackRoute)` بدلاً من pop.
+**Why:** بعض الشاشات يمكن الوصول إليها عبر deep links بدون navigation stack سابق (web refresh). زر الرجوع المعتاد لا يعمل لأن Stack فارغ.
+**Usage:** `AppBackButton(fallbackRoute: '/customer/home')` في `RequestDetailScreen`.
+**Note:** في الحالة الطبيعية (تنقل داخل التطبيق)، `canPop = true` ويعمل pop طبيعياً.
+
+### `GET /api/requests/{id}` endpoint — ضرورة web refresh (2026-07-01)
+**Decision:** إضافة `GET /api/requests/{id}` endpoint يجلب طلباً محدداً بـ UUID (مع تحقق من ملكية العميل).
+**Why:** بدون هذا الـ endpoint، عند web refresh:
+1. Provider فارغ (لم يُحمَّل)
+2. Screen لا تجد الطلب في provider
+3. لا طريقة لجلبه — loading لا نهاية له
+**Security:** يتحقق `WHERE CustomerId = userId` — لا يمكن عميل جلب طلب عميل آخر.
+**Projection:** نفس `Select` expression كـ `GetMyRequestsAsync` لضمان consistency في البيانات المُرجَعة.
+**Service method:** `RequestService.GetByIdAsync(Guid id)` في Backend + `RequestService.getRequest(String id)` في Flutter.
+
 ---
 
 ## Backend

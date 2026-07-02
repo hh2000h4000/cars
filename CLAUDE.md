@@ -69,7 +69,7 @@ Customer → Request (multi-shop) → Shop accepts → ChatRoom opens
 → Job done → Customer reviews → Shop rating updated
 ```
 
-## Current Status (آخر تحديث: 2026-06-28)
+## Current Status (آخر تحديث: 2026-07-01)
 
 - Backend: يعمل على PostgreSQL، جميع endpoints مكتملة ✅
 - Flutter: يعمل على موبايل وChromeWeb، بيانات حقيقية من API ✅
@@ -91,6 +91,9 @@ Customer → Request (multi-shop) → Shop accepts → ChatRoom opens
 - **SignalR — تحديث حالة المتجر لحظياً:** الـ Backend يرسل `ShopStatusChanged` event عبر `IHubContext<ChatHub>` عند Approve/Reject/Suspend. Flutter يستقبل الحدث في `ShopShell`، يعرض dialog مناسب، ينقل لتبويب "متجري" عند الحالات الحرجة ✅
 - **ShopOwnerProvider:** Single Source of Truth لبيانات ملف المتجر (`/api/shops/my`). استدعاء واحد فقط من Shell، تحديث SignalR مباشر من payload بدون API call إضافي ✅
 - **Bug Fix — WidgetsBindingObserver:** حُذف من الشاشات الفردية (Dashboard + MyStore) لمنع 5 استدعاءات متزامنة عند العودة للتطبيق ✅
+- **Web Deep Links:** UUID مُضمَّن في URL path بدلاً من Navigator.arguments — `/customer/request-detail/{uuid}` يبقى بعد browser refresh ✅
+- **GET /api/requests/{id}:** endpoint جديد — يُمكّن RequestDetailScreen من جلب بياناتها مباشرةً عند refresh (حين provider فارغ) ✅
+- **Bug Fix — Back Navigation بعد Web Refresh:** الـ legacy route `/customer/request-detail` يعرض CustomerShell بدلاً من RequestDetailScreen('') — يحل مشكلة Flutter Web parent route hierarchy ✅
 
 ## Ports & URLs
 
@@ -175,3 +178,5 @@ Customer → Request (multi-shop) → Shop accepts → ChatRoom opens
 - Cloud storage للملفات المرفوعة (حالياً local disk)
 - Rate Limiting على `/auth/login` ضد brute force
 - تشغيل `dotnet ef database update` على الخادم لتطبيق migration 20260627000003 (RejectionReason)
+- **Sprint 3 SignalR:** أحداث `RequestAccepted` / `JobStarted` / `JobCompleted` — تحديث فوري عند العميل بدون reload يدوي
+- **الترحيل لـ go_router** — حل جذري لمشاكل web deep links (Navigator 1.0 محدود في web)
