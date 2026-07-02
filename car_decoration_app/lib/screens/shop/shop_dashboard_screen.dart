@@ -35,22 +35,29 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
   int get _newCount =>
       _requests.where((r) => r.shopStatus == ShopRequestShopStatus.pending).length;
 
-  int get _waitingCount => _requests.where((r) =>
-      r.shopStatus == ShopRequestShopStatus.accepted && r.status == 'Open').length;
+  int get _waitingCount => _requests
+      .where((r) =>
+          r.shopStatus == ShopRequestShopStatus.accepted && r.status == 'Open')
+      .length;
 
-  int get _activeCount =>
-      _requests.where((r) => r.status == 'ShopSelected' || r.status == 'InProgress').length;
+  int get _activeCount => _requests
+      .where((r) => r.status == 'ShopSelected' || r.status == 'InProgress')
+      .length;
 
   int get _completedThisMonth {
     final now = DateTime.now();
-    return _requests.where((r) =>
-        r.status == 'Completed' &&
-        r.createdAt.year == now.year &&
-        r.createdAt.month == now.month).length;
+    return _requests
+        .where((r) =>
+            r.status == 'Completed' &&
+            r.createdAt.year == now.year &&
+            r.createdAt.month == now.month)
+        .length;
   }
 
-  List<ShopRequest> get _recentNew =>
-      _requests.where((r) => r.shopStatus == ShopRequestShopStatus.pending).take(5).toList();
+  List<ShopRequest> get _recentNew => _requests
+      .where((r) => r.shopStatus == ShopRequestShopStatus.pending)
+      .take(5)
+      .toList();
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +115,7 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Dark header ──
+              // ── Dark header ──────────────────────────────────────────────
               Container(
                 width: double.infinity,
                 decoration: const BoxDecoration(
@@ -128,14 +135,14 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Row: Toggle (left/end) | Name+Status | Avatar (right/start)
+                            // ── Row: Avatar | Name+Status | Toggle ──
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                // Avatar — right side (RTL start)
+                                // Avatar (RIGHT in RTL)
                                 ShopAvatar(mono: mono, size: 50, fontSize: 19),
                                 const SizedBox(width: 12),
-                                // Shop name + status
+                                // Name + status
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -144,7 +151,9 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Text(
-                                            shop.name.isNotEmpty ? shop.name : 'متجري',
+                                            shop.name.isNotEmpty
+                                                ? shop.name
+                                                : 'متجري',
                                             style: const TextStyle(
                                               fontFamily: 'Tajawal',
                                               fontSize: 17,
@@ -155,7 +164,8 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                                           if (isApproved) ...[
                                             const SizedBox(width: 5),
                                             const Icon(Icons.verified_rounded,
-                                                color: AppColors.goldLight, size: 16),
+                                                color: AppColors.goldLight,
+                                                size: 16),
                                           ],
                                         ],
                                       ),
@@ -168,11 +178,12 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                                     ],
                                   ),
                                 ),
-                                // Toggle — left side (RTL end)
+                                // Toggle (LEFT in RTL)
                                 if (isApproved)
                                   Switch(
                                     value: _isOpen,
-                                    onChanged: (v) => setState(() => _isOpen = v),
+                                    onChanged: (v) =>
+                                        setState(() => _isOpen = v),
                                     activeColor: Colors.white,
                                     activeTrackColor: AppColors.green,
                                     inactiveThumbColor: Colors.white54,
@@ -185,35 +196,60 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                               ],
                             ),
 
-                            const SizedBox(height: 26),
+                            const SizedBox(height: 24),
 
-                            // Revenue section
-                            const Text(
-                              'إيراد هذا الشهر (ر.س)',
-                              style: TextStyle(
-                                fontFamily: 'Tajawal',
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white54,
-                              ),
+                            // ── Revenue Row: number (right) + chart (left) ──
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                // Revenue label + number (RIGHT in RTL = first child)
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start, // RTL = right
+                                    children: const [
+                                      Text(
+                                        'إيراد هذا الشهر (ر.س)',
+                                        style: TextStyle(
+                                          fontFamily: 'Tajawal',
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white54,
+                                        ),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        '0',
+                                        style: TextStyle(
+                                          fontFamily: 'Tajawal',
+                                          fontSize: 46,
+                                          fontWeight: FontWeight.w900,
+                                          color: Colors.white,
+                                          height: 1.1,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                // Mini chart (LEFT in RTL = last child)
+                                SizedBox(
+                                  width: 110,
+                                  height: 58,
+                                  child: CustomPaint(
+                                      painter: _MiniChartPainter()),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 6),
-                            const Text(
-                              '0',
-                              style: TextStyle(
-                                fontFamily: 'Tajawal',
-                                fontSize: 44,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                                height: 1.1,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
+
+                            const SizedBox(height: 14),
+
+                            // ── Growth chip ──
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 11, vertical: 5),
+                                  horizontal: 11, vertical: 6),
                               decoration: BoxDecoration(
-                                color: AppColors.green.withOpacity(0.2),
+                                color: AppColors.green.withOpacity(0.18),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Row(
@@ -240,7 +276,7 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                 ),
               ),
 
-              // ── 3 Stat Cards ──
+              // ── 3 Stat Cards ─────────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                 child: Row(
@@ -253,18 +289,20 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                       hasStar: shop.rating > 0,
                     ),
                     const SizedBox(width: 10),
-                    _StatCard(value: _newCount.toString(), sub: 'طلبات جديدة'),
+                    _StatCard(
+                        value: _newCount.toString(), sub: 'طلبات جديدة'),
                     const SizedBox(width: 10),
-                    const _StatCard(value: '—', sub: 'متوسط الرد', unit: 'د'),
+                    const _StatCard(
+                        value: '—', sub: 'متوسط الرد', unit: 'د'),
                   ],
                 ),
               ),
 
               const SizedBox(height: 22),
 
-              // ── نظرة عامة ──
+              // ── نظرة عامة ────────────────────────────────────────────────
               const Padding(
-                padding: EdgeInsets.fromLTRB(22, 0, 22, 12),
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 12),
                 child: Text('نظرة عامة',
                     style: TextStyle(
                       fontFamily: 'Tajawal',
@@ -281,36 +319,40 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                   crossAxisCount: 2,
                   mainAxisSpacing: 10,
                   crossAxisSpacing: 10,
-                  childAspectRatio: 1.5,
+                  childAspectRatio: 1.25,
                   children: [
+                    // 1st → RIGHT in RTL
                     _OverviewCard(
                       value: _newCount.toString(),
                       label: 'طلبات بانتظار رد',
-                      icon: Icons.notifications_rounded,
+                      icon: Icons.chat_bubble_outline_rounded,
                       iconColor: const Color(0xFFE91E63),
                       iconBg: const Color(0xFFFCE4EC),
                       isUrgent: _newCount > 0,
                     ),
+                    // 2nd → LEFT in RTL
                     _OverviewCard(
                       value: _waitingCount.toString(),
                       label: 'عروض قيد الانتظار',
-                      icon: Icons.description_rounded,
+                      icon: Icons.description_outlined,
                       iconColor: const Color(0xFFF57C00),
                       iconBg: const Color(0xFFFFF3E0),
                     ),
-                    _OverviewCard(
-                      value: _completedThisMonth.toString(),
-                      label: 'مكتملة هذا الشهر',
-                      icon: Icons.check_circle_rounded,
-                      iconColor: AppColors.green,
-                      iconBg: AppColors.greenLight,
-                    ),
+                    // 3rd → RIGHT in RTL
                     _OverviewCard(
                       value: _activeCount.toString(),
                       label: 'أعمال قيد التنفيذ',
-                      icon: Icons.build_rounded,
+                      icon: Icons.key_rounded,
                       iconColor: const Color(0xFF0288D1),
                       iconBg: const Color(0xFFE3F2FD),
+                    ),
+                    // 4th → LEFT in RTL
+                    _OverviewCard(
+                      value: _completedThisMonth.toString(),
+                      label: 'مكتملة هذا الشهر',
+                      icon: Icons.task_alt_rounded,
+                      iconColor: AppColors.green,
+                      iconBg: AppColors.greenLight,
                     ),
                   ],
                 ),
@@ -318,9 +360,9 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
 
               const SizedBox(height: 22),
 
-              // ── أحدث الطلبات ──
+              // ── أحدث الطلبات ─────────────────────────────────────────────
               Padding(
-                padding: const EdgeInsets.fromLTRB(22, 0, 22, 12),
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                 child: Row(
                   children: [
                     const Text('أحدث الطلبات',
@@ -366,13 +408,13 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                   itemBuilder: (_, i) {
                     final r = _recentNew[i];
                     return GestureDetector(
-                      onTap: () =>
-                          Navigator.pushNamed(context, '/shop/request-detail',
-                                  arguments: r)
-                              .then((_) => _loadRequests()),
+                      onTap: () => Navigator.pushNamed(
+                              context, '/shop/request-detail',
+                              arguments: r)
+                          .then((_) => _loadRequests()),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 14),
+                            horizontal: 14, vertical: 12),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           border: Border.all(color: AppColors.border),
@@ -380,38 +422,44 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                         ),
                         child: Row(
                           children: [
+                            // Avatar (RIGHT in RTL)
                             Container(
                               width: 44,
                               height: 44,
                               decoration: BoxDecoration(
-                                color: AppColors.dark,
-                                borderRadius: BorderRadius.circular(13),
+                                color: AppColors.goldBg,
+                                borderRadius: BorderRadius.circular(12),
                               ),
                               alignment: Alignment.center,
                               child: Text(r.mono,
                                   style: const TextStyle(
                                     fontFamily: 'Tajawal',
-                                    fontSize: 16,
+                                    fontSize: 17,
                                     fontWeight: FontWeight.w900,
-                                    color: AppColors.goldLight,
+                                    color: AppColors.goldText,
                                   )),
                             ),
                             const SizedBox(width: 12),
+                            // Description + vehicle
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(r.customerName,
-                                      style: const TextStyle(
-                                        fontFamily: 'Tajawal',
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w800,
-                                        color: AppColors.textPrimary,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis),
-                                  const SizedBox(height: 3),
-                                  Text('${r.vehicleInfo} · ${r.location}',
+                                  Text(
+                                    r.description.isNotEmpty
+                                        ? r.description
+                                        : r.customerName,
+                                    style: const TextStyle(
+                                      fontFamily: 'Tajawal',
+                                      fontSize: 13.5,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(r.vehicleInfo,
                                       style: const TextStyle(
                                         fontFamily: 'Tajawal',
                                         fontSize: 12,
@@ -422,13 +470,32 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                               ),
                             ),
                             const SizedBox(width: 10),
-                            Text(r.timeAgo,
-                                style: const TextStyle(
-                                  fontFamily: 'Tajawal',
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textMuted,
-                                )),
+                            // Time + chevron (LEFT in RTL)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(r.timeAgo,
+                                    style: const TextStyle(
+                                      fontFamily: 'Tajawal',
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textMuted,
+                                    )),
+                                const SizedBox(height: 6),
+                                Container(
+                                  width: 28,
+                                  height: 28,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.background,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(
+                                      Icons.chevron_left_rounded,
+                                      color: AppColors.textSecondary,
+                                      size: 18),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -525,7 +592,8 @@ class _StatusBadge extends StatelessWidget {
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: const [
-            Icon(Icons.folder_open_rounded, color: Color(0xFF64B5F6), size: 13),
+            Icon(Icons.folder_open_rounded,
+                color: Color(0xFF64B5F6), size: 13),
             SizedBox(width: 4),
             Text('مطلوب منك رفع مستندات',
                 style: TextStyle(
@@ -554,7 +622,7 @@ class _StatusBadge extends StatelessWidget {
   }
 }
 
-// ── Stat Card (3 cards row) ───────────────────────────────────────────────────
+// ── Stat Card ─────────────────────────────────────────────────────────────────
 
 class _StatCard extends StatelessWidget {
   final String value;
@@ -623,7 +691,7 @@ class _StatCard extends StatelessWidget {
       );
 }
 
-// ── Overview Card (2×2 grid) ──────────────────────────────────────────────────
+// ── Overview Card ─────────────────────────────────────────────────────────────
 
 class _OverviewCard extends StatelessWidget {
   final String value;
@@ -651,70 +719,119 @@ class _OverviewCard extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Top: number + urgent badge
+            // TOP: icon position depends on urgency
+            // Urgent   → icon RIGHT (RTL start=first), badge LEFT (RTL end=last)
+            // Normal   → nothing RIGHT, icon LEFT (RTL end=last)
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  child: Text(value,
-                      style: const TextStyle(
-                        fontFamily: 'Tajawal',
-                        fontSize: 30,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.textPrimary,
-                        height: 1.0,
-                      )),
-                ),
-                if (isUrgent)
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: AppColors.redLight,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: const Text('عاجل',
-                        style: TextStyle(
-                          fontFamily: 'Tajawal',
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.red,
-                        )),
-                  ),
-              ],
-            ),
-            // Bottom: label + icon
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Text(label,
-                      style: const TextStyle(
-                        fontFamily: 'Tajawal',
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textSecondary,
+                // First child → RIGHT in RTL
+                isUrgent
+                    ? Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                            color: iconBg, shape: BoxShape.circle),
+                        child: Icon(icon, color: iconColor, size: 18),
+                      )
+                    : const SizedBox(width: 36),
+                // Last child → LEFT in RTL
+                isUrgent
+                    ? Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 9, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.redLight,
+                          borderRadius: BorderRadius.circular(7),
+                        ),
+                        child: const Text('عاجل',
+                            style: TextStyle(
+                              fontFamily: 'Tajawal',
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.red,
+                            )),
+                      )
+                    : Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                            color: iconBg, shape: BoxShape.circle),
+                        child: Icon(icon, color: iconColor, size: 18),
                       ),
-                      maxLines: 2),
-                ),
-                const SizedBox(width: 6),
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration:
-                      BoxDecoration(color: iconBg, shape: BoxShape.circle),
-                  child: Icon(icon, color: iconColor, size: 17),
-                ),
               ],
             ),
+
+            const Spacer(),
+
+            // BOTTOM: number + label
+            Text(value,
+                style: const TextStyle(
+                  fontFamily: 'Tajawal',
+                  fontSize: 32,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.textPrimary,
+                  height: 1.1,
+                )),
+            const SizedBox(height: 2),
+            Text(label,
+                style: const TextStyle(
+                  fontFamily: 'Tajawal',
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textSecondary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis),
           ],
         ),
       );
 }
 
-// ── Background painter ────────────────────────────────────────────────────────
+// ── Mini line chart ───────────────────────────────────────────────────────────
+
+class _MiniChartPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final linePaint = Paint()
+      ..color = AppColors.goldLight.withOpacity(0.9)
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final dotPaint = Paint()
+      ..color = AppColors.goldLight
+      ..style = PaintingStyle.fill;
+
+    final points = [
+      Offset(0, size.height * 0.85),
+      Offset(size.width * 0.18, size.height * 0.65),
+      Offset(size.width * 0.36, size.height * 0.72),
+      Offset(size.width * 0.55, size.height * 0.42),
+      Offset(size.width * 0.75, size.height * 0.28),
+      Offset(size.width, size.height * 0.08),
+    ];
+
+    final path = Path()..moveTo(points[0].dx, points[0].dy);
+    for (int i = 1; i < points.length; i++) {
+      final cpx = (points[i - 1].dx + points[i].dx) / 2;
+      path.cubicTo(
+          cpx, points[i - 1].dy, cpx, points[i].dy, points[i].dx, points[i].dy);
+    }
+    canvas.drawPath(path, linePaint);
+
+    for (final p in points) {
+      canvas.drawCircle(p, 2.5, dotPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_MiniChartPainter old) => false;
+}
+
+// ── Background lines ──────────────────────────────────────────────────────────
 
 class _LinesPainter extends CustomPainter {
   @override
