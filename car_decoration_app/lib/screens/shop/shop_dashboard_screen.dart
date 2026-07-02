@@ -54,10 +54,28 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
         .length;
   }
 
-  List<ShopRequest> get _recentNew => _requests
-      .where((r) => r.shopStatus == ShopRequestShopStatus.pending)
-      .take(5)
-      .toList();
+  List<ShopRequest> get _recentRequests => _requests.take(5).toList();
+
+  ({String label, Color bg, Color textColor}) _chipFor(ShopRequest r) {
+    if (r.shopStatus == ShopRequestShopStatus.pending) {
+      return (
+        label: 'جديد',
+        bg: const Color(0xFFE3F2FD),
+        textColor: const Color(0xFF1565C0),
+      );
+    }
+    switch (r.status) {
+      case 'Completed':
+        return (label: 'مكتمل', bg: AppColors.greenLight, textColor: AppColors.green);
+      case 'InProgress':
+      case 'ShopSelected':
+        return (label: 'جارٍ', bg: const Color(0xFFFFF8E1), textColor: const Color(0xFFF57C00));
+      case 'Cancelled':
+        return (label: 'ملغى', bg: AppColors.redLight, textColor: AppColors.red);
+      default:
+        return (label: 'مفتوح', bg: AppColors.goldBg, textColor: AppColors.goldText);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -113,194 +131,198 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ── Dark header ──────────────────────────────────────────────
+              // ── Dark olive header ──────────────────────────────────────────
               Container(
                 width: double.infinity,
+                clipBehavior: Clip.antiAlias,
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Color(0xFF1B1A14), Color(0xFF2E2917)],
+                    colors: [Color(0xFF2C3320), Color(0xFF4A5530)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
+                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
                 ),
-                child: Stack(
-                  children: [
-                    Positioned.fill(child: CustomPaint(painter: _LinesPainter())),
-                    SafeArea(
-                      bottom: false,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                child: SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // ── Top row: Toggle | Name+Status | Avatar ──
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            // ── Row: Avatar | Name+Status | Toggle ──
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                // Avatar (RIGHT in RTL)
-                                ShopAvatar(mono: mono, size: 50, fontSize: 19),
-                                const SizedBox(width: 12),
-                                // Name + status
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                            // Toggle (RIGHT in RTL — first child)
+                            if (isApproved)
+                              Switch(
+                                value: _isOpen,
+                                onChanged: (v) => setState(() => _isOpen = v),
+                                activeColor: Colors.white,
+                                activeTrackColor: AppColors.green,
+                                inactiveThumbColor: Colors.white54,
+                                inactiveTrackColor: Colors.white24,
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              )
+                            else
+                              const SizedBox(width: 48),
+
+                            // Name + status (centered, Expanded)
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            shop.name.isNotEmpty
-                                                ? shop.name
-                                                : 'متجري',
-                                            style: const TextStyle(
-                                              fontFamily: 'Tajawal',
-                                              fontSize: 17,
-                                              fontWeight: FontWeight.w900,
-                                              color: Colors.white,
-                                            ),
+                                      Container(
+                                        width: 16,
+                                        height: 16,
+                                        decoration: const BoxDecoration(
+                                          color: AppColors.goldLight,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(Icons.check_rounded,
+                                            size: 10, color: Color(0xFF2C3320)),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Flexible(
+                                        child: Text(
+                                          shop.name.isNotEmpty ? shop.name : 'متجري',
+                                          style: const TextStyle(
+                                            fontFamily: 'Tajawal',
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.w900,
+                                            color: Colors.white,
                                           ),
-                                          if (isApproved) ...[
-                                            const SizedBox(width: 5),
-                                            const Icon(Icons.verified_rounded,
-                                                color: AppColors.goldLight,
-                                                size: 16),
-                                          ],
-                                        ],
-                                      ),
-                                      const SizedBox(height: 5),
-                                      _StatusBadge(
-                                        status: shop.status,
-                                        isOpen: _isOpen,
-                                        rejectionReason: shop.rejectionReason,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                // Toggle (LEFT in RTL)
-                                if (isApproved)
-                                  Switch(
-                                    value: _isOpen,
-                                    onChanged: (v) =>
-                                        setState(() => _isOpen = v),
-                                    activeColor: Colors.white,
-                                    activeTrackColor: AppColors.green,
-                                    inactiveThumbColor: Colors.white54,
-                                    inactiveTrackColor: Colors.white24,
-                                    materialTapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                  )
-                                else
-                                  const SizedBox(width: 48),
-                              ],
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            // ── Revenue Row: number (right) + chart (left) ──
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                // Revenue label + number (RIGHT in RTL = first child)
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start, // RTL = right
-                                    children: const [
-                                      Text(
-                                        'إيراد هذا الشهر (ر.س)',
-                                        style: TextStyle(
-                                          fontFamily: 'Tajawal',
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white54,
-                                        ),
-                                      ),
-                                      SizedBox(height: 4),
-                                      Text(
-                                        '0',
-                                        style: TextStyle(
-                                          fontFamily: 'Tajawal',
-                                          fontSize: 46,
-                                          fontWeight: FontWeight.w900,
-                                          color: Colors.white,
-                                          height: 1.1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
                                     ],
                                   ),
-                                ),
-                                const SizedBox(width: 16),
-                                // Mini chart (LEFT in RTL = last child)
-                                SizedBox(
-                                  width: 110,
-                                  height: 58,
-                                  child: CustomPaint(
-                                      painter: _MiniChartPainter()),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 14),
-
-                            // ── Growth chip ──
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 11, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: AppColors.green.withOpacity(0.18),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: const [
-                                  Icon(Icons.trending_up_rounded,
-                                      color: AppColors.green, size: 14),
-                                  SizedBox(width: 5),
-                                  Text('— عن الشهر الماضي',
-                                      style: TextStyle(
-                                        fontFamily: 'Tajawal',
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.green,
-                                      )),
+                                  const SizedBox(height: 4),
+                                  _StatusBadge(
+                                    status: shop.status,
+                                    isOpen: _isOpen,
+                                    rejectionReason: shop.rejectionReason,
+                                  ),
                                 ],
                               ),
                             ),
+
+                            // Avatar (LEFT in RTL — last child)
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: AppColors.gold,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(mono,
+                                  style: const TextStyle(
+                                    fontFamily: 'Tajawal',
+                                    fontSize: 19,
+                                    fontWeight: FontWeight.w900,
+                                    color: Color(0xFF2C3320),
+                                  )),
+                            ),
                           ],
                         ),
-                      ),
+
+                        const SizedBox(height: 22),
+
+                        // ── Revenue: centered ──
+                        const Text(
+                          'إيراد هذا الشهر (ر.س)',
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white54,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          '0',
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 42,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            height: 1.1,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF4ADE80).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('↗',
+                                  style: TextStyle(
+                                      fontSize: 13, color: Color(0xFF4ADE80))),
+                              SizedBox(width: 4),
+                              Text('— عن الشهر الماضي',
+                                  style: TextStyle(
+                                    fontFamily: 'Tajawal',
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF4ADE80),
+                                  )),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        // ── Full-width chart ──
+                        SizedBox(
+                          height: 56,
+                          width: double.infinity,
+                          child: CustomPaint(painter: _ChartPainter()),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
 
-              // ── 3 Stat Cards ─────────────────────────────────────────────
+              // ── 3 Stat Cards ──────────────────────────────────────────────
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
                 child: Row(
                   children: [
+                    // متوسط الرد (RIGHT in RTL — first)
+                    const _StatCard(value: '—', label: 'متوسط الرد', unit: 'د'),
+                    const SizedBox(width: 10),
+                    // طلبات جديدة (middle)
+                    _StatCard(value: _newCount.toString(), label: 'طلبات جديدة'),
+                    const SizedBox(width: 10),
+                    // Rating (LEFT in RTL — last)
                     _StatCard(
                       value: shop.rating > 0
                           ? shop.rating.toStringAsFixed(1)
                           : '—',
-                      sub: '${shop.totalJobs} عملية',
+                      label: '${shop.totalJobs} عملية',
                       hasStar: shop.rating > 0,
                     ),
-                    const SizedBox(width: 10),
-                    _StatCard(
-                        value: _newCount.toString(), sub: 'طلبات جديدة'),
-                    const SizedBox(width: 10),
-                    const _StatCard(
-                        value: '—', sub: 'متوسط الرد', unit: 'د'),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 22),
+              const SizedBox(height: 24),
 
-              // ── نظرة عامة ────────────────────────────────────────────────
+              // ── نظرة عامة ─────────────────────────────────────────────────
               const Padding(
                 padding: EdgeInsets.fromLTRB(20, 0, 20, 12),
                 child: Text('نظرة عامة',
@@ -312,16 +334,24 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                     )),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: GridView.count(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   crossAxisCount: 2,
                   mainAxisSpacing: 10,
                   crossAxisSpacing: 10,
-                  childAspectRatio: 1.25,
+                  childAspectRatio: 1.2,
                   children: [
                     // 1st → RIGHT in RTL
+                    _OverviewCard(
+                      value: _waitingCount.toString(),
+                      label: 'عروض قيد الانتظار',
+                      icon: Icons.description_outlined,
+                      iconColor: const Color(0xFFF57C00),
+                      iconBg: const Color(0xFFFFF3E0),
+                    ),
+                    // 2nd → LEFT in RTL
                     _OverviewCard(
                       value: _newCount.toString(),
                       label: 'طلبات بانتظار رد',
@@ -330,23 +360,7 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                       iconBg: const Color(0xFFFCE4EC),
                       isUrgent: _newCount > 0,
                     ),
-                    // 2nd → LEFT in RTL
-                    _OverviewCard(
-                      value: _waitingCount.toString(),
-                      label: 'عروض قيد الانتظار',
-                      icon: Icons.description_outlined,
-                      iconColor: const Color(0xFFF57C00),
-                      iconBg: const Color(0xFFFFF3E0),
-                    ),
                     // 3rd → RIGHT in RTL
-                    _OverviewCard(
-                      value: _activeCount.toString(),
-                      label: 'أعمال قيد التنفيذ',
-                      icon: Icons.key_rounded,
-                      iconColor: const Color(0xFF0288D1),
-                      iconBg: const Color(0xFFE3F2FD),
-                    ),
-                    // 4th → LEFT in RTL
                     _OverviewCard(
                       value: _completedThisMonth.toString(),
                       label: 'مكتملة هذا الشهر',
@@ -354,13 +368,21 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                       iconColor: AppColors.green,
                       iconBg: AppColors.greenLight,
                     ),
+                    // 4th → LEFT in RTL
+                    _OverviewCard(
+                      value: _activeCount.toString(),
+                      label: 'أعمال قيد التنفيذ',
+                      icon: Icons.build_outlined,
+                      iconColor: const Color(0xFF0288D1),
+                      iconBg: const Color(0xFFE3F2FD),
+                    ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 22),
+              const SizedBox(height: 24),
 
-              // ── أحدث الطلبات ─────────────────────────────────────────────
+              // ── أحدث الطلبات ──────────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                 child: Row(
@@ -375,23 +397,31 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                     const Spacer(),
                     GestureDetector(
                       onTap: () {},
-                      child: const Text('عرض الكل',
-                          style: TextStyle(
-                            fontFamily: 'Tajawal',
-                            fontSize: 13,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.goldText,
-                          )),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('عرض الكل',
+                              style: TextStyle(
+                                fontFamily: 'Tajawal',
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.goldText,
+                              )),
+                          SizedBox(width: 2),
+                          Icon(Icons.chevron_left_rounded,
+                              color: AppColors.goldText, size: 18),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
 
-              if (_recentNew.isEmpty)
+              if (_recentRequests.isEmpty)
                 const Padding(
                   padding: EdgeInsets.fromLTRB(22, 0, 22, 32),
                   child: Center(
-                    child: Text('لا توجد طلبات جديدة',
+                    child: Text('لا توجد طلبات',
                         style: TextStyle(
                             fontFamily: 'Tajawal',
                             fontSize: 14,
@@ -402,11 +432,12 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                 ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-                  itemCount: _recentNew.length,
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 36),
+                  itemCount: _recentRequests.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 10),
                   itemBuilder: (_, i) {
-                    final r = _recentNew[i];
+                    final r = _recentRequests[i];
+                    final chip = _chipFor(r);
                     return GestureDetector(
                       onTap: () => Navigator.pushNamed(
                               context, '/shop/request-detail',
@@ -414,36 +445,42 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                           .then((_) => _loadRequests()),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 12),
+                            horizontal: 14, vertical: 13),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          border: Border.all(color: AppColors.border),
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: Row(
                           children: [
-                            // Avatar (RIGHT in RTL)
+                            // Status chip (RIGHT in RTL — first)
                             Container(
-                              width: 44,
-                              height: 44,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 9, vertical: 5),
                               decoration: BoxDecoration(
-                                color: AppColors.goldBg,
-                                borderRadius: BorderRadius.circular(12),
+                                color: chip.bg,
+                                borderRadius: BorderRadius.circular(20),
                               ),
-                              alignment: Alignment.center,
-                              child: Text(r.mono,
-                                  style: const TextStyle(
+                              child: Text(chip.label,
+                                  style: TextStyle(
                                     fontFamily: 'Tajawal',
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w900,
-                                    color: AppColors.goldText,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    color: chip.textColor,
                                   )),
                             ),
-                            const SizedBox(width: 12),
-                            // Description + vehicle
+                            const SizedBox(width: 10),
+                            // Name + service (center)
                             Expanded(
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start, // RTL = RIGHT
                                 children: [
                                   Text(
                                     r.description.isNotEmpty
@@ -451,50 +488,43 @@ class _ShopDashboardScreenState extends State<ShopDashboardScreen> {
                                         : r.customerName,
                                     style: const TextStyle(
                                       fontFamily: 'Tajawal',
-                                      fontSize: 13.5,
+                                      fontSize: 13,
                                       fontWeight: FontWeight.w800,
                                       color: AppColors.textPrimary,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: 2),
                                   Text(r.vehicleInfo,
                                       style: const TextStyle(
                                         fontFamily: 'Tajawal',
-                                        fontSize: 12,
+                                        fontSize: 11,
                                         fontWeight: FontWeight.w600,
                                         color: AppColors.textSecondary,
-                                      )),
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis),
                                 ],
                               ),
                             ),
                             const SizedBox(width: 10),
-                            // Time + chevron (LEFT in RTL)
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(r.timeAgo,
-                                    style: const TextStyle(
-                                      fontFamily: 'Tajawal',
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.textMuted,
-                                    )),
-                                const SizedBox(height: 6),
-                                Container(
-                                  width: 28,
-                                  height: 28,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.background,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: const Icon(
-                                      Icons.chevron_left_rounded,
-                                      color: AppColors.textSecondary,
-                                      size: 18),
-                                ),
-                              ],
+                            // Avatar (LEFT in RTL — last)
+                            Container(
+                              width: 38,
+                              height: 38,
+                              decoration: BoxDecoration(
+                                color: AppColors.gold,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(r.mono,
+                                  style: const TextStyle(
+                                    fontFamily: 'Tajawal',
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w900,
+                                    color: Color(0xFF2C3320),
+                                  )),
                             ),
                           ],
                         ),
@@ -524,33 +554,35 @@ class _StatusBadge extends StatelessWidget {
     switch (status) {
       case 'Approved':
         return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 7,
-              height: 7,
-              decoration: BoxDecoration(
-                color: isOpen ? AppColors.green : Colors.white38,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: 5),
             Text(
               isOpen ? 'متاح للطلبات الآن' : 'مغلق حالياً',
               style: TextStyle(
                 fontFamily: 'Tajawal',
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: isOpen ? AppColors.green : Colors.white54,
+                color: isOpen ? const Color(0xFF4ADE80) : Colors.white54,
+              ),
+            ),
+            const SizedBox(width: 5),
+            Container(
+              width: 7,
+              height: 7,
+              decoration: BoxDecoration(
+                color: isOpen ? const Color(0xFF4ADE80) : Colors.white38,
+                shape: BoxShape.circle,
               ),
             ),
           ],
         );
       case 'Rejected':
         return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: const [
                 Icon(Icons.cancel_rounded, color: AppColors.red, size: 13),
@@ -570,12 +602,14 @@ class _StatusBadge extends StatelessWidget {
                       fontFamily: 'Tajawal',
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white38)),
+                      color: Colors.white38),
+                  textAlign: TextAlign.center),
             ],
           ],
         );
       case 'Suspended':
         return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: const [
             Icon(Icons.block_rounded, color: Color(0xFFCE93D8), size: 13),
@@ -590,6 +624,7 @@ class _StatusBadge extends StatelessWidget {
         );
       case 'DocsRequested':
         return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: const [
             Icon(Icons.folder_open_rounded,
@@ -605,6 +640,7 @@ class _StatusBadge extends StatelessWidget {
         );
       default:
         return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: const [
             Icon(Icons.hourglass_top_rounded,
@@ -626,23 +662,29 @@ class _StatusBadge extends StatelessWidget {
 
 class _StatCard extends StatelessWidget {
   final String value;
-  final String sub;
+  final String label;
   final bool hasStar;
   final String? unit;
   const _StatCard(
       {required this.value,
-      required this.sub,
+      required this.label,
       this.hasStar = false,
       this.unit});
 
   @override
   Widget build(BuildContext context) => Expanded(
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+          padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 8),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.07),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Column(
             children: [
@@ -661,24 +703,24 @@ class _StatCard extends StatelessWidget {
                   if (hasStar) ...[
                     const SizedBox(width: 2),
                     const Icon(Icons.star_rounded,
-                        color: AppColors.star, size: 16),
+                        color: AppColors.star, size: 15),
                   ] else if (unit != null) ...[
                     const SizedBox(width: 2),
                     Text(unit!,
                         style: const TextStyle(
                           fontFamily: 'Tajawal',
-                          fontSize: 12,
+                          fontSize: 11,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textSecondary,
                         )),
                   ],
                 ],
               ),
-              const SizedBox(height: 4),
-              Text(sub,
+              const SizedBox(height: 3),
+              Text(label,
                   style: const TextStyle(
                     fontFamily: 'Tajawal',
-                    fontSize: 10.5,
+                    fontSize: 10,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textSecondary,
                   ),
@@ -710,108 +752,110 @@ class _OverviewCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: AppColors.border),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // TOP: icon position depends on urgency
-            // Urgent   → icon RIGHT (RTL start=first), badge LEFT (RTL end=last)
-            // Normal   → nothing RIGHT, icon LEFT (RTL end=last)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // First child → RIGHT in RTL
-                isUrgent
-                    ? Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                            color: iconBg, shape: BoxShape.circle),
-                        child: Icon(icon, color: iconColor, size: 18),
-                      )
-                    : const SizedBox(width: 36),
-                // Last child → LEFT in RTL
-                isUrgent
-                    ? Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 9, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.redLight,
-                          borderRadius: BorderRadius.circular(7),
-                        ),
-                        child: const Text('عاجل',
-                            style: TextStyle(
-                              fontFamily: 'Tajawal',
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.red,
-                            )),
-                      )
-                    : Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                            color: iconBg, shape: BoxShape.circle),
-                        child: Icon(icon, color: iconColor, size: 18),
-                      ),
+  Widget build(BuildContext context) => Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
               ],
             ),
-
-            const Spacer(),
-
-            // BOTTOM: number + label
-            Text(value,
-                style: const TextStyle(
-                  fontFamily: 'Tajawal',
-                  fontSize: 32,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.textPrimary,
-                  height: 1.1,
-                )),
-            const SizedBox(height: 2),
-            Text(label,
-                style: const TextStyle(
-                  fontFamily: 'Tajawal',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textSecondary,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                // Icon at top (LEFT-aligned in RTL via CrossAxisAlignment.end)
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: iconBg,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: iconColor, size: 20),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis),
-          ],
-        ),
+                const Spacer(),
+                // Number centered
+                Align(
+                  alignment: Alignment.center,
+                  child: Text(value,
+                      style: const TextStyle(
+                        fontFamily: 'Tajawal',
+                        fontSize: 30,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.textPrimary,
+                        height: 1.1,
+                      )),
+                ),
+                const SizedBox(height: 3),
+                // Label centered
+                Align(
+                  alignment: Alignment.center,
+                  child: Text(label,
+                      style: const TextStyle(
+                        fontFamily: 'Tajawal',
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 2),
+                ),
+              ],
+            ),
+          ),
+          // Urgent badge: top-right corner (RTL start)
+          if (isUrgent)
+            Positioned(
+              top: 10,
+              right: 10,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.red,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text('عاجل',
+                    style: TextStyle(
+                      fontFamily: 'Tajawal',
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    )),
+              ),
+            ),
+        ],
       );
 }
 
-// ── Mini line chart ───────────────────────────────────────────────────────────
+// ── Full-width line chart ─────────────────────────────────────────────────────
 
-class _MiniChartPainter extends CustomPainter {
+class _ChartPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final linePaint = Paint()
-      ..color = AppColors.goldLight.withOpacity(0.9)
-      ..strokeWidth = 2.0
+      ..color = const Color(0xFFC9A84C)
+      ..strokeWidth = 2.5
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
-    final dotPaint = Paint()
-      ..color = AppColors.goldLight
-      ..style = PaintingStyle.fill;
-
     final points = [
       Offset(0, size.height * 0.85),
-      Offset(size.width * 0.18, size.height * 0.65),
-      Offset(size.width * 0.36, size.height * 0.72),
-      Offset(size.width * 0.55, size.height * 0.42),
-      Offset(size.width * 0.75, size.height * 0.28),
-      Offset(size.width, size.height * 0.08),
+      Offset(size.width * 0.15, size.height * 0.65),
+      Offset(size.width * 0.32, size.height * 0.72),
+      Offset(size.width * 0.50, size.height * 0.42),
+      Offset(size.width * 0.68, size.height * 0.28),
+      Offset(size.width * 0.84, size.height * 0.16),
+      Offset(size.width, size.height * 0.06),
     ];
 
     final path = Path()..moveTo(points[0].dx, points[0].dy);
@@ -822,34 +866,14 @@ class _MiniChartPainter extends CustomPainter {
     }
     canvas.drawPath(path, linePaint);
 
+    final dotPaint = Paint()
+      ..color = const Color(0xFFC9A84C)
+      ..style = PaintingStyle.fill;
     for (final p in points) {
       canvas.drawCircle(p, 2.5, dotPaint);
     }
   }
 
   @override
-  bool shouldRepaint(_MiniChartPainter old) => false;
-}
-
-// ── Background lines ──────────────────────────────────────────────────────────
-
-class _LinesPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFFD4B96A).withOpacity(0.09)
-      ..strokeWidth = 1.0;
-    const spacing = 22.0;
-    final count = (size.width + size.height) ~/ spacing + 2;
-    for (int i = 0; i < count; i++) {
-      final x = i * spacing - size.height;
-      canvas.drawLine(
-          Offset(x, 0),
-          Offset(x + size.height * math.tan(math.pi / 4), size.height),
-          paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_LinesPainter old) => false;
+  bool shouldRepaint(_ChartPainter old) => false;
 }
